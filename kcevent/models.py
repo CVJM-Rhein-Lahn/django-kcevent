@@ -34,18 +34,25 @@ class Participant(KCPerson):
         ROLE_RELOADED = 'RL', _('Reloaded')
         ROLE_STAFF = 'ST', _('Staff')
 
+    class GenderTypes(models.TextChoices):
+        GENDER_MALE = 'M', _('Male')
+        GENDER_FEMALE = 'W', _('Female')
+        GENDER_DIVERT = 'D', _('Divert')
+
     birthday = models.DateField()
     church = models.ForeignKey('Partner', null=True, on_delete=models.SET_NULL)
     intolerances = models.TextField(blank=True)
     nutrition = models.CharField(
         max_length=3,
         choices=NutritionTypes.choices,
-        default=NutritionTypes.NUTRITION_REGULAR,
     )
     role = models.CharField(
         max_length=2,
         choices=ParticipantRoles.choices,
-        default=ParticipantRoles.ROLE_CONFIRMEE,
+    )
+    gender = models.CharField(
+        max_length=1,
+        choices=GenderTypes.choices,
     )
 
 class Partner(models.Model):
@@ -166,9 +173,10 @@ class KCEventRegistration(models.Model):
         verbose_name = _('Event registration')
         verbose_name_plural = _('Event registrations')
 
-    reg_time = models.DateTimeField()
+    reg_time = models.DateTimeField(auto_now_add=True)
     reg_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE)
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE)
+    reg_notes = models.TextField(blank=True)
 
     # further documentation
     reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration)

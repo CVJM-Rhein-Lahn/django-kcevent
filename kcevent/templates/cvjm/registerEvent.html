@@ -1,0 +1,140 @@
+{% extends "cvjm/base.html" %}
+{% load formclass %}
+
+{% block content %}
+<div class="col-sm-8">
+<h1>Anmeldung {{ evt.name }}</h1>
+<p>Bitte tragen Sie nachfolgend die Daten Ihres Kindes f&uuml;r die Anmeldung zum {{ evt.name }} ein.
+  Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
+</div>
+<div class="container">
+    <div class="row">
+      <div class="col">
+        {{ form.non_field_errors }}
+        {{ formReg.non_field_errors }}
+        <form action="{% url 'registerEvent' %}" enctype="multipart/form-data" method="post">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.church.errors }}
+              <label for="{{ form.church.id_for_label }}">Kirchengemeinde</label>
+              {{ form.church|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.role.errors }}
+              <label for="{{ form.role.id_for_label }}">Funktion</label>
+              {{ form.role|addclass:'form-control' }}
+            </div>
+          </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.first_name.errors }}
+              <label for="{{ form.first_name.id_for_label }}">Vorname</label>
+              {{ form.first_name|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.last_name.errors }}
+              <label for="{{ form.last_name.id_for_label }}">Nachname</label>
+              {{ form.last_name|addclass:'form-control' }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.gender.errors }}
+              <label for="{{ form.gender.id_for_label }}">Geschlecht</label>
+              {{ form.gender|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.birthday.errors }}
+              <label for="{{ form.birthday.id_for_label }}">Geburtstag</label>
+              {{ form.birthday|addclass:'form-control' }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.street.errors }}
+              <label for="{{ form.street.id_for_label }}">Straße</label>
+              {{ form.street|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.house_number.errors }}
+              <label for="{{ form.house_number.id_for_label }}">Hausnummer</label>
+              {{ form.house_number|addclass:'form-control' }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.zip_code.errors }}
+              <label for="{{ form.zip_code.id_for_label }}">Postleitzahl</label>
+              {{ form.zip_code|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.city.errors }}
+              <label for="{{ form.city.id_for_label }}">Wohnort</label>
+              {{ form.city|addclass:'form-control' }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.mail_addr.errors }}
+              <label for="{{ form.mail_addr.id_for_label }}">E-Mail</label>
+              {{ form.mail_addr|addclass:'form-control' }}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.phone.errors }}
+              <label for="{{ form.phone.id_for_label }}">Telefon</label>
+              {{ form.phone|addclass:'form-control' }}
+            </div>
+        </div>
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              {{ form.intolerances.errors }}
+              <label for="{{ form.intolerances.id_for_label }}">Allergien / Unvertr&auml;glichkeiten</label>
+              {{ form.intolerances|addclass:'form-control' }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="custom-file col-md-12">
+              {{ formReg.reg_doc_consent.errors }}
+              {{ formReg.reg_doc_consent|addclass:'custom-file-input' }}
+              <label for="{{ formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit</label>
+            </div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="custom-file col-md-12">
+              {{ formReg.reg_doc_pass.errors }}
+              {{ formReg.reg_doc_pass|addclass:'custom-file-input' }}
+              <label for="{{ formReg.reg_doc_pass.id_for_label }}" class="custom-file-label">Freizeitpass</label>
+            </div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="custom-file col-md-12">
+              {{ formReg.reg_doc_meddispense.errors }}
+              {{ formReg.reg_doc_meddispense|addclass:'custom-file-input' }}
+              <label for="{{ formReg.reg_doc_meddispense.id_for_label }}" class="custom-file-label">Medikamentenabgabe</label>
+            </div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="form-group col-lg">
+              {{ formReg.reg_notes.errors }}
+              <label for="{{ formReg.reg_notes.id_for_label }}">Sonstige Mitteilungen</label>
+              {{ formReg.reg_notes|addclass:'form-control' }}
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              {{ form.nutrition.errors }}
+              <label for="{{ form.nutrition.id_for_label }}">Ernährung</label>
+              {{ form.nutrition|addclass:'form-control' }}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Anmelden</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "cvjm/base.html" %}
+
+{% block content %}
+<div class="col-sm-8">
+    <h1>Anmeldung Konfi-Castle 2020</h1>
+    <p>Bitte geben Sie das Passwort aus den Anmeldeunterlagen ein.</p>
+</div>
+
+<div class="container">
+    <div class="row">
+      <div class="col">
+        <form action="{% url 'registerEventLogin' %}" method="post">
+          {% csrf_token %}
+        {% if error_message %}
+            <p class="bg-danger p-d ml-b">{{ error_message }}</p>
+        {% endif %}
+          <div class="form-row">
+            <div class="form-group col-lg-6 clearfix">
+              <label for="password">Kennwort</label>
+              <input name="password" type="password" class="form-control" placeholder="Kennwort" />
+            </div>
+          </div>
+          <input type="hidden" name="next" value="{{next}}" />
+          <button name="login" type="submit" class="btn btn-primary">Absenden</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

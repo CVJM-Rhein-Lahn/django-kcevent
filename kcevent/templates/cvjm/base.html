@@ -1,0 +1,45 @@
+{% load static %}
+<!doctype html>
+<html lang="de">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" />
+
+  <title>Anmeldung Konfi-Castle</title>
+</head>
+
+<body>
+<header>
+  <!-- Image and text -->
+  <nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="https://cvjm-rhein-lahn.de">
+      <img src="{% static "img/logo.svg" %}" width="80" height="69" class="d-inline-block align-top" alt="Logo">
+    </a>
+  </nav>
+</header>
+  <div class="container">
+    <div class="row">
+      {% block content %}{% endblock %}
+    </div>
+    <footer>
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12">
+            &copy; 2015-2020 CVJM Kreisverband Rhein-Lahn e. V. | <a href="https://anmeldung.konficastle.org/datenschutz.html">Datenschutz</a> | <a href="https://anmeldung.konficastle.org/impressum">Impressum</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="{% static "js/jquery-3.2.1.slim.min.js" %}"></script>
+  <script src="{% static "js/popper.min.js" %}"></script>
+  <script src="{% static "js/bootstrap.min.js" %}"></script>
+</body>
+
+</html>
