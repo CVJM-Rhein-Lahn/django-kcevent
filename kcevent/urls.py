@@ -20,8 +20,9 @@ from . import views
 urlpatterns = [
     path('partnership/', views.managePartnership, name='partnership'),
     path('events/', views.listEvents, name='listEvents'),
-    path('login', views.registerEventLogin, name='registerEventLogin'),
-    path('', views.registerEvent, name='registerEvent'),
+    path('login/<str:event_url>', views.registerEventLogin, name='registerEventLogin'),
+    path('register/<str:event_url>', views.registerEvent, name='registerEvent'),
+    path('', views.registerEvent, name='listPublicEvents'),
 
     #path('login/', views.user_login, name='user_login')
 

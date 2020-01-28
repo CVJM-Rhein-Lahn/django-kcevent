@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required
+from django.utils.translation import ugettext_lazy as _
 from .forms import ParticipantForm, KCEventRegistrationForm
-from .models import KCEvent
+from .models import KCEvent, Partner
+import uuid, json
 
 # allow churches to register their partnership
 def managePartnership(request):
@@ -14,54 +16,111 @@ def managePartnership(request):
 def listEvents(request):
     return HttpResponse("Yeah lets add event.")
 
-def registerEventLogin(request):
+def registerEventLogin(request, event_url, evt=None):
+    if not evt:
+        # try to find the event
+        try:
+            evt = KCEvent.objects.get(event_url=event_url)
+        except:
+            raise Http404(_('Event not found'))
+
     if request.method == 'POST':
         password = request.POST['password']
-        if password == 'mono':
-            request.session['is_kclogged_in'] = True
-            return redirect(reverse('registerEvent'))
+        if password == evt.reg_pwd:
+            request.session['is_kclogged_in_' + str(evt.id)] = True
+            return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
         else:
-            return render(request, 'cvjm/kclogin.html', {'error_message': 'Ungültige Zugangsdaten!'})
+            return render(
+                request, 'cvjm/kclogin.html', 
+                {
+                'error_message': _('Invalid credentials provided!'),
+                'event': evt,
+                'loginUrl': reverse('registerEventLogin', kwargs={'event_url': evt.event_url})
+                }
+            )
+    elif evt.reg_pwd:
+        print(reverse('registerEventLogin', kwargs={'event_url': evt.event_url}))
+        return render(
+            request, 'cvjm/kclogin.html',
+            {
+                'event': evt,
+                'loginUrl': reverse('registerEventLogin', kwargs={'event_url': evt.event_url})
+            }
+        )
     else:
-        return render(request, 'cvjm/kclogin.html')
+        request.session['is_kclogged_in_' + str(evt.id)] = True
+        return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
 
-def registerEvent(request):
+def registerEvent(request, event_url):
+    # try to find the event
+    try:
+        evt = KCEvent.objects.get(event_url=event_url)
+    except:
+        raise Http404(_('Event not found'))
+
     # first check if user is logged in.
-    if not request.session.get('is_kclogged_in', False):
-        return registerEventLogin(request)
+    if not request.session.get('is_kclogged_in_' + str(evt.id), False):
+        return registerEventLogin(request, event_url, evt)
     # user is logged in. Check if already filled in:
-    elif request.session.get('is_kcform_filled', False):
+    elif request.session.get('is_kcform_filled_' + str(evt.id), False):
         # user already filled in.
         return render(request, 'cvjm/registrationFinished.html')
     else:
-        evt = KCEvent.objects.all()[0]
-        form = ParticipantForm(request.POST if request.method == 'POST' else None)
-        formReg = KCEventRegistrationForm(
-            request.POST if request.method == 'POST' else None,
-            request.FILES if request.method == 'POST' else None
-        )
+        formUuid = None
+        editConfirm = False
+        if request.method == 'POST' and request.POST.get('fh', None) and \
+            (request.POST.get('confirm', None) != None or request.POST.get('edit', None) != None):
+            formUuid = request.POST.get('fh')
+            form = ParticipantForm(json.loads(request.session['f_' + formUuid]))
+            formReg = KCEventRegistrationForm(json.loads(request.session['f_' + formUuid]))
+            editConfirm = True
+        else:
+            formUuid = str(uuid.uuid4())
+            form = ParticipantForm(request.POST if request.method == 'POST' else None)
+            formReg = KCEventRegistrationForm(
+                request.POST if request.method == 'POST' else None,
+                request.FILES if request.method == 'POST' else None
+            )
+
         if request.method == 'POST':
             if form.is_valid() and formReg.is_valid():
-                form.save()
-                formReg.instance.reg_user = form.instance
-                formReg.instance.reg_event = evt
-                formReg.save()
-                request.session['is_kcform_filled'] = True
-                return render(request, 'cvjm/registrationFinished.html')
-            else:
-                for field, errors in form.errors.items():
-                    print(field, errors)
-                for field, errors in formReg.errors.items():
-                    print(field, errors)
-
+                if request.POST.get('confirm', None):
+                    form.save()
+                    formReg.instance.reg_user = form.instance
+                    formReg.instance.reg_event = evt
+                    formReg.save()
+                    request.session['is_kcform_filled_' + str(evt.id)] = True
+                    del(request.session['f_' + formUuid])
+                    return render(request, 'cvjm/registrationFinished.html')
+                elif not editConfirm:
+                    request.session['f_' + formUuid] = json.dumps(request.POST)
+                    # fetch the corresponding objects.
+                    partner = Partner.objects.get(id=form.instance.church.id)
+                    print(formReg.instance.reg_doc_pass.url)
+                    return render(
+                        request, 'cvjm/registerEventConfirm.html', 
+                        {
+                            'form': form,
+                            'formReg': formReg,
+                            'evt': evt,
+                            'partner': partner,
+                            'fh': formUuid,
+                            'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
+                        }
+                    )
         return render(
             request, 'cvjm/registerEvent.html', 
             {
                 'form': form,
                 'formReg': formReg,
-                'evt': evt
+                'evt': evt,
+                'fh': formUuid,
+                'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
             }
-    )
+        )
+
+def listPublicEvents(request):
+    pass
 
 def user_login(request):
     if request.method == 'POST':

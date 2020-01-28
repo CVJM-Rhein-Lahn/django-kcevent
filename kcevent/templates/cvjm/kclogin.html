@@ -9,7 +9,7 @@
 <div class="container">
     <div class="row">
       <div class="col">
-        <form action="{% url 'registerEventLogin' %}" method="post">
+        <form action="{{ loginUrl }}" method="post">
           {% csrf_token %}
         {% if error_message %}
             <p class="bg-danger p-d ml-b">{{ error_message }}</p>

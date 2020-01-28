@@ -87,6 +87,8 @@ class KCEvent(models.Model):
     name = models.CharField(max_length=250)
     start_date = models.DateField()
     end_date = models.DateField()
+    event_url = models.SlugField()
+    reg_pwd = models.CharField(max_length=250, blank=True)
 
     participants = models.ManyToManyField(
         'Participant',

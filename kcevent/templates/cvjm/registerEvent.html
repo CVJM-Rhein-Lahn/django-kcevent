@@ -12,7 +12,7 @@
       <div class="col">
         {{ form.non_field_errors }}
         {{ formReg.non_field_errors }}
-        <form action="{% url 'registerEvent' %}" enctype="multipart/form-data" method="post">
+        <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
           {% csrf_token %}
           <div class="form-row">
             <div class="form-group col-md-6">
@@ -46,7 +46,7 @@
             </div>
             <div class="form-group col-md-6">
               {{ form.birthday.errors }}
-              <label for="{{ form.birthday.id_for_label }}">Geburtstag</label>
+              <label for="{{ form.birthday.id_for_label }}">Geburtstag (dd.mm.YYYY)</label>
               {{ form.birthday|addclass:'form-control' }}
             </div>
         </div>
@@ -131,7 +131,8 @@
               {{ form.nutrition|addclass:'form-control' }}
             </div>
           </div>
-          <button type="submit" class="btn btn-primary">Anmelden</button>
+          <input type="hidden" name="fh" value="{{ fh }}" />
+          <button name="register" type="submit" class="btn btn-primary">Anmelden</button>
         </form>
       </div>
     </div>

@@ -1,0 +1,87 @@
+{% extends "cvjm/base.html" %}
+{% load formclass %}
+
+{% block content %}
+<div class="col-sm-8">
+<h1>Anmeldung {{ evt.name }} - Übersicht</h1>
+<p>Bitte überprüfen Sie sorgfältig Ihre Angaben zur Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt sind, bestätigen Sie bitte die Anmeldung.
+  Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
+</div>
+<div class="container">
+    <div class="row">
+      <div class="col">
+        <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
+          {% csrf_token %}
+          <div class="form-row">
+            <div class="form-group col-md-3">Kirchengemeinde:</div>
+            <div class="form-group col-md-6">{{partner.name}}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">Funktion:</div>
+            <div class="form-group col-md-6">{{form.instance.role}}</div>
+          </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Name:</div>
+            <div class="form-group col-md-6">{{form.first_name.value}} {{form.last_name.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Geschlecht:</div>
+            <div class="form-group col-md-6">{{form.gender.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Geburtstag:</div>
+            <div class="form-group col-md-6">{{form.birthday.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Anschrift:</div>
+            <div class="form-group col-md-6">{{form.street.value}} {{form.house_number.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Postleitzahl:</div>
+            <div class="form-group col-md-6">{{form.zip_code.value}} {{form.city.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">E-Mail:</div>
+            <div class="form-group col-md-6">{{form.mail_addr.value}}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-3">Telefon:</div>
+            <div class="form-group col-md-6">{{form.phone.value}}</div>
+        </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">Allergien / Unvertr&auml;glichkeiten:</div>
+            <div class="form-group col-md-6">{{form.intolerances.value}}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-3">Anmeldung Freizeit:</div>
+            <div class="form-group col-md-6">{{ formReg.reg_doc_consent.value }}</div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="form-group col-md-3">Freizeitpass:</div>
+            <div class="form-group col-md-6">{{ formReg.reg_doc_pass.value }}</div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="form-group col-md-3">Medikamentenabgabe:</div>
+            <div class="form-group col-md-6">{{ formReg.reg_doc_meddispense }}</div>
+          </div>
+          <br>
+          <div class="form-row">
+            <div class="form-group col-md-3">Sonstige Mitteilungen:</div>
+            <div class="form-group col-md-6">{{formReg.reg_notes.value}}</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label>Ernährung: {{form.nutrition.value}}</label>
+            </div>
+          </div>
+          <input type="hidden" name="fh" value="{{ fh }}" />
+          <button name="edit" type="submit" class="btn btn-primary">Bearbeiten</button>
+          <button name="confirm" type="submit" class="btn btn-primary">Bestätigen</button>
+        </form>
+      </div>
+    </div>
+</div>
+
+{% endblock %}
