@@ -16,3 +16,4 @@ class KCEventRegistrationForm(forms.ModelForm):
         fields = [
             'reg_doc_pass', 'reg_doc_meddispense', 'reg_doc_consent', 'reg_notes'
         ]
+

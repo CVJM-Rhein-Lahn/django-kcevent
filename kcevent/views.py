@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import permission_required
 from django.utils.translation import ugettext_lazy as _
 from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, Partner
+from .formhelper import KcFormHelper
 import uuid, json
 
 # allow churches to register their partnership
@@ -66,55 +67,40 @@ def registerEvent(request, event_url):
         # user already filled in.
         return render(request, 'cvjm/registrationFinished.html')
     else:
-        formUuid = None
         editConfirm = False
         if request.method == 'POST' and request.POST.get('fh', None) and \
             (request.POST.get('confirm', None) != None or request.POST.get('edit', None) != None):
-            formUuid = request.POST.get('fh')
-            form = ParticipantForm(json.loads(request.session['f_' + formUuid]))
-            formReg = KCEventRegistrationForm(json.loads(request.session['f_' + formUuid]))
             editConfirm = True
-        else:
-            formUuid = str(uuid.uuid4())
-            form = ParticipantForm(request.POST if request.method == 'POST' else None)
-            formReg = KCEventRegistrationForm(
-                request.POST if request.method == 'POST' else None,
-                request.FILES if request.method == 'POST' else None
-            )
 
+        kfh = KcFormHelper.checkInstantiate(request, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
-            if form.is_valid() and formReg.is_valid():
-                if request.POST.get('confirm', None):
-                    form.save()
-                    formReg.instance.reg_user = form.instance
-                    formReg.instance.reg_event = evt
-                    formReg.save()
+            if kfh.isValid():
+                if request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
+                    kfh.form.save()
+                    kfh.formReg.instance.reg_user = kfh.form.instance
+                    kfh.formReg.instance.reg_event = evt
+                    kfh.formReg.save()
+                    # fixme: kfh.clean()
                     request.session['is_kcform_filled_' + str(evt.id)] = True
-                    del(request.session['f_' + formUuid])
                     return render(request, 'cvjm/registrationFinished.html')
                 elif not editConfirm:
-                    request.session['f_' + formUuid] = json.dumps(request.POST)
+                    kfh.setStage('preview')
                     # fetch the corresponding objects.
-                    partner = Partner.objects.get(id=form.instance.church.id)
-                    print(formReg.instance.reg_doc_pass.url)
+                    partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     return render(
                         request, 'cvjm/registerEventConfirm.html', 
                         {
-                            'form': form,
-                            'formReg': formReg,
                             'evt': evt,
                             'partner': partner,
-                            'fh': formUuid,
+                            'kfh': kfh,
                             'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
                         }
                     )
         return render(
             request, 'cvjm/registerEvent.html', 
             {
-                'form': form,
-                'formReg': formReg,
                 'evt': evt,
-                'fh': formUuid,
+                'kfh': kfh,
                 'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
             }
         )

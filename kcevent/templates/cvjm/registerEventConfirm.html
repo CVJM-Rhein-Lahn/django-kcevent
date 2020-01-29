@@ -18,65 +18,66 @@
           </div>
           <div class="form-row">
             <div class="form-group col-md-3">Funktion:</div>
-            <div class="form-group col-md-6">{{form.instance.role}}</div>
+            <div class="form-group col-md-6">{{kfh.form.instance.role}}</div>
           </div>
         <div class="form-row">
             <div class="form-group col-md-3">Name:</div>
-            <div class="form-group col-md-6">{{form.first_name.value}} {{form.last_name.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.first_name.value}} {{kfh.form.last_name.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">Geschlecht:</div>
-            <div class="form-group col-md-6">{{form.gender.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.gender.value}} -- {{kfh.kfh.form.gender.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">Geburtstag:</div>
-            <div class="form-group col-md-6">{{form.birthday.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.birthday.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">Anschrift:</div>
-            <div class="form-group col-md-6">{{form.street.value}} {{form.house_number.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.street.value}} {{kfh.form.house_number.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">Postleitzahl:</div>
-            <div class="form-group col-md-6">{{form.zip_code.value}} {{form.city.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.zip_code.value}} {{kfh.form.city.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">E-Mail:</div>
-            <div class="form-group col-md-6">{{form.mail_addr.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.mail_addr.value}}</div>
         </div>
         <div class="form-row">
             <div class="form-group col-md-3">Telefon:</div>
-            <div class="form-group col-md-6">{{form.phone.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.phone.value}}</div>
         </div>
           <div class="form-row">
             <div class="form-group col-md-3">Allergien / Unvertr&auml;glichkeiten:</div>
-            <div class="form-group col-md-6">{{form.intolerances.value}}</div>
+            <div class="form-group col-md-6">{{kfh.form.intolerances.value}}</div>
           </div>
           <div class="form-row">
             <div class="form-group col-md-3">Anmeldung Freizeit:</div>
-            <div class="form-group col-md-6">{{ formReg.reg_doc_consent.value }}</div>
+            <div class="form-group col-md-6">{{ kfh.formReg.reg_doc_consent.value }}</div>
           </div>
           <br>
           <div class="form-row">
             <div class="form-group col-md-3">Freizeitpass:</div>
-            <div class="form-group col-md-6">{{ formReg.reg_doc_pass.value }}</div>
+            <div class="form-group col-md-6">{{ kfh.formReg.reg_doc_pass.value }}</div>
           </div>
           <br>
           <div class="form-row">
             <div class="form-group col-md-3">Medikamentenabgabe:</div>
-            <div class="form-group col-md-6">{{ formReg.reg_doc_meddispense }}</div>
+            <div class="form-group col-md-6">{{ kfh.formReg.reg_doc_meddispense }}</div>
           </div>
           <br>
           <div class="form-row">
             <div class="form-group col-md-3">Sonstige Mitteilungen:</div>
-            <div class="form-group col-md-6">{{formReg.reg_notes.value}}</div>
+            <div class="form-group col-md-6">{{kfh.formReg.reg_notes.value}}</div>
           </div>
           <div class="form-row">
             <div class="form-group col-md-4">
-              <label>Ernährung: {{form.nutrition.value}}</label>
+              <label>Ernährung: {{kfh.form.nutrition.value}}</label>
             </div>
           </div>
-          <input type="hidden" name="fh" value="{{ fh }}" />
+          <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
+          <input type="hidden" name="_fgstage" value="confirm" />
           <button name="edit" type="submit" class="btn btn-primary">Bearbeiten</button>
           <button name="confirm" type="submit" class="btn btn-primary">Bestätigen</button>
         </form>
