@@ -46,6 +46,8 @@ class Participant(KCPerson):
         max_length=3,
         choices=NutritionTypes.choices,
     )
+    lactose_intolerance = models.BooleanField(default=False)
+    celiac_disease = models.BooleanField(default=False)
     role = models.CharField(
         max_length=2,
         choices=ParticipantRoles.choices,
@@ -87,6 +89,8 @@ class KCEvent(models.Model):
     name = models.CharField(max_length=250)
     start_date = models.DateField()
     end_date = models.DateField()
+    registration_start = models.DateField(null=True)
+    registration_end = models.DateField(null=True)
     event_url = models.SlugField()
     reg_pwd = models.CharField(max_length=250, blank=True)
 

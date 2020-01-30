@@ -7,8 +7,11 @@ class ParticipantForm(forms.ModelForm):
         fields = [
             'first_name', 'last_name', 'street', 'house_number', 'zip_code', 'city',
             'phone', 'mail_addr', 'birthday', 'church', 'intolerances', 'nutrition', 
-            'role', 'gender'
+            'role', 'gender', 'lactose_intolerance', 'celiac_disease'
         ]
+        widgets = {
+            'birthday': forms.DateInput(attrs={'type': 'date'})
+        }
 
 class KCEventRegistrationForm(forms.ModelForm):
     class Meta:

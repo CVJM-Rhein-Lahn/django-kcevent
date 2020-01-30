@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, Partner
 from .formhelper import KcFormHelper
-import uuid, json
+import datetime
 
 # allow churches to register their partnership
 def managePartnership(request):
@@ -62,16 +62,7 @@ def registerEvent(request, event_url):
     # first check if user is logged in.
     if not request.session.get('is_kclogged_in_' + str(evt.id), False):
         return registerEventLogin(request, event_url, evt)
-    # user is logged in. Check if already filled in:
-    elif request.session.get('is_kcform_filled_' + str(evt.id), False):
-        # user already filled in.
-        return render(request, 'cvjm/registrationFinished.html')
     else:
-        editConfirm = False
-        if request.method == 'POST' and request.POST.get('fh', None) and \
-            (request.POST.get('confirm', None) != None or request.POST.get('edit', None) != None):
-            editConfirm = True
-
         kfh = KcFormHelper.checkInstantiate(request, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
             if kfh.isValid():
@@ -81,9 +72,16 @@ def registerEvent(request, event_url):
                     kfh.formReg.instance.reg_event = evt
                     kfh.formReg.save()
                     # fixme: kfh.clean()
-                    request.session['is_kcform_filled_' + str(evt.id)] = True
-                    return render(request, 'cvjm/registrationFinished.html')
-                elif not editConfirm:
+                    partner = Partner.objects.get(id=kfh.form.instance.church.id)
+                    return render(
+                        request, 'cvjm/registrationFinished.html',
+                        {
+                            'evt': evt,
+                            'partner': partner,
+                            'kfh': kfh
+                        }
+                    )
+                elif request.POST.get('edit', None) is None:
                     kfh.setStage('preview')
                     # fetch the corresponding objects.
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
@@ -96,6 +94,7 @@ def registerEvent(request, event_url):
                             'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
                         }
                     )
+        kfh.setStage(None)
         return render(
             request, 'cvjm/registerEvent.html', 
             {
@@ -106,7 +105,14 @@ def registerEvent(request, event_url):
         )
 
 def listPublicEvents(request):
-    pass
+    # check which event is online...
+    now = datetime.datetime.now()
+    events = KCEvent.objects.filter(registration_start__lte=now, registration_end__gte=now)
+    if not events:
+        return redirect('https://cvjm-rhein-lahn.de')
+    else:
+        # take the first active one
+        return redirect(reverse('registerEvent', kwargs={'event_url': events[0].event_url}))
 
 def user_login(request):
     if request.method == 'POST':
