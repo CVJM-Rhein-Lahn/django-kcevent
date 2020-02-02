@@ -77,8 +77,7 @@ def registerEvent(request, event_url):
                     # send confirmation to participant
                     kfh.formReg.instance.sendConfirmation()
                     # send information to host and church
-                    kfh.formReg.instance.reg_event.notifyNewRegistration(kfh.formReg.instance)
-                    kfh.formReg.instance.reg_user.church.notifyNewRegistration(kfh.formReg.instance)
+                    kfh.formReg.instance.notifyHostChurch()
                     return render(
                         request, 'cvjm/registrationFinished.html',
                         {

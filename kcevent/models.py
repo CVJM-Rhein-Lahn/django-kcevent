@@ -26,7 +26,7 @@ class KCTemplate(models.Model):
         REGISTRATION_CONFIRMATION = 'registrationConfirmation', _('Confirm registration to participant')
         REGISTRATION_NOTIFICATION = 'registrationNotification', _('Confirm registration to church and host')
 
-    tpl_set = models.OneToOneField(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
+    tpl_set = models.ForeignKey(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
     tpl_type = models.CharField(
         max_length=50,
         choices=TemplateTypes.choices,
@@ -123,7 +123,7 @@ class Partner(models.Model):
     house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
     city = models.CharField(max_length=120, verbose_name=_('City'))
     zip_code = models.CharField(max_length=10, verbose_name=_('Postal code'))
-    mail_church = models.EmailField(verbose_name=_('Mail address'))
+    mail_addr = models.EmailField(verbose_name=_('Mail address'))
 
     representative = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Responsible person'))
     contact_person = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Contact person'))
@@ -137,9 +137,6 @@ class Partner(models.Model):
 
     def __str__(self):
         return self.name
-
-    def notifyNewRegistration(self, registration):
-        pass
 
 class KCEventHost(models.Model):
     class Meta:
@@ -220,11 +217,6 @@ class KCEvent(models.Model):
                     m.connection = connection
                     m.send()
 
-    def notifyNewRegistration(self, registration):
-        # must be send to corresponding contact person of church
-        # must be send to organizer
-        pass
-
 def getUploadPathEventPartner(instance, filename):
     # file will be uploaded to MEDIA_ROOT/kcevent/event_<id>/church_id/<filename>
     return 'kcevent/event_{0}/church_{1}/{2}'.format(
@@ -295,14 +287,18 @@ class KCEventRegistration(models.Model):
     def sendConfirmation(self):
         # Find the right template.
         if not self.reg_event.template:
-            raise Exception('No template set defined!')
+            raise Exception('No template set defined for event {0}!'.format(self.reg_event.name))
 
         # find the right template
         tpl = KCTemplate.objects.filter(
             tpl_set=self.reg_event.template, tpl_type=KCTemplate.TemplateTypes.REGISTRATION_CONFIRMATION
         ).first()
+        if not tpl:
+            raise Exception('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
+
         sender = settings.NOTIFY_SENDER
         context = Context({
+            'host': self.reg_event.host,
             'event': self.reg_event,
             'user': self.reg_user,
             'notes': self.reg_notes,
@@ -325,3 +321,42 @@ class KCEventRegistration(models.Model):
         else:
             return False
 
+    def notifyHostChurch(self):
+        # Find the right template.
+        if not self.reg_event.template:
+            raise Exception('No template set defined for event {0}!'.format(self.reg_event.name))
+
+        # find the right template
+        tpl = KCTemplate.objects.filter(
+            tpl_set=self.reg_event.template, tpl_type=KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION
+        ).first()
+        if not tpl:
+            raise Exception('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
+
+        sender = settings.NOTIFY_SENDER
+        messages = []
+        for f in [self.reg_event.host, self.reg_user.church]:
+            context = Context({
+                'host': self.reg_event.host,
+                'recipient': f,
+                'event': self.reg_event,
+                'user': self.reg_user,
+                'notes': self.reg_notes,
+                'partner_name': self.reg_user.church.name
+            })
+            subject = Template(tpl.tpl_subject).render(context)
+            message = Template(tpl.tpl_content).render(context)
+            m = mail.EmailMessage(subject, message, sender, [f.mail_addr,])
+            if self.reg_doc_pass:
+                m.attach_file(self.reg_doc_pass.path)
+                print(self.reg_doc_pass.path)
+            if self.reg_doc_consent:
+                m.attach_file(self.reg_doc_consent.path)
+            if self.reg_doc_meddispense:
+                m.attach_file(self.reg_doc_meddispense.path)
+            messages.append(m)
+
+        with mail.get_connection() as connection:
+                for m in messages:
+                    m.connection = connection
+                    m.send()
