@@ -94,10 +94,10 @@ class KCEvent(models.Model):
     end_date = models.DateField(verbose_name=_('End date'))
     registration_start = models.DateField(null=True, verbose_name=_('Registration start'))
     registration_end = models.DateField(null=True, verbose_name=_('Registration end'))
-    event_url = models.SlugField(verbose_name=_('Registration URL'), help=_('SEO optimized location for register to event.'))
+    event_url = models.SlugField(verbose_name=_('Registration URL'), help_text=_('SEO optimized location for register to event.'))
     reg_pwd = models.CharField(
         max_length=250, blank=True, verbose_name=_('Registration password'), 
-        help=_('Password (can be empty) which is necessary in order to be able to register to event.')
+        help_text=_('Password (can be empty) which is necessary in order to be able to register to event.')
     )
 
     participants = models.ManyToManyField(
