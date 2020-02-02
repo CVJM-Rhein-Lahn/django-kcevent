@@ -1,6 +1,46 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.core import mail
+from django.conf import settings
+from django.template import Context, Template
+from django.utils import timezone
+
+class KCTemplateSet(models.Model):
+    class Meta:
+        verbose_name = _('Template set')
+        verbose_name_plural = _('Template sets')
+
+    name = models.CharField(max_length=250, verbose_name=_('Name'))
+
+    def __str__(self):
+        return self.name
+
+
+class KCTemplate(models.Model):
+    class Meta:
+        verbose_name =_('Template')
+        verbose_name_plural =_('Templates')
+        unique_together = (('tpl_set', 'tpl_type'),)
+
+    class TemplateTypes(models.TextChoices):
+        REGISTRATION_CONFIRMATION = 'registrationConfirmation', _('Confirm registration to participant')
+        REGISTRATION_NOTIFICATION = 'registrationNotification', _('Confirm registration to church and host')
+
+    tpl_set = models.OneToOneField(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
+    tpl_type = models.CharField(
+        max_length=50,
+        choices=TemplateTypes.choices,
+        verbose_name=_('Template type')
+    )
+    tpl_subject = models.CharField(max_length=255, verbose_name=_('Subject template'))
+    tpl_content = models.TextField(verbose_name=_('Body template'))
+
+    def __str__(self):
+        return 'Template for set {0} / {1}: {2}'.format(
+            self.tpl_set.name, 
+            self.tpl_type, 
+            self.tpl_subject
+        )
 
 class KCPerson(models.Model):
     class Meta:
@@ -17,6 +57,10 @@ class KCPerson(models.Model):
     mail_addr = models.EmailField(verbose_name=_('Mail address'))
 
     def __str__(self):
+        return '{0} {1}'.format(self.first_name, self.last_name)
+
+    @property
+    def fullname(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
 
 class Participant(KCPerson):
@@ -59,6 +103,16 @@ class Participant(KCPerson):
         verbose_name=_('Gender')
     )
 
+    @property
+    def nutrition_tolerances(self):
+        n = str(self.get_nutrition_display())
+        if self.lactose_intolerance:
+            n += ', ' + str(_('Lactose intolerance'))
+        if self.celiac_disease:
+            n += ', ' + str(_('Celiac disease'))
+
+        return n
+
 class Partner(models.Model):
     class Meta:
         verbose_name = _('Partner')
@@ -84,11 +138,34 @@ class Partner(models.Model):
     def __str__(self):
         return self.name
 
+    def notifyNewRegistration(self, registration):
+        pass
+
+class KCEventHost(models.Model):
+    class Meta:
+        verbose_name = _('Event host')
+        verbose_name_plural = _('Event hosts')
+
+    name = models.CharField(max_length=250, verbose_name=_('Name'))
+    street = models.CharField(max_length=120, verbose_name=_('Street'))
+    house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
+    city = models.CharField(max_length=120, verbose_name=_('City'))
+    zip_code = models.CharField(max_length=10, verbose_name=_('Postal code'))
+    mail_addr = models.EmailField(verbose_name=_('Mail address'))
+    website = models.URLField(blank=True, verbose_name=_('Website'))
+
+    representative = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Responsible person'))
+    contact_person = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Contact person'))
+
+    def __str__(self):
+        return self.name
+
 class KCEvent(models.Model):
     class Meta:
         verbose_name = _('Event')
         verbose_name_plural = _('Events')
 
+    host = models.ForeignKey(KCEventHost, on_delete=models.CASCADE, related_name='+', verbose_name=_('Host'), null=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     start_date = models.DateField(verbose_name=_('Start date'))
     end_date = models.DateField(verbose_name=_('End date'))
@@ -98,6 +175,10 @@ class KCEvent(models.Model):
     reg_pwd = models.CharField(
         max_length=250, blank=True, verbose_name=_('Registration password'), 
         help_text=_('Password (can be empty) which is necessary in order to be able to register to event.')
+    )
+    template = models.ForeignKey(
+        KCTemplateSet, on_delete=models.SET_NULL, null=True, verbose_name=_('Template set'),
+        help_text=_('A set of templates used in order to send mails.')
     )
 
     participants = models.ManyToManyField(
@@ -139,6 +220,11 @@ class KCEvent(models.Model):
                     m.connection = connection
                     m.send()
 
+    def notifyNewRegistration(self, registration):
+        # must be send to corresponding contact person of church
+        # must be send to organizer
+        pass
+
 def getUploadPathEventPartner(instance, filename):
     # file will be uploaded to MEDIA_ROOT/kcevent/event_<id>/church_id/<filename>
     return 'kcevent/event_{0}/church_{1}/{2}'.format(
@@ -149,8 +235,8 @@ def getUploadPathEventPartner(instance, filename):
 
 class KCEventPartner(models.Model):
     class Meta:
-        verbose_name = _('Event Partner')
-        verbose_name_plural = _('Event Partners')
+        verbose_name = _('Event partner')
+        verbose_name_plural = _('Event partners')
 
     evp_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     evp_partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name=_('Event partner'))
@@ -196,9 +282,46 @@ class KCEventRegistration(models.Model):
     reg_doc_meddispense = models.FileField(upload_to=getUploadPathEventRegistration, null=True, blank=True, verbose_name=_('Medical dispense'))
     reg_doc_consent = models.FileField(upload_to=getUploadPathEventRegistration, verbose_name=_('Consent form'))
 
+    # meta information for notification
+    confirmation_send = models.BooleanField(default=False, verbose_name=_('Confirmation send'))
+    confirmation_dt = models.DateTimeField(null=True, verbose_name=_('Confirmation date/time'))
+
     def __str__(self):
         # event ?
         event = self.reg_event.name if self.reg_event else '??'
         participant = str(self.reg_user) if self.reg_user else '??'
         return 'Registration "' + event + '": ' + participant
+
+    def sendConfirmation(self):
+        # Find the right template.
+        if not self.reg_event.template:
+            raise Exception('No template set defined!')
+
+        # find the right template
+        tpl = KCTemplate.objects.filter(
+            tpl_set=self.reg_event.template, tpl_type=KCTemplate.TemplateTypes.REGISTRATION_CONFIRMATION
+        ).first()
+        sender = settings.NOTIFY_SENDER
+        context = Context({
+            'event': self.reg_event,
+            'user': self.reg_user,
+            'notes': self.reg_notes,
+            'partner_name': self.reg_user.church.name
+        })
+        subject = Template(tpl.tpl_subject).render(context)
+        message = Template(tpl.tpl_content).render(context)
+        m = mail.EmailMessage(subject, message, sender, [self.reg_user.mail_addr,])
+        sendResult = False
+        try:
+            sendResult = m.send()
+        except ConnectionRefusedError:
+            sendResult = False
+
+        if sendResult:
+            self.confirmation_send = True
+            self.confirmation_dt = timezone.now()
+            self.save()
+            return True
+        else:
+            return False
 

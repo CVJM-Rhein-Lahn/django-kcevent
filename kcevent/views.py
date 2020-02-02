@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
 from django.urls import reverse
@@ -73,6 +74,11 @@ def registerEvent(request, event_url):
                     kfh.formReg.save()
                     # fixme: kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
+                    # send confirmation to participant
+                    kfh.formReg.instance.sendConfirmation()
+                    # send information to host and church
+                    kfh.formReg.instance.reg_event.notifyNewRegistration(kfh.formReg.instance)
+                    kfh.formReg.instance.reg_user.church.notifyNewRegistration(kfh.formReg.instance)
                     return render(
                         request, 'cvjm/registrationFinished.html',
                         {
@@ -109,7 +115,7 @@ def listPublicEvents(request):
     now = datetime.datetime.now()
     events = KCEvent.objects.filter(registration_start__lte=now, registration_end__gte=now)
     if not events:
-        return redirect('https://cvjm-rhein-lahn.de')
+        return redirect(settings.MAIN_PAGE)
     else:
         # take the first active one
         return redirect(reverse('registerEvent', kwargs={'event_url': events[0].event_url}))
