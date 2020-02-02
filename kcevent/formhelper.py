@@ -67,6 +67,16 @@ class KcFormHelper(object):
     def getStage(self):
         return self._stage
 
+    def clean(self):
+        for vN, vV in self._fileInfos.items():
+            if os.path.exists(vV['fileName']):
+                try:
+                    os.unlink(vV['fileName'])
+                except:
+                    pass
+        
+        self._fileInfos = {}
+
     def updateData(self, request, pl):
         # mostly not necessary, but might be necessary to update fields.
         for vN, vV in pl['payload'].items():
@@ -115,7 +125,9 @@ class KcFormHelper(object):
                             self._fileInfos[x.name]['fileSize'] == x.value().size:
                             fileInfo = self._fileInfos[x.name]
                         else:
-                            xtt = tempfile.NamedTemporaryFile(prefix='kcevnt_preview_', delete=False)
+                            xtt = tempfile.NamedTemporaryFile(
+                                prefix='kcevent_preview_' + k + '_' + x.name + '_'.lower(), delete=False
+                            )
                             xtt.write(x.value().read())
                             xtt.close()
                             fileInfo = {
@@ -135,7 +147,6 @@ class KcFormHelper(object):
 
     def saveForm(self, request):
         fgHash = self.getHash()
-        pl = self._preparePayload()
         request.session['__kcform__' + fgHash] = json.dumps({
             '_hash': fgHash,
             '_stage': self._stage,

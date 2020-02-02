@@ -349,7 +349,6 @@ class KCEventRegistration(models.Model):
             m = mail.EmailMessage(subject, message, sender, [f.mail_addr,])
             if self.reg_doc_pass:
                 m.attach_file(self.reg_doc_pass.path)
-                print(self.reg_doc_pass.path)
             if self.reg_doc_consent:
                 m.attach_file(self.reg_doc_consent.path)
             if self.reg_doc_meddispense:

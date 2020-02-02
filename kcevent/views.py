@@ -72,7 +72,7 @@ def registerEvent(request, event_url):
                     kfh.formReg.instance.reg_user = kfh.form.instance
                     kfh.formReg.instance.reg_event = evt
                     kfh.formReg.save()
-                    # fixme: kfh.clean()
+                    kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     # send confirmation to participant
                     kfh.formReg.instance.sendConfirmation()
