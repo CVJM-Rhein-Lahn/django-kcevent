@@ -12,7 +12,10 @@
         <form action="{{ loginUrl }}" method="post">
           {% csrf_token %}
         {% if error_message %}
-            <p class="bg-danger p-d ml-b">{{ error_message }}</p>
+            <div class="alert alert-danger alert-dismissible fade show">
+              {{ error_message }}
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+          </div>
         {% endif %}
           <div class="form-row">
             <div class="form-group col-lg-6 clearfix">
