@@ -36,7 +36,7 @@ def registerEventLogin(request, event_url, evt=None):
                 request, 'cvjm/kclogin.html', 
                 {
                 'error_message': _('Invalid credentials provided!'),
-                'event': evt,
+                'evt': evt,
                 'loginUrl': reverse('registerEventLogin', kwargs={'event_url': evt.event_url})
                 }
             )
@@ -45,7 +45,7 @@ def registerEventLogin(request, event_url, evt=None):
         return render(
             request, 'cvjm/kclogin.html',
             {
-                'event': evt,
+                'evt': evt,
                 'loginUrl': reverse('registerEventLogin', kwargs={'event_url': evt.event_url})
             }
         )
