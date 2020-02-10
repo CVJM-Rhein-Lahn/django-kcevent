@@ -268,6 +268,7 @@ class KCEventRegistration(models.Model):
     reg_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
+    reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
 
     # further documentation
     reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, verbose_name=_('Event passport'))

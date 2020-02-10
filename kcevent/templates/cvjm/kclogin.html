@@ -1,33 +1,29 @@
 {% extends "cvjm/base.html" %}
 
 {% block content %}
-<div class="col-sm-8">
+<div class="container">
+  <div class="item-1">
     <h1>Anmeldung {{ evt.name }}</h1>
     <p>Bitte geben Sie das Passwort aus den Anmeldeunterlagen ein.</p>
+  </div>
 </div>
 
-<div class="container">
-    <div class="row">
-      <div class="col">
-        <form action="{{ loginUrl }}" method="post">
-          {% csrf_token %}
-        {% if error_message %}
-            <div class="alert alert-danger alert-dismissible fade show">
-              {{ error_message }}
-              <button type="button" class="close" data-dismiss="alert">&times;</button>
-          </div>
-        {% endif %}
-          <div class="form-row">
-            <div class="form-group col-lg-6 clearfix">
-              <label for="password">Kennwort</label>
-              <input name="password" type="password" class="form-control" placeholder="Kennwort" />
-            </div>
-          </div>
-          <input type="hidden" name="next" value="{{next}}" />
-          <button name="login" type="submit" class="btn btn-primary">Absenden</button>
-        </form>
-      </div>
+<form action="{{ loginUrl }}" method="post">
+  {% csrf_token %}
+  <div class="formgrid-container">
+    {% if error_message %}
+    <div class="alert alert-danger alert-dismissible fade show">
+      {{ error_message }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
-</div>
+    {% endif %}
+    <div class="formgrid-1">
+      <input id="kcevnt-password" name="password" type="password" class="form-control" placeholder="Kennwort" />
+      <!--<label for="kcevnt-password">Kennwort*</label>-->
+      <input type="hidden" name="next" value="{{next}}" />
+      <button name="login" type="submit" class="btn btn-primary">Absenden</button>
+    </div>
+  </div>
+</form>
 
 {% endblock %}
