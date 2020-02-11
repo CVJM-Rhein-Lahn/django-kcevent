@@ -28,6 +28,7 @@ class ParticipantForm(forms.ModelForm):
         self.fields['church'].empty_label = _('Please choose your church')
         # replace empty choice
         self.fields['role'].widget.choices = [('', _('Please choose your role'))] + self.fields['role'].widget.choices[1:]
+        self.fields['gender'].widget.choices = [('', _('Please choose your gender'))] + self.fields['gender'].widget.choices[1:]
 
 class KCEventRegistrationForm(forms.ModelForm):
     class Meta:
