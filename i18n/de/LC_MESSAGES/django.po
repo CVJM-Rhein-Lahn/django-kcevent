@@ -1,14 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Konfi-Castle Event Management Translations
+# Copyright (C) 2020 CVJM Kreisverband Rhein-Lahn e.V.
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Lukas Schreiner <lukas.schreiner@konfi-castle-rhein-lahn.de>, 2020.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: Konfi-Castle Event Management\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-27 20:40+0000\n"
-"PO-Revision-Date: 2020-01-27 21:42+0100\n"
+"POT-Creation-Date: 2020-02-11 18:39+0000\n"
+"PO-Revision-Date: 2020-02-11 19:55+0100\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -17,87 +17,96 @@ msgstr ""
 "Last-Translator: \n"
 "Language-Team: \n"
 "X-Generator: Poedit 2.2\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
-#: kcevent/apps.py:6
+#: kcevent_remote/kcevent/apps.py:6
 msgid "Konfi Castle Event Management"
-msgstr "Konfi-Castle Eventverwaltung"
+msgstr "Konfi-Castle Event Management"
 
-#: kcevent/models.py:7
+#: kcevent_remote/kcevent/models.py:7
 msgid "Person"
 msgstr "Person"
 
-#: kcevent/models.py:8
+#: kcevent_remote/kcevent/models.py:8
 msgid "Persons"
 msgstr "Personen"
 
-#: kcevent/models.py:24
+#: kcevent_remote/kcevent/models.py:24
 msgid "Participant"
 msgstr "Teilnehmer"
 
-#: kcevent/models.py:25
+#: kcevent_remote/kcevent/models.py:25
 msgid "Participants"
 msgstr "Teilnehmer"
 
-#: kcevent/models.py:28
+#: kcevent_remote/kcevent/models.py:28
 msgid "Regular"
 msgstr "Regulär"
 
-#: kcevent/models.py:29
+#: kcevent_remote/kcevent/models.py:29
 msgid "Vegetarian"
 msgstr "Vegetarisch"
 
-#: kcevent/models.py:30
+#: kcevent_remote/kcevent/models.py:30
 msgid "Vegan"
 msgstr "Vegan"
 
-#: kcevent/models.py:33
+#: kcevent_remote/kcevent/models.py:33
 msgid "Confirmand"
-msgstr "Konfirmand/in"
+msgstr "Konfirmant"
 
-#: kcevent/models.py:34
+#: kcevent_remote/kcevent/models.py:34
 msgid "Reloaded"
 msgstr "Reloaded"
 
-#: kcevent/models.py:35
+#: kcevent_remote/kcevent/models.py:35
 msgid "Staff"
-msgstr "Mitarbeiter/in"
+msgstr "Mitarbeiter"
 
-#: kcevent/models.py:38
+#: kcevent_remote/kcevent/models.py:38
 msgid "Male"
 msgstr "Männlich"
 
-#: kcevent/models.py:39
+#: kcevent_remote/kcevent/models.py:39
 msgid "Female"
 msgstr "Weiblich"
 
-#: kcevent/models.py:40
+#: kcevent_remote/kcevent/models.py:40
 msgid "Divert"
 msgstr "Divers"
 
-#: kcevent/models.py:60 kcevent/models.py:61
+#: kcevent_remote/kcevent/models.py:62 kcevent_remote/kcevent/models.py:63
 msgid "Partner"
 msgstr "Partner"
 
-#: kcevent/models.py:84
+#: kcevent_remote/kcevent/models.py:86
 msgid "Event"
 msgstr "Veranstaltung"
 
-#: kcevent/models.py:85
+#: kcevent_remote/kcevent/models.py:87
 msgid "Events"
 msgstr "Veranstaltungen"
 
-#: kcevent/models.py:139
+#: kcevent_remote/kcevent/models.py:145
 msgid "Event Partner"
 msgstr "Veranstaltungspartner"
 
-#: kcevent/models.py:140
+#: kcevent_remote/kcevent/models.py:146
 msgid "Event Partners"
 msgstr "Veranstaltungspartner"
 
-#: kcevent/models.py:173
+#: kcevent_remote/kcevent/models.py:179
 msgid "Event registration"
-msgstr "Event Registrierung"
+msgstr "Veranstaltungsregistrierung"
 
-#: kcevent/models.py:174
+#: kcevent_remote/kcevent/models.py:180
 msgid "Event registrations"
-msgstr "Event Registrierungen"
+msgstr "Veranstaltungsregistrierungen"
+
+#: kcevent_remote/kcevent/views.py:26 kcevent_remote/kcevent/views.py:60
+msgid "Event not found"
+msgstr "Veranstaltung nicht gefunden"
+
+#: kcevent_remote/kcevent/views.py:37
+msgid "Invalid credentials provided!"
+msgstr "Ungültige Zugangsdaten angegeben!"
