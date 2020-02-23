@@ -1,5 +1,5 @@
 from django import forms
-from kcevent.models import Participant, KCEventRegistration
+from kcevent.models import Participant, KCEventRegistration, KCEvent
 from django.utils.translation import ugettext_lazy as _
 
 class ParticipantForm(forms.ModelForm):
@@ -41,3 +41,23 @@ class KCEventRegistrationForm(forms.ModelForm):
             'reg_notes': forms.Textarea(attrs={'placeholder': _('Other communications')}),
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # we need user information
+        eventId = self.instance.reg_event_id
+        firstName = self.data.get('first_name')
+        lastName = self.data.get('last_name')
+        birthday = self.data.get('birthday')
+        mailAddr = self.data.get('mail_addr')
+        # first check if we can find a user
+        usr = Participant.objects.filter(first_name=firstName, last_name=lastName, birthday=birthday, mail_addr=mailAddr)
+        # find event
+        evt = KCEvent.objects.get(id=eventId)
+        if usr and eventId and evt:
+            usr = usr.first()
+            # now check if there is already an registration known.
+            kcer = KCEventRegistration.objects.get(reg_user=usr, reg_event=evt)
+            if kcer:
+                raise forms.ValidationError(
+                    _('You\'re already registered to this event.')
+                )

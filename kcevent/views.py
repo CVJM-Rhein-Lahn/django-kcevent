@@ -66,6 +66,8 @@ def registerEvent(request, event_url):
     else:
         kfh = KcFormHelper.checkInstantiate(request, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
+            kfh.formReg.instance.reg_user = kfh.form.instance
+            kfh.formReg.instance.reg_event = evt
             if kfh.isValid():
                 if request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
                     kfh.form.save()

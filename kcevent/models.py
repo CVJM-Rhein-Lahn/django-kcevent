@@ -356,7 +356,11 @@ class KCEventRegistration(models.Model):
                 m.attach_file(self.reg_doc_meddispense.path)
             messages.append(m)
 
-        with mail.get_connection() as connection:
-                for m in messages:
-                    m.connection = connection
-                    m.send()
+        try:
+            with mail.get_connection() as connection:
+                    for m in messages:
+                        m.connection = connection
+                        m.send()
+        except ConnectionRefusedError as e:
+            # log somewhere.
+            pass
