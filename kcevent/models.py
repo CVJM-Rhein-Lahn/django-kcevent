@@ -295,7 +295,7 @@ class KCEventRegistration(models.Model):
             oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_pass.name))
             newName = 'doc_pass_' + user_name + oldExt
             self.reg_doc_pass.name = getUploadPathEventRegistration(self, newName)
-            newPath = os.path.join(settings.MEDIA_ROOT + self.reg_doc_pass.name)
+            newPath = os.path.join(settings.MEDIA_ROOT, self.reg_doc_pass.name)
             if oldPath != newPath:
                 os.rename(oldPath, newPath)
                 changed = True
@@ -305,7 +305,7 @@ class KCEventRegistration(models.Model):
             oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_meddispense.name))
             newName = 'doc_meddispense_' + user_name + oldExt
             self.reg_doc_meddispense.name = getUploadPathEventRegistration(self, newName)
-            newPath = os.path.join(settings.MEDIA_ROOT + self.reg_doc_meddispense.name)
+            newPath = os.path.join(settings.MEDIA_ROOT, self.reg_doc_meddispense.name)
             if oldPath != newPath:
                 os.rename(oldPath, newPath)
                 changed = True
@@ -315,7 +315,7 @@ class KCEventRegistration(models.Model):
             oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_consent.name))
             newName = 'doc_consent_' + user_name + oldExt
             self.reg_doc_consent.name = getUploadPathEventRegistration(self, newName)
-            newPath = os.path.join(settings.MEDIA_ROOT + self.reg_doc_consent.name)
+            newPath = os.path.join(settings.MEDIA_ROOT, self.reg_doc_consent.name)
             if oldPath != newPath:
                 os.rename(oldPath, newPath)
                 changed = True
