@@ -56,8 +56,11 @@ class KCEventRegistrationForm(forms.ModelForm):
         if usr and eventId and evt:
             usr = usr.first()
             # now check if there is already an registration known.
-            kcer = KCEventRegistration.objects.get(reg_user=usr, reg_event=evt)
-            if kcer:
+            try:
+                kcer = KCEventRegistration.objects.get(reg_user=usr, reg_event=evt)
+            except KCEventRegistration.DoesNotExist:
+                pass
+            else:
                 raise forms.ValidationError(
                     _('You\'re already registered to this event.')
                 )

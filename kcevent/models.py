@@ -4,6 +4,7 @@ from django.core import mail
 from django.conf import settings
 from django.template import Context, Template
 from django.utils import timezone
+import os
 
 class KCTemplateSet(models.Model):
     class Meta:
@@ -284,6 +285,42 @@ class KCEventRegistration(models.Model):
         event = self.reg_event.name if self.reg_event else '??'
         participant = str(self.reg_user) if self.reg_user else '??'
         return 'Registration "' + event + '": ' + participant
+
+    def updateFilePaths(self):
+        changed = False
+        user_name = self.reg_user.last_name.lower().replace(' ', '') + self.reg_user.first_name.lower().replace(' ', '')
+        if self.reg_doc_pass.name:
+            oldPath = self.reg_doc_pass.path
+            oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_pass.name))
+            newName = 'doc_pass_' + user_name + oldExt
+            self.reg_doc_pass.name = getUploadPathEventRegistration(self, newName)
+            newPath = settings.MEDIA_ROOT + self.reg_doc_pass.name
+            if oldPath != newPath:
+                os.rename(oldPath, newPath)
+                changed = True
+
+        if self.reg_doc_meddispense.name:
+            oldPath = self.reg_doc_meddispense.path
+            oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_meddispense.name))
+            newName = 'doc_meddispense_' + user_name + oldExt
+            self.reg_doc_meddispense.name = getUploadPathEventRegistration(self, newName)
+            newPath = settings.MEDIA_ROOT + self.reg_doc_meddispense.name
+            if oldPath != newPath:
+                os.rename(oldPath, newPath)
+                changed = True
+
+        if self.reg_doc_consent.name:
+            oldPath = self.reg_doc_consent.path
+            oldName, oldExt = os.path.splitext(os.path.basename(self.reg_doc_consent.name))
+            newName = 'doc_consent_' + user_name + oldExt
+            self.reg_doc_consent.name = getUploadPathEventRegistration(self, newName)
+            newPath = settings.MEDIA_ROOT + self.reg_doc_consent.name
+            if oldPath != newPath:
+                os.rename(oldPath, newPath)
+                changed = True
+
+        if changed:
+            self.save()
 
     def sendConfirmation(self):
         # Find the right template.

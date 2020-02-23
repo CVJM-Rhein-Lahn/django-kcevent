@@ -64,6 +64,8 @@ def registerEvent(request, event_url):
     if not request.session.get('is_kclogged_in_' + str(evt.id), False):
         return registerEventLogin(request, event_url, evt)
     else:
+        # FIXME: depending on the given user data (first name, last name, birthday, etc.) identify and update
+        # existing user!
         kfh = KcFormHelper.checkInstantiate(request, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
             kfh.formReg.instance.reg_user = kfh.form.instance
@@ -74,6 +76,7 @@ def registerEvent(request, event_url):
                     kfh.formReg.instance.reg_user = kfh.form.instance
                     kfh.formReg.instance.reg_event = evt
                     kfh.formReg.save()
+                    kfh.formReg.instance.updateFilePaths()
                     kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     # send confirmation to participant
