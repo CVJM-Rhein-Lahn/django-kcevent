@@ -3,12 +3,16 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
 from django.urls import reverse
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import smart_str
 from .forms import ParticipantForm, KCEventRegistrationForm
-from .models import KCEvent, Partner
+from .models import KCEvent, KCEventRegistration, Partner
 from .formhelper import KcFormHelper
 import datetime
+import zipfile
+import io
+import os
 
 # allow churches to register their partnership
 def managePartnership(request):
@@ -17,6 +21,58 @@ def managePartnership(request):
 @permission_required('kcevent.Event.can_add')
 def listEvents(request):
     return HttpResponse("Yeah lets add event.")
+
+@login_required
+@permission_required('kcevent.can_download_regdocs', raise_exception=True)
+def downloadRegistrationDocuments(request, event_url):
+    # try to find the event
+    try:
+        evt = KCEvent.objects.get(event_url=event_url)
+    except:
+        raise Http404(_('Event not found'))
+
+    # fetch all documents
+    registrations = KCEventRegistration.objects.filter(reg_event=evt)
+    now = datetime.datetime.now()
+    zipNameBase = '{0}_{1}_documents'.format(
+        now.strftime('%Y_%m_%d'), event_url
+    )
+    zipName = zipNameBase + '.zip'
+    zStream = io.BytesIO()
+    zfile = zipfile.ZipFile(zStream, mode='x')
+    for r in registrations:
+        user_name = smart_str(r.reg_user.last_name.lower().replace(' ', '') + '_' + \
+            r.reg_user.first_name.lower().replace(' ', '')) + \
+            '_{0}'.format(r.reg_user.id)
+        # Doc pass
+        if r.reg_doc_pass:
+            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_pass.name))
+            try:
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_pass.name), arcName)
+            except FileNotFoundError:
+                zfile.writestr(arcName, 'File not found on server.')
+                pass
+        # Medidispense
+        if r.reg_doc_meddispense:
+            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_meddispense.name))
+            try:
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_meddispense.name), arcName)
+            except FileNotFoundError:
+                zfile.writestr(arcName, 'File not found on server.')
+                pass
+        # Consent
+        if r.reg_doc_consent:
+            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_consent.name))
+            try:
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_consent.name), arcName)
+            except FileNotFoundError:
+                zfile.writestr(arcName, 'File not found on server.')
+                pass
+    zfile.close()
+    zStream.seek(0)
+    response = HttpResponse(zStream, content_type='application/zip')
+    response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(zipName)
+    return response
 
 def registerEventLogin(request, event_url, evt=None):
     if not evt:
