@@ -10,13 +10,15 @@
 
 <form action="{{ loginUrl }}" method="post">
   {% csrf_token %}
-  <div class="formgrid-container">
-    {% if error_message %}
+  {% if error_message %}
+  <div class="alertbox">
     <div class="alert alert-danger alert-dismissible fade show">
-      {{ error_message }}
+      <span class="alertmessage">{{ error_message }}</span>
       <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
-    {% endif %}
+  </div>
+  {% endif %}
+  <div class="formgrid-container">
     <div class="formgrid-1">
       <input id="kcevnt-password" name="password" type="password" class="form-control" placeholder="Kennwort" />
       <!--<label for="kcevnt-password">Kennwort*</label>-->

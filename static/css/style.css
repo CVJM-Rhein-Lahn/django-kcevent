@@ -94,6 +94,45 @@ a:link {
   grid-row-gap: 5em;
 }
 
+.alertbox {
+  display: grid;
+  grid-template-columns: repeat(12, [col] 1fr);
+  grid-template-rows: [row] auto;
+}
+
+.alertbox .alert {
+  grid-column: span 6;
+  grid-row: 1;
+  min-height: 1vh;
+  background-color: #fff4f4;
+  border: 1px solid #f00;
+  padding: .25em;
+  display: inline-flex;
+}
+
+.alertbox .alert button {
+  background-color: transparent;
+  border: 2px solid brown; 
+  color: brown;
+  text-decoration: none;
+  padding: 2px 5px;
+  margin: 0; 
+  margin-left: auto !important;
+  cursor: pointer;
+}
+
+.alertbox .alert-danger .alertmessage:before {
+  font-family: "Font Awesome 5 Pro";
+  font-weight: 900;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+  margin-right: 5px;
+  color: brown;
+  content: "\f071";
+}
+
 .formgrid-1 {
   grid-column: span 6;
   grid-row: 1;
