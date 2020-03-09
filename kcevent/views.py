@@ -13,6 +13,8 @@ import datetime
 import zipfile
 import io
 import os
+import csv
+import tempfile
 
 # allow churches to register their partnership
 def managePartnership(request):
@@ -34,42 +36,78 @@ def downloadRegistrationDocuments(request, event_url):
     # fetch all documents
     registrations = KCEventRegistration.objects.filter(reg_event=evt)
     now = datetime.datetime.now()
-    zipNameBase = '{0}_{1}_documents'.format(
+    downloadBase = '{0}_{1}'.format(
         now.strftime('%Y_%m_%d'), event_url
     )
+    csvName = '{0}_participants.csv'.format(downloadBase)
+    zipNameBase = '{0}_documents'.format(downloadBase)
     zipName = zipNameBase + '.zip'
     zStream = io.BytesIO()
     zfile = zipfile.ZipFile(zStream, mode='x')
+    # create a document which all participants information - usable as CSV
+    regtmp = tempfile.NamedTemporaryFile(delete=False)
+    regtmp.close()
+    csvfile = open(regtmp.name, 'w', encoding='iso-8859-1', newline='')
+    rtw = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    headerFields = [
+        _('Surname'), _('First name'), _('Street'), _('House no.'), _('Postal code'),
+        _('City'), _('Phone'), _('Mail address'), _('Birthday'), _('Church'),
+        _('Intolerances'), _('Nutrition'), _('Lactose intolerance'), 
+        _('Celiac disease'), _('Role'), _('Gender'),
+        _('Notes'), _('Event passport'), _('Medical dispense'), _('Consent form')
+    ]
+    rtw.writerow(headerFields)
     for r in registrations:
         user_name = smart_str(r.reg_user.last_name.lower().replace(' ', '') + '_' + \
             r.reg_user.first_name.lower().replace(' ', '')) + \
             '_{0}'.format(r.reg_user.id)
         # Doc pass
+        arcPathDocPass = ''
         if r.reg_doc_pass:
-            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_pass.name))
+            arcPathDocPass = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_pass.name))
             try:
-                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_pass.name), arcName)
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_pass.name), arcPathDocPass)
             except FileNotFoundError:
-                zfile.writestr(arcName, 'File not found on server.')
+                zfile.writestr(arcPathDocPass, 'File not found on server.')
                 pass
         # Medidispense
+        arcPathMediDispense = ''
         if r.reg_doc_meddispense:
-            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_meddispense.name))
+            arcPathMediDispense = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_meddispense.name))
             try:
-                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_meddispense.name), arcName)
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_meddispense.name), arcPathMediDispense)
             except FileNotFoundError:
-                zfile.writestr(arcName, 'File not found on server.')
+                zfile.writestr(arcPathMediDispense, 'File not found on server.')
                 pass
         # Consent
+        arcPathConsent = ''
         if r.reg_doc_consent:
-            arcName = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_consent.name))
+            arcPathConsent = os.path.join(zipNameBase, user_name, os.path.basename(r.reg_doc_consent.name))
             try:
-                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_consent.name), arcName)
+                zfile.write(os.path.join(settings.MEDIA_ROOT, r.reg_doc_consent.name), arcPathConsent)
             except FileNotFoundError:
-                zfile.writestr(arcName, 'File not found on server.')
+                zfile.writestr(arcPathConsent, 'File not found on server.')
                 pass
+    
+        rp = r.reg_user
+        rtw.writerow([
+            rp.last_name, rp.first_name, rp.street, rp.house_number,
+            rp.zip_code, rp.city, rp.phone, rp.mail_addr, 
+            rp.birthday.strftime('%d.%m.%Y'),
+            rp.church.name, rp.intolerances, rp.get_nutrition_display(),
+            _('Yes') if rp.lactose_intolerance else _('No'), 
+            _('Yes') if rp.celiac_disease else _('No'),
+            rp.get_role_display(), rp.get_gender_display(),
+            r.reg_notes,
+            # documents
+            arcPathDocPass, arcPathMediDispense, arcPathConsent
+        ])
+
+    csvfile.close()
+    zfile.write(regtmp.name, csvName)
     zfile.close()
     zStream.seek(0)
+    os.unlink(regtmp.name)
     response = HttpResponse(zStream, content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(zipName)
     return response
