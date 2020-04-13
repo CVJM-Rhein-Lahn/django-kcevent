@@ -2,10 +2,12 @@
 {% load formclass %}
 
 {% block content %}
-<div class="col-sm-8">
+<div class="container">
+    <div class="item-1">
 <h1>Anmeldung {{ evt.name }} - Übersicht</h1>
 <p>Bitte überprüfen Sie sorgfältig Ihre Angaben zur Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt sind, bestätigen Sie bitte die Anmeldung.
   Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
+</div>
 </div>
 <div class="container">
     <div class="row">
@@ -69,6 +71,7 @@
             <div class="form-group col-md-2">{{kfh.form.instance.get_nutrition_display}}</div>
             <div class="form-group col-md-2">{% if kfh.form.lactose_intolerance.value %}Laktoseintoleranz{% endif %}</div>
             <div class="form-group col-md-2">{% if kfh.form.celiac_disease.value %}Zöliakie{% endif %}</div>
+            <div class="form-group col-md-2">{% if kfh.formReg.reg_consent.value %}Hiermit melde ich meine Tochter / meinen Sohn zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.{% endif %}</div>
           </div>
           <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
           <input type="hidden" name="_fgstage" value="confirm" />
