@@ -1,47 +1,64 @@
 {% load static %}
-<!doctype html>
-<html lang="de">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <!--<link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}" />-->
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anmeldung Konfi-Castle</title>
+    <link rel="stylesheet" href="{% static "css/cvjm.css" %}" />
     <link rel="stylesheet" href="{% static "css/style.css" %}" />
     <link rel="stylesheet" href="{% static "css/SourceSansPro.css" %}" />
     <link rel="stylesheet" href="{% static "css/Awesome.css" %}" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro|Source+Serif+Pro&display=swap">
+    <link rel="shortcut icon" href="{% static "img/icons/favicon.ico" %}>
+</head>
 
-    <title>Anmeldung Konfi-Castle</title>
-  </head>
-  <body>
+<body>
     <header>
-      <div class="nav-container">
         <nav>
-          <div class="navigation">
-            <div class="logo"><a href="https://anmeldung.konficastle.org" title="Home">
-                <img src="{% static "img/CVJM_Logo.png" %}" width="131" height="54" alt="Logo"></a>
-            </div>
-          </div>
-        </nav>
-      </div>
+            <div id=" main-navigation">
+    <div id="logo" id="back-to-top"><a href="#"><img src="img/CVJM_Logo.png" width="131" height="54" alt="CVJM"></a>
+    </div>
+    <div class="main-nav-links hover-item">
+        <ul>
+            <a href="#">Startseite</a>
+            <a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a>
+        </ul>
+    </div>
+
+    <div id="mobile-menu">
+        <input type="checkbox" id="overlay-input" />
+        <label for="overlay-input" id="overlay-button"><span></span></label>
+        <div id="overlay">
+            <ul>
+                <li><a href="#">Startseite</a></li>
+                <li><a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a></li>
+            </ul>
+        </div>
+    </div>
+    </div>
+    </nav>
     </header>
 
     {% block content %}{% endblock %}
 
     <footer>
-        <div class="container-footer">
-        <div class="item-10">
-          &copy; 2015-2020 CVJM Kreisverband Rhein-Lahn e. V. | 
-          <a href="https://anmeldung.konficastle.org/datenschutz.html">Datenschutz</a> | 
-          <a href="https://anmeldung.konficastle.org/impressum">Impressum</a>
+        <div id="footer" class="hover-item">
+            <div class="footer-copyright">
+                <p>© 2000 - 2020 CVJM Kreisverband Rhein-Lahn e. V. | <a
+                        href="https://cvjm-rhein-lahn.de/Willkommen/Impressum.html" target="_blank"
+                        rel="noopener noreferrer">Impressum</a> | <a
+                        href="https://cvjm-rhein-lahn.de/Willkommen/Datenschutz.html" target="_blank"
+                        rel="noopener noreferrer">Datenschutzerkl&auml;rung &amp; Cookies</a></p>
+            </div>
         </div>
-      </div>
     </footer>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
     <script src="{% static "js/jquery-3.2.1.slim.min.js" %}"></script>
     <script src="{% static "js/popper.min.js" %}"></script>
-    <script src="{% static "js/bootstrap.min.js" %}"></script>
-  </body>
+    </body>
+
 </html>
