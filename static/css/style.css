@@ -423,10 +423,6 @@ textarea {
   font-weight: 700;
 }
 
-/*textarea:focus, input:focus {
-  border-color: transparent !important;
-}
-*/
 ::placeholder {
   color: #181818;
 }
