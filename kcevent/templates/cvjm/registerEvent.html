@@ -2,144 +2,166 @@
 {% load formclass %}
 
 {% block content %}
-<div class="container">
-  <div class="item-1">
-    <h1>Anmeldung <br/>{{ evt.name }}</h1>
-    <p>Wir freuen uns, dass ihr Kind am diesj&auml;hrigen Konfi-Castle teilnimmt. Bitte tragen Sie nachfolgend die Daten Ihres Kindes für die Anmeldung zum diesj&auml;hrigen Konfi-Castle ein. Bitte geben Sie die schriftliche Anmeldung zeitnah im Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
-  </div>
-</div>
 
-
-{{ kfh.form.non_field_errors }}
-{{ kfh.formReg.non_field_errors }}
-<form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
-  {% csrf_token %}
-  <div class="formgrid-container">
-    <div class="formgrid-1">
-      {{ kfh.form.church.errors }}
-      {{ kfh.form.church|addclass:'custom-select' }}
-      <label for="{{ kfh.form.church.id_for_label }}">Kirchengemeinde*</label>
-    </div>
-
-    <div class="formgrid-2">
-      {{ kfh.form.role.errors }}
-      {{ kfh.form.role|addclass:'custom-select' }}
-      <label for="{{ kfh.form.role.id_for_label }}">Funktion*</label>
-    </div>
-    
-    <div class="formgrid-3">
-      {{ kfh.form.first_name.errors }}
-      {{ kfh.form.first_name|addclass:'form-control' }}
-      <label for="{{ kfh.form.first_name.id_for_label }}">Vorname*</label>
-    </div>
-    <div class="formgrid-4">
-      {{ kfh.form.last_name.errors }}
-      {{ kfh.form.last_name|addclass:'form-control' }}
-      <label for="{{ kfh.form.last_name.id_for_label }}">Nachname*</label>
-    </div>
-    
-    <div class="formgrid-5">
-      {{ kfh.form.gender.errors }}
-      {{ kfh.form.gender|addclass:'custom-select' }}
-      <label for="{{ kfh.form.gender.id_for_label }}">Geschlecht*</label>
-    </div>
-    <div class="formgrid-6">
-      {{ kfh.form.birthday.errors }}
-      {{ kfh.form.birthday|addclass:'form-control' }}
-      <label for="{{ kfh.form.birthday.id_for_label }}">Geburtstag*</label>
-    </div>
-    
-    <div class="formgrid-7">
-      {{ kfh.form.street.errors }}
-      {{ kfh.form.street|addclass:'form-control' }}
-      <label for="{{ kfh.form.street.id_for_label }}">Straße*</label>
-    </div>
-    <div class="formgrid-8">
-      {{ kfh.form.house_number.errors }}
-      {{ kfh.form.house_number|addclass:'form-control' }}
-      <label for="{{ kfh.form.house_number.id_for_label }}">Hausnummer*</label>
-    </div>
-    
-    <div class="formgrid-9">
-      {{ kfh.form.zip_code.errors }}
-      {{ kfh.form.zip_code|addclass:'form-control' }}
-      <label for="{{ kfh.form.zip_code.id_for_label }}">Postleitzahl*</label>
-    </div>
-    <div class="formgrid-10">
-      {{ kfh.form.city.errors }}
-      {{ kfh.form.city|addclass:'form-control' }}
-      <label for="{{ kfh.form.city.id_for_label }}">Wohnort*</label>
-    </div>
-    
-    <div class="formgrid-11">
-      {{ kfh.form.mail_addr.errors }}
-      {{ kfh.form.mail_addr|addclass:'form-control' }}
-      <label for="{{ kfh.form.mail_addr.id_for_label }}">E-Mail*</label>
-    </div>
-    <div class="formgrid-12">
-      {{ kfh.form.phone.errors }}
-      {{ kfh.form.phone|addclass:'form-control' }}
-      <label for="{{ kfh.form.phone.id_for_label }}">Telefon*</label>
-    </div>
-    
-    <div class="formgrid-13">
-      {{ kfh.form.intolerances.errors }}
-      {{ kfh.form.intolerances|addclass:'form-control' }}
-      <label for="{{ kfh.form.intolerances.id_for_label }}">Allergien / Unvertr&auml;glichkeiten</label>
-    </div>
-    
-    <div class="formgrid-14">
-      {{ kfh.formReg.reg_doc_consent.errors }}
-      {{ kfh.formReg.reg_doc_consent|addclass:'custom-file-input' }}
-      <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit*</label>
-    </div>
-    
-    <div class="formgrid-15">
-      {{ kfh.formReg.reg_doc_pass.errors }}
-      {{ kfh.formReg.reg_doc_pass|addclass:'custom-file-input' }}
-      <label for="{{ kfh.formReg.reg_doc_pass.id_for_label }}" class="custom-file-label">Freizeitpass*</label>
-    </div>
-    
-    <div class="formgrid-16">
-      {{ kfh.formReg.reg_doc_meddispense.errors }}
-      {{ kfh.formReg.reg_doc_meddispense|addclass:'custom-file-input' }}
-      <label for="{{ kfh.formReg.reg_doc_meddispense.id_for_label }}" class="custom-file-label">Medikamentenabgabe</label>
-    </div>
-
-    <div class="formgrid-17">
-      {{ kfh.formReg.reg_notes.errors }}
-      {{ kfh.formReg.reg_notes|addclass:'form-control' }}
-      <label for="{{ kfh.formReg.reg_notes.id_for_label }}">Sonstige Mitteilungen</label>
-    </div>
-
-    <div class="formgrid-18-1">
-      {{ kfh.form.nutrition.errors }}
-      {{ kfh.form.nutrition|addclass:'custom-select' }}
-      <label for="{{ kfh.form.nutrition.id_for_label }}">Ernährung*</label>
-    </div>
-    <div class="formgrid-18-3">
-      {{ kfh.form.lactose_intolerance.errors }}
-      {{ kfh.form.lactose_intolerance|addclass:'form-check-input' }}
-      <label class="form-check-label" for="{{ kfh.form.lactose_intolerance.id_for_label }}">Laktoseintoleranz</label>
-    </div>
-    <div class="formgrid-18-4">
-      {{ kfh.form.celiac_disease.errors }}
-      {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
-      <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">Zöliakie</label>
-    </div>
-    <div class="formgrid-19">
-      {{ kfh.formReg.reg_consent.errors }}
-      {{ kfh.formReg.reg_consent|addclass:'form-check-input' }}
-      <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">Hiermit melde ich mein Kind zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*</label>
-    </div>
-
-    <div class="formgrid-25">
-      <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
-      <input type="hidden" name="_fgstage" value="preview" />
-      <button name="register" type="submit" class="btn btn-primary">Anmelden</button>
-      <br />
-      <p>Die mit * markierten Felder sind notwendige Angaben und m&uuml;ssen ausgef&uuml;llt werden.</p>
+<section>
+  <div class="event-info">
+    <div class="event-info-item">
+      <h2>Anmeldung <br>{{ evt.name }}</h2>
+      <p>Wir freuen uns, dass ihr Kind am diesj&auml;hrigen Konfi-Castle teilnimmt. Bitte tragen Sie nachfolgend die Daten
+        Ihres Kindes f&uuml;r die Anmeldung zum diesj&auml;hrigen Konfi-Castle ein. Bitte geben Sie die schriftliche Anmeldung
+        zeitnah im Konfirmationsunterricht Ihrer Kirchengemeinde ab. Die mit einem * markierten Felder sind notwendige
+        Angaben und m&uuml;ssen ausgef&uuml;llt werden.</p>
     </div>
   </div>
-</form>
+</section>
+
+
+
+<section>
+  {{ kfh.form.non_field_errors }}
+  {{ kfh.formReg.non_field_errors }}
+  <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+
+
+    <div class="formgrid-container">
+      <div class="formgrid-item">
+        {{ kfh.form.church.errors }}
+        {{ kfh.form.church|addclass:'custom-select' }}
+        <label for="{{ kfh.form.church.id_for_label }}">Kirchengemeinde*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.role.errors }}
+        {{ kfh.form.role|addclass:'custom-select' }}
+        <label for="{{ kfh.form.role.id_for_label }}">Funktion*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.first_name.errors }}
+        {{ kfh.form.first_name|addclass:'form-control' }}
+        <label for="{{ kfh.form.first_name.id_for_label }}">Vorname*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.last_name.errors }}
+        {{ kfh.form.last_name|addclass:'form-control' }}
+        <label for="{{ kfh.form.last_name.id_for_label }}">Nachname*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.gender.errors }}
+        {{ kfh.form.gender|addclass:'custom-select' }}
+        <label for="{{ kfh.form.gender.id_for_label }}">Geschlecht*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.birthday.errors }}
+        {{ kfh.form.birthday|addclass:'form-control' }}
+        <label for="{{ kfh.form.birthday.id_for_label }}">Geburtstag*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.street.errors }}
+        {{ kfh.form.street|addclass:'form-control' }}
+        <label for="{{ kfh.form.street.id_for_label }}">Straße*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.house_number.errors }}
+        {{ kfh.form.house_number|addclass:'form-control' }}
+        <label for="{{ kfh.form.house_number.id_for_label }}">Hausnummer*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.zip_code.errors }}
+        {{ kfh.form.zip_code|addclass:'form-control' }}
+        <label for="{{ kfh.form.zip_code.id_for_label }}">Postleitzahl*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.city.errors }}
+        {{ kfh.form.city|addclass:'form-control' }}
+        <label for="{{ kfh.form.city.id_for_label }}">Wohnort*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.mail_addr.errors }}
+        {{ kfh.form.mail_addr|addclass:'form-control' }}
+        <label for="{{ kfh.form.mail_addr.id_for_label }}">E-Mail*</label>
+      </div>
+
+      <div class="formgrid-item">
+        {{ kfh.form.phone.errors }}
+        {{ kfh.form.phone|addclass:'form-control' }}
+        <label for="{{ kfh.form.phone.id_for_label }}">Telefon*</label>
+      </div>
+
+      <div class="formgrid-textbox">
+        {{ kfh.form.intolerances.errors }}
+        {{ kfh.form.intolerances|addclass:'form-control' }}
+        <label for="{{ kfh.form.intolerances.id_for_label }}">Allergien / Unvertr&auml;glichkeiten</label>
+      </div>
+
+      <div class="formgrid-textbox">
+        {{ kfh.formReg.reg_notes.errors }}
+        {{ kfh.formReg.reg_notes|addclass:'form-control' }}
+        <label for="{{ kfh.formReg.reg_notes.id_for_label }}">Sonstige Mitteilungen</label>
+      </div>
+
+      <div class="formgrid-item-short">
+        {{ kfh.form.nutrition.errors }}
+        {{ kfh.form.nutrition|addclass:'custom-select' }}
+        <label for="{{ kfh.form.nutrition.id_for_label }}">Ern&auml;hrung*</label>
+      </div>
+
+      <div class="formgrid-item-short">
+        {{ kfh.form.lactose_intolerance.errors }}
+        {{ kfh.form.lactose_intolerance|addclass:'form-check-input' }}
+        <label class="form-check-label" for="{{ kfh.form.lactose_intolerance.id_for_label }}">Laktoseintoleranz</label>
+      </div>
+
+      <div class="formgrid-item-short">
+        {{ kfh.form.celiac_disease.errors }}
+        {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
+        <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">Z&ouml;liakie</label>
+      </div>
+
+      <div class="formgrid-upload">
+        {{ kfh.formReg.reg_doc_consent.errors }}
+        {{ kfh.formReg.reg_doc_consent|addclass:'custom-file-input' }}
+        <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit*
+          (Einladung & Anmeldung
+          Konfi-Castle aus dem Konfirmationsunterricht)</label>
+      </div>
+
+      <div class="formgrid-upload">
+        {{ kfh.formReg.reg_doc_pass.errors }}
+        {{ kfh.formReg.reg_doc_pass|addclass:'custom-file-input' }}
+        <label for="{{ kfh.formReg.reg_doc_pass.id_for_label }}" class="custom-file-label">Freizeitpass*</label>
+      </div>
+
+      <div class="formgrid-upload">
+        {{ kfh.formReg.reg_doc_meddispense.errors }}
+        {{ kfh.formReg.reg_doc_meddispense|addclass:'custom-file-input' }}
+        <label for="{{ kfh.formReg.reg_doc_meddispense.id_for_label }}"
+          class="custom-file-label">Medikamentenabgabe</label>
+      </div>
+
+      <div class="formgrid-item-full">
+        {{ kfh.formReg.reg_consent.errors }}
+        {{ kfh.formReg.reg_consent|addclass:'form-check-input' }}
+        <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">Hiermit melde ich mein Kind zu
+          Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*</label>
+      </div>
+
+      <div class="formgrid-item-full">
+        <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
+        <input type="hidden" name="_fgstage" value="preview" />
+        <button name="register" type="submit" class="btn btn-primary">Anmelden</button>
+      </div>
+    </div>
+  </form>
+</section>
+
 {% endblock %}

@@ -1,8 +1,14 @@
 {% extends "cvjm/base.html" %}
 
 {% block content %}
-<div class="col-sm-8">
-    <h1>Anmeldung zu {{ evt.name }} erfolgreich - Danke!</h1>
-    <p>Vielen Dank für die Anmeldung Ihres Kindes {{kfh.form.instance.first_name}}.</p>
-</div>
+
+  <section>
+    <div class="event-info">
+      <div class="event-info-item">
+        <h2>Anmeldung erfolgreich!</h2>
+        <p>Vielen Dank f&uuml;r die Anmeldung Ihres Kindes {{kfh.form.instance.first_name}} {{kfh.form.instance.last_name}} zu {{ evt.name }}.</p>
+      </div>
+    </div>
+  </section>
+
 {% endblock %}

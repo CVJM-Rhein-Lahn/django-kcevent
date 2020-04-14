@@ -2,84 +2,112 @@
 {% load formclass %}
 
 {% block content %}
-<div class="container">
-    <div class="item-1">
-<h1>Anmeldung {{ evt.name }} - Übersicht</h1>
-<p>Bitte überprüfen Sie sorgfältig Ihre Angaben zur Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt sind, bestätigen Sie bitte die Anmeldung.
-  Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
-</div>
-</div>
-<div class="container">
-    <div class="row">
-      <div class="col">
-        <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
-          {% csrf_token %}
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Kirchengemeinde:</div>
-            <div class="form-group col-md-6">{{partner.name}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Funktion:</div>
-            <div class="form-group col-md-6">{{kfh.form.instance.get_role_display}}</div>
-          </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Name:</div>
-            <div class="form-group col-md-6">{{kfh.form.first_name.value}} {{kfh.form.last_name.value}}</div>
-        </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Geschlecht:</div>
-            <div class="form-group col-md-6">{{kfh.form.instance.get_gender_display}}</div>
-        </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Geburtstag:</div>
-            <div class="form-group col-md-6">{{kfh.form.birthday.value}}</div>
-        </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Anschrift:</div>
-            <div class="form-group col-md-6">{{kfh.form.street.value}} {{kfh.form.house_number.value}}<br />{{kfh.form.zip_code.value}} {{kfh.form.city.value}}</div>
-        </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">E-Mail:</div>
-            <div class="form-group col-md-6">{{kfh.form.mail_addr.value}}</div>
-        </div>
-        <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Telefon:</div>
-            <div class="form-group col-md-6">{{kfh.form.phone.value}}</div>
-        </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Allergien / Unvertr&auml;glichkeiten:</div>
-            <div class="form-group col-md-6">{{kfh.form.intolerances.value}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Anmeldung Freizeit:</div>
-            <div class="form-group col-md-6">{{kfh.formReg.reg_doc_consent.value}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Freizeitpass:</div>
-            <div class="form-group col-md-6">{{kfh.formReg.reg_doc_pass.value}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Medikamentenabgabe:</div>
-            <div class="form-group col-md-6">{{kfh.formReg.reg_doc_meddispense.value}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Sonstige Mitteilungen:</div>
-            <div class="form-group col-md-6">{{kfh.formReg.reg_notes.value}}</div>
-          </div>
-          <div class="form-row">
-            <div class="form-group font-weight-bold col-md-3">Ernährung:</div>
-            <div class="form-group col-md-2">{{kfh.form.instance.get_nutrition_display}}</div>
-            <div class="form-group col-md-2">{% if kfh.form.lactose_intolerance.value %}Laktoseintoleranz{% endif %}</div>
-            <div class="form-group col-md-2">{% if kfh.form.celiac_disease.value %}Zöliakie{% endif %}</div>
-            <div class="form-group col-md-2">{% if kfh.formReg.reg_consent.value %}Hiermit melde ich meine Tochter / meinen Sohn zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.{% endif %}</div>
-          </div>
-          <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
-          <input type="hidden" name="_fgstage" value="confirm" />
-          <button name="edit" type="submit" class="btn btn-primary">Bearbeiten</button>
-          <button name="confirm" type="submit" class="btn btn-primary">Bestätigen</button>
-        </form>
+
+<section>
+  <div class="event-info">
+    <div class="event-info-item">
+      <h2>Anmeldung &uuml;bersicht<br> {{ evt.name }}</h2>
+      <p>Bitte &uuml;berpr&uuml;fen Sie sorgf&auml;ltig Ihre Angaben zur Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt
+        sind, best&auml;tigen Sie bitte die Anmeldung. Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht
+        Ihrer Kirchengemeinde ab.</p>
+    </div>
+  </div>
+</section>
+
+
+<section>
+  <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+
+    <div class="formgrid-container">
+      <div class="formgrid-item-full">
+        <h5>Kirchengemeinde:</h5>
+        <p>{{partner.name}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Funktion:</h5>
+        <p>{{kfh.form.instance.get_role_display}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Vorname Nachname:</h5>
+        <p>{{kfh.form.first_name.value}} {{kfh.form.last_name.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Geschlecht:</h5>
+        <p>{{kfh.form.instance.get_gender_display}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Geburtstag:</h5>
+        <p>{{kfh.form.birthday.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Anschrift:</h5>
+        <p>{{kfh.form.street.value}} {{kfh.form.house_number.value}}<br />{{kfh.form.zip_code.value}}
+          {{kfh.form.city.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>E-Mail:</h5>
+        <p>{{kfh.form.mail_addr.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Telefon:</h5>
+        <p>{{kfh.form.phone.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Allergien / Unvertr&auml;glichkeiten:</h5>
+        <p>{{kfh.form.intolerances.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Anmeldung Freizeit:</h5>
+        <p>{{kfh.formReg.reg_doc_consent.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Freizeitpass:</h5>
+        <p>{{kfh.formReg.reg_doc_pass.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Medikamentenabgabe:</h5>
+        <p>{{kfh.formReg.reg_doc_meddispense.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Sonstige Mitteilungen:</h5>
+        <p>{{kfh.formReg.reg_notes.value}}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Ern&auml;hrung:</h5>
+        <p>{{kfh.form.instance.get_nutrition_display}} <br>
+          {% if kfh.form.lactose_intolerance.value %}Laktoseintoleranz{% endif %} <br>
+          {% if kfh.form.celiac_disease.value %}Z&ouml;liakie{% endif %}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <h5>Best&&auml;tigung:</h5>
+        <p>{% if kfh.formReg.reg_consent.value %}Hiermit melde ich meine Tochter / meinen Sohn zu Konfi-Castle im CVJM
+          Kreisverband
+          Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.{% endif %}</p>
+      </div>
+
+      <div class="formgrid-item-full">
+        <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
+        <input type="hidden" name="_fgstage" value="confirm" />
+        <button name="edit" type="submit" class="btn btn-primary">Bearbeiten</button>
+        <button name="confirm" type="submit" class="btn btn-primary">Best&&auml;tigen</button>
       </div>
     </div>
-</div>
+  </form>
+</section>
 
 {% endblock %}
