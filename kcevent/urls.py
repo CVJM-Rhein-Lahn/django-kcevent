@@ -22,6 +22,7 @@ urlpatterns = [
     path('events/', views.listEvents, name='listEvents'),
     path('login/<str:event_url>', views.registerEventLogin, name='registerEventLogin'),
     path('register/<str:event_url>', views.registerEvent, name='registerEvent'),
+    path('dl/<str:event_url>', views.downloadRegistrationDocuments, name='downloadEventDocuments'),
     path('', views.listPublicEvents, name='listPublicEvents'),
 
     #path('login/', views.user_login, name='user_login')
