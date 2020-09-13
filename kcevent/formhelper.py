@@ -1,5 +1,6 @@
 import uuid, json, tempfile, os
 from django.core.files import File
+from sentry_sdk import configure_scope as sentry_scope
 
 class KcUploadedFile(File):
     """
@@ -84,14 +85,23 @@ class KcFormHelper(object):
                 fieldName = vV['fieldName']
                 formName = vV['formName']
                 x = getattr(self._forms[formName], 'files')
-                xFile = KcUploadedFile(
-                    open(vV['fileName'], 'rb'),
-                    vV['fileUploadName'],
-                    vV['fileType'],
-                    vV['fileSize']
-                )
-                x[fieldName]= xFile
-                self._fileInfos[vN] = vV
+                with sentry_scope() as scope:
+                    for ffN, ffV in self._fileInfos.items():
+                        ctxName = 'kfh.{:s}'.format(ffN)
+                        scope.set_context(ctxName, ffV)
+                    if fieldName in x:
+                        scope.set_context('forms.{:s}'.format(fieldName), x[fieldName])
+                try:
+                    xFile = KcUploadedFile(
+                        open(vV['fileName'], 'rb'),
+                        vV['fileUploadName'],
+                        vV['fileType'],
+                        vV['fileSize']
+                    )
+                    x[fieldName]= xFile
+                    self._fileInfos[vN] = vV
+                except FileNotFoundError as e:
+                    pass
 
     def debug(self):
         print('valid: ', self.isValid())

@@ -9,6 +9,7 @@ from django.utils.encoding import smart_str
 from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, KCEventRegistration, Partner
 from .formhelper import KcFormHelper
+from sentry_sdk import configure_scope as sentry_scope
 import datetime
 import zipfile
 import io
@@ -148,11 +149,17 @@ def registerEventLogin(request, event_url, evt=None):
         return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
 
 def registerEvent(request, event_url):
+    with sentry_scope() as scope:
+        scope.set_tag('event.slug', event_url)
+        
     # try to find the event
     try:
         evt = KCEvent.objects.get(event_url=event_url)
     except:
         raise Http404(_('Event not found'))
+
+    with sentry_scope() as scope:
+        scope.set_tag('event.id', evt.id)
 
     # first check if user is logged in.
     if not request.session.get('is_kclogged_in_' + str(evt.id), False):
