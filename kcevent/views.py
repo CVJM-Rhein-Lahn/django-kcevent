@@ -10,6 +10,7 @@ from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, KCEventRegistration, Partner
 from .formhelper import KcFormHelper
 from sentry_sdk import configure_scope as sentry_scope
+from sentry_sdk import capture_exception
 import datetime
 import zipfile
 import io
@@ -181,9 +182,19 @@ def registerEvent(request, event_url):
                     kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     # send confirmation to participant
-                    kfh.formReg.instance.sendConfirmation()
+                    try:
+                        kfh.formReg.instance.sendConfirmation()
+                    except Exception as e:
+                        # catch SMTP issues, but log it!
+                        # for user experience, just continue!
+                        capture_exception(e)
                     # send information to host and church
-                    kfh.formReg.instance.notifyHostChurch()
+                    try:
+                        kfh.formReg.instance.notifyHostChurch()
+                    except Exception as e:
+                        # catch SMTP issues, but log it!
+                        # for user experience, just continue!
+                        capture_exception(e)
                     return render(
                         request, 'cvjm/registrationFinished.html',
                         {
@@ -250,3 +261,19 @@ def user_login(request):
     else:
         # No post data availabe, let's just show the page to the user.
         return render(request, 'kcevent/login.html')
+
+def responseError400(request, exception):
+    return _responseError(400, request, exception)
+
+def responseError403(request, exception):
+    return _responseError(403, request, exception)
+
+def responseError404(request, exception):
+    return _responseError(404, request, exception)
+
+def responseError500(request):
+    return _responseError(500, request)
+
+def _responseError(statusCode, request, exception=None):
+    # No post data availabe, let's just show the page to the user.
+    return render(request, 'cvjm/error.html', {'error_code': statusCode})
