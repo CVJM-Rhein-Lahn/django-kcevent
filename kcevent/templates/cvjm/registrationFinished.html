@@ -6,7 +6,11 @@
     <div class="event-info">
       <div class="event-info-item">
         <h2>Anmeldung erfolgreich!</h2>
+        {% if kfh.form.instance.role.value == "ST" %}
+        <p>Vielen Dank {{kfh.form.instance.first_name}} {{kfh.form.instance.last_name}} für Deine Anmeldung und Mitarbeit zu {{ evt.name }}.</p>
+        {% else %}
         <p>Vielen Dank f&uuml;r die Anmeldung Ihres Kindes {{kfh.form.instance.first_name}} {{kfh.form.instance.last_name}} zu {{ evt.name }}.</p>
+        {% endif %}
       </div>
     </div>
   </section>

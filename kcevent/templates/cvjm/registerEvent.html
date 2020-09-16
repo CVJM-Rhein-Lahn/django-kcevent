@@ -1,5 +1,30 @@
 {% extends "cvjm/base.html" %}
 {% load formclass %}
+{% load static %}
+
+{% block addjs %}
+<script type="application/javascript">
+function updateConsentText(val) {
+  udText = "";
+  switch(val) {
+    case "CF":
+    case "RL":
+      udText = "Hiermit melde ich mein Kind zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*";
+    break;
+    case "ST":
+      udText = "Hiermit melde ich mich zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*";
+    break;
+  }
+  $('label[for="id_reg_consent"]')[0].innerText = udText;
+}
+
+$(document).ready(function() {
+  $('#id_role').change(function(evt, obj) {
+    updateConsentText(evt.target.value);
+  });
+});
+</script>
+{% endblock %}
 
 {% block content %}
 
@@ -7,22 +32,19 @@
   <div class="event-info">
     <div class="event-info-item">
       <h2>Anmeldung <br>{{ evt.name }}</h2>
-      <p>Wir freuen uns, dass ihr Kind am diesj&auml;hrigen Konfi-Castle teilnimmt. Bitte tragen Sie nachfolgend die Daten
-        Ihres Kindes f&uuml;r die Anmeldung zum diesj&auml;hrigen Konfi-Castle ein. Bitte geben Sie die schriftliche Anmeldung
+      <p>Wir freuen uns, dass Du oder Ihr Kind am diesj&auml;hrigen Konfi-Castle teilnimmt. Bitte tragen Sie nachfolgend die Daten
+        des Teilnehmersf&uuml;r die Anmeldung zum diesj&auml;hrigen Konfi-Castle ein. Bitte geben Sie die schriftliche Anmeldung
         zeitnah im Konfirmationsunterricht Ihrer Kirchengemeinde ab. Die mit einem * markierten Felder sind notwendige
         Angaben und m&uuml;ssen ausgef&uuml;llt werden.</p>
     </div>
   </div>
 </section>
 
-
-
 <section>
   {{ kfh.form.non_field_errors }}
   {{ kfh.formReg.non_field_errors }}
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-
 
     <div class="formgrid-container">
       <div class="formgrid-item">

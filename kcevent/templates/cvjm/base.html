@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{% static "css/SourceSansPro.css" %}" />
     <link rel="stylesheet" href="{% static "css/Awesome.css" %}" />
     <link rel="shortcut icon" href="{% static "img/icons/favicon.ico" %}">
+    <script type="application/javascript" src="{% static "js/jquery-3.5.1.slim.min.js" %}"></script>
+    {% block addjs %}{% endblock %}
 </head>
 
 <body>
@@ -53,9 +55,6 @@
             </div>
         </div>
     </footer>
-
-    <script src="{% static "js/jquery-3.2.1.slim.min.js" %}"></script>
-    <script src="{% static "js/popper.min.js" %}"></script>
-    </body>
+</body>
 
 </html>
