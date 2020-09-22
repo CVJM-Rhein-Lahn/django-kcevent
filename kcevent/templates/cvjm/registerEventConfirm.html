@@ -7,13 +7,14 @@
   <div class="event-info">
     <div class="event-info-item">
       <h2>Anmeldung &Uuml;bersicht<br> {{ evt.name }}</h2>
-      <p>Bitte &uuml;berpr&uuml;fen Sie sorgf&auml;ltig Ihre Angaben zur Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt
-        sind, best&auml;tigen Sie bitte die Anmeldung. Bitte geben Sie die schriftliche Anmeldung im Konfirmationsunterricht
-        Ihrer Kirchengemeinde ab.</p>
+      <p>Bitte überprüfen Sie / überprüfe sorgfältig Ihre / Deine Angaben zur
+        Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt sind,
+        bestätigen Sie / bestätige bitte die Anmeldung. Teilnehmende Konfirmanden
+        und Reloadeds geben zudem die schriftliche Anmeldung zeitnah im
+        Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
     </div>
   </div>
 </section>
-
 
 <section>
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
@@ -95,10 +96,7 @@
 
       <div class="formgrid-item-full">
         <h5>Best&auml;tigung:</h5>
-        <p>{% if kfh.formReg.reg_consent.value %}{% if kfh.form.role.value == "ST" %}
-          Hiermit melde ich mich zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.
-          {% else %}
-          Hiermit melde ich meine Tochter / meinen Sohn zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.{% endif %}{% endif %}</p>
+        <p>Hiermit melde ich mein Kind / mich zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.</p>
       </div>
 
       <div class="formgrid-item-full">
