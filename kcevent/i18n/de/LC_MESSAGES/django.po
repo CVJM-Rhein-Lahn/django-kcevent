@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Konfi-Castle Event Management\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-20 11:09+0000\n"
-"PO-Revision-Date: 2021-02-20 12:12+0100\n"
+"POT-Creation-Date: 2021-02-20 11:30+0000\n"
+"PO-Revision-Date: 2021-02-20 12:30+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -369,6 +369,14 @@ msgstr "Bestätigung versendet"
 #: kcevent/models.py:320
 msgid "Confirmation date/time"
 msgstr "Bestätigungsdatum/-uhrzeit"
+
+#: kcevent/templates/cvjm/kclogin.html:31
+msgid "Password"
+msgstr "Kennwort"
+
+#: kcevent/templates/cvjm/kclogin.html:33
+msgid "Submit"
+msgstr "Absenden"
 
 #: kcevent/views.py:36 kcevent/views.py:123 kcevent/views.py:160
 msgid "Event not found"
