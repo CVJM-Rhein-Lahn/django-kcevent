@@ -5,13 +5,19 @@
 <section>
   <div class="event-info">
     <div class="event-info-item hover-item">
-      <h2>Anmeldung <br> {{ evt.name }}</h2>
+      <h2>{% if evt.formLogin.subject %}{{evt.formLogin.subject}}{% else %}Anmeldung <br> {{ evt.name }}{% endif %}</h2>
+      {% if evt.formLogin.content %}
+      {{evt.formLogin.content}}
+      {% else %}
+      <p>Bitte geben Sie / bitte gib das Passwort aus den Anmeldeunterlagen ein.</p>
+      {% endif %}
+      <!--<h2>Anmeldung <br> {{ evt.name }}</h2>
       <p>Bitte geben Sie / bitte gib das Passwort aus den Anmeldeunterlagen ein.</p>
       <p>Zur Anmeldung wird die ausgefüllte schriftliche Anmeldung zu Konfi-Castle
         aus dem Konfirmandenunterricht, der ausgefüllte Freizeitpass und
         gegebenenfalls die Medikamentenabgabe benötigt. Alternativ können diese
         Dateien von der Seite <a href="https://dl.konficastle.org/">https://dl.konficastle.org/</a>
-        heruntergeladen werden.</p>
+        heruntergeladen werden.</p>-->
     </div>
   </div>
 </section>
