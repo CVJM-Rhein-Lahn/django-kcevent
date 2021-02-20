@@ -168,7 +168,7 @@ def registerEvent(request, event_url):
     else:
         # FIXME: depending on the given user data (first name, last name, birthday, etc.) identify and update
         # existing user!
-        kfh = KcFormHelper.checkInstantiate(request, form=ParticipantForm, formReg=KCEventRegistrationForm)
+        kfh = KcFormHelper.checkInstantiate(request, evt, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
             kfh.formReg.instance.reg_user = kfh.form.instance
             kfh.formReg.instance.reg_event = evt

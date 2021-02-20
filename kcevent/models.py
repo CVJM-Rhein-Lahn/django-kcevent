@@ -86,10 +86,12 @@ class Participant(KCPerson):
 
     birthday = models.DateField(verbose_name=_('Birthday'))
     church = models.ForeignKey('Partner', null=True, on_delete=models.SET_NULL, verbose_name=_('Church'))
-    intolerances = models.TextField(blank=True, verbose_name=_('Intolerances'))
+    intolerances = models.TextField(blank=True, default='', verbose_name=_('Intolerances'))
     nutrition = models.CharField(
         max_length=3,
         choices=NutritionTypes.choices,
+        blank=True,
+        default=''
     )
     lactose_intolerance = models.BooleanField(default=False, verbose_name=_('Lactose intolerance'))
     celiac_disease = models.BooleanField(default=False, verbose_name=_('Celiac disease'))
@@ -186,6 +188,9 @@ class KCEvent(models.Model):
         verbose_name=_('Participants')
     )
 
+    onSiteAttendance = models.BooleanField(default=True, verbose_name=_('On-site attendance'), \
+        help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
+
     def __str__(self):
         return self.name
 
@@ -275,9 +280,9 @@ class KCEventRegistration(models.Model):
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
 
     # further documentation
-    reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, verbose_name=_('Event passport'))
-    reg_doc_meddispense = models.FileField(upload_to=getUploadPathEventRegistration, null=True, blank=True, verbose_name=_('Medical dispense'))
-    reg_doc_consent = models.FileField(upload_to=getUploadPathEventRegistration, verbose_name=_('Consent form'))
+    reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Event passport'))
+    reg_doc_meddispense = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Medical dispense'))
+    reg_doc_consent = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Consent form'))
 
     # meta information for notification
     confirmation_send = models.BooleanField(default=False, verbose_name=_('Confirmation send'))

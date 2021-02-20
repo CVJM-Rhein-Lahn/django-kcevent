@@ -96,11 +96,13 @@
         <label for="{{ kfh.form.phone.id_for_label }}">Telefon*</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-textbox">
         {{ kfh.form.intolerances.errors }}
         {{ kfh.form.intolerances|addclass:'form-control' }}
         <label for="{{ kfh.form.intolerances.id_for_label }}">Allergien / Unvertr&auml;glichkeiten</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-textbox">
         {{ kfh.formReg.reg_notes.errors }}
@@ -108,6 +110,7 @@
         <label for="{{ kfh.formReg.reg_notes.id_for_label }}">Sonstige Mitteilungen</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-short">
         {{ kfh.form.nutrition.errors }}
         {{ kfh.form.nutrition|addclass:'custom-select' }}
@@ -125,15 +128,17 @@
         {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
         <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">Z&ouml;liakie</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-upload">
         {{ kfh.formReg.reg_doc_consent.errors }}
         {{ kfh.formReg.reg_doc_consent|addclass:'custom-file-input' }}
-        <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit*
+        <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit{% if evt.onSiteAttendance %}*{% endif %}
           (Einladung & Anmeldung
           Konfi-Castle aus dem Konfirmationsunterricht)</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-upload">
         {{ kfh.formReg.reg_doc_pass.errors }}
         {{ kfh.formReg.reg_doc_pass|addclass:'custom-file-input' }}
@@ -146,6 +151,7 @@
         <label for="{{ kfh.formReg.reg_doc_meddispense.id_for_label }}"
           class="custom-file-label">Medikamentenabgabe</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-item-full">
         {{ kfh.formReg.reg_consent.errors }}
