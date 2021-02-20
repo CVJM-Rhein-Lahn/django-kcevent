@@ -26,6 +26,8 @@ class KCTemplate(models.Model):
     class TemplateTypes(models.TextChoices):
         REGISTRATION_CONFIRMATION = 'registrationConfirmation', _('Confirm registration to participant')
         REGISTRATION_NOTIFICATION = 'registrationNotification', _('Confirm registration to church and host')
+        FORM_LOGIN = 'formLogin', _('Notes during login to event')
+        FORM_INTRODUCTION = 'formIntroduction', _('Introduction to event')
 
     tpl_set = models.ForeignKey(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
     tpl_type = models.CharField(
@@ -185,6 +187,40 @@ class KCEvent(models.Model):
         through_fields=('reg_event', 'reg_user'),
         verbose_name=_('Participants')
     )
+    
+    def formLogin(self):
+        tpl = KCTemplate.objects.filter(
+            tpl_set=self.template, tpl_type=KCTemplate.TemplateTypes.FORM_LOGIN
+        ).first()
+        dta = {
+            'subject': None,
+            'content': None
+        }
+        if tpl:
+            context = Context({
+                'event': self,
+            })
+            dta['subject'] = Template(tpl.tpl_subject).render(context)
+            dta['content'] = Template(tpl.tpl_content).render(context)
+
+        return dta
+
+    def formIntroduction(self):
+        tpl = KCTemplate.objects.filter(
+            tpl_set=self.template, tpl_type=KCTemplate.TemplateTypes.FORM_INTRODUCTION
+        ).first()
+        dta = {
+            'subject': None,
+            'content': None
+        }
+        if tpl:
+            context = Context({
+                'event': self,
+            })
+            dta['subject'] = Template(tpl.tpl_subject).render(context)
+            dta['content'] = Template(tpl.tpl_content).render(context)
+
+        return dta
 
     def __str__(self):
         return self.name
