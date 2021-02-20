@@ -9,6 +9,8 @@ from django.utils.encoding import smart_str
 from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, KCEventRegistration, Partner
 from .formhelper import KcFormHelper
+from sentry_sdk import configure_scope as sentry_scope
+from sentry_sdk import capture_exception
 import datetime
 import zipfile
 import io
@@ -148,11 +150,17 @@ def registerEventLogin(request, event_url, evt=None):
         return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
 
 def registerEvent(request, event_url):
+    with sentry_scope() as scope:
+        scope.set_tag('event.slug', event_url)
+        
     # try to find the event
     try:
         evt = KCEvent.objects.get(event_url=event_url)
     except:
         raise Http404(_('Event not found'))
+
+    with sentry_scope() as scope:
+        scope.set_tag('event.id', evt.id)
 
     # first check if user is logged in.
     if not request.session.get('is_kclogged_in_' + str(evt.id), False):
@@ -174,9 +182,19 @@ def registerEvent(request, event_url):
                     kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     # send confirmation to participant
-                    kfh.formReg.instance.sendConfirmation()
+                    try:
+                        kfh.formReg.instance.sendConfirmation()
+                    except Exception as e:
+                        # catch SMTP issues, but log it!
+                        # for user experience, just continue!
+                        capture_exception(e)
                     # send information to host and church
-                    kfh.formReg.instance.notifyHostChurch()
+                    try:
+                        kfh.formReg.instance.notifyHostChurch()
+                    except Exception as e:
+                        # catch SMTP issues, but log it!
+                        # for user experience, just continue!
+                        capture_exception(e)
                     return render(
                         request, 'cvjm/registrationFinished.html',
                         {
@@ -243,3 +261,19 @@ def user_login(request):
     else:
         # No post data availabe, let's just show the page to the user.
         return render(request, 'kcevent/login.html')
+
+def responseError400(request, exception):
+    return _responseError(400, request, exception)
+
+def responseError403(request, exception):
+    return _responseError(403, request, exception)
+
+def responseError404(request, exception):
+    return _responseError(404, request, exception)
+
+def responseError500(request):
+    return _responseError(500, request)
+
+def _responseError(statusCode, request, exception=None):
+    # No post data availabe, let's just show the page to the user.
+    return render(request, 'cvjm/error.html', {'error_code': statusCode})

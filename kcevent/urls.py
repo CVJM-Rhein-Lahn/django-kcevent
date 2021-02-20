@@ -26,5 +26,8 @@ urlpatterns = [
     path('', views.listPublicEvents, name='listPublicEvents'),
 
     #path('login/', views.user_login, name='user_login')
-
 ]
+handler400 = views.responseError400
+handler403 = views.responseError403
+handler404 = views.responseError404
+handler500 = views.responseError500

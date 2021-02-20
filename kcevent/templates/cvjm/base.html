@@ -12,33 +12,33 @@
     <link rel="stylesheet" href="{% static "css/SourceSansPro.css" %}" />
     <link rel="stylesheet" href="{% static "css/Awesome.css" %}" />
     <link rel="shortcut icon" href="{% static "img/icons/favicon.ico" %}">
+    {% block addjs %}{% endblock %}
 </head>
 
 <body>
     <header>
         <nav>
             <div id="main-navigation">
-    <div id="logo"><a href="#"><img src="{% static "img/CVJM_Logo.png" %}" width="131" height="54" alt="CVJM"></a>
-    </div>
-    <div class="main-nav-links hover-item">
-        <ul>
-            <a href="#">Startseite</a>
-            <a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a>
-        </ul>
-    </div>
-
-    <div id="mobile-menu">
-        <input type="checkbox" id="overlay-input" />
-        <label for="overlay-input" id="overlay-button"><span></span></label>
-        <div id="overlay">
-            <ul>
-                <li><a href="#">Startseite</a></li>
-                <li><a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a></li>
-            </ul>
-        </div>
-    </div>
-    </div>
-    </nav>
+                <div id="logo"><a href="#"><img src="{% static "img/CVJM_Logo.png" %}" width="131" height="54" alt="CVJM"></a>
+                </div>
+                <div class="main-nav-links hover-item">
+                    <ul>
+                        <a href="https://konficastle.org/">Startseite</a>
+                        <a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a>
+                    </ul>
+                </div>
+                <div id="mobile-menu">
+                    <input type="checkbox" id="overlay-input" />
+                    <label for="overlay-input" id="overlay-button"><span></span></label>
+                    <div id="overlay">
+                        <ul>
+                            <li><a href="https://konficastle.org/">Startseite</a></li>
+                            <li><a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </header>
 
     {% block content %}{% endblock %}
@@ -54,9 +54,6 @@
             </div>
         </div>
     </footer>
-
-    <script src="{% static "js/jquery-3.2.1.slim.min.js" %}"></script>
-    <script src="{% static "js/popper.min.js" %}"></script>
-    </body>
+</body>
 
 </html>

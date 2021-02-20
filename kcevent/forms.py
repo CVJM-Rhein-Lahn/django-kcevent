@@ -41,6 +41,12 @@ class KCEventRegistrationForm(forms.ModelForm):
             'reg_notes': forms.Textarea(attrs={'placeholder': _('Other communications')}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for k, v in self.fields.items():
+            if k.startswith('reg_doc_'):
+                self.fields[k].widget.attrs['accept'] = 'image/*,.pdf,application/pdf'
+
     def clean(self):
         cleaned_data = super().clean()
         # we need user information

@@ -7,22 +7,21 @@
   <div class="event-info">
     <div class="event-info-item">
       <h2>Anmeldung <br>{{ evt.name }}</h2>
-      <p>Wir freuen uns, dass ihr Kind am diesj&auml;hrigen Konfi-Castle teilnimmt. Bitte tragen Sie nachfolgend die Daten
-        Ihres Kindes f&uuml;r die Anmeldung zum diesj&auml;hrigen Konfi-Castle ein. Bitte geben Sie die schriftliche Anmeldung
-        zeitnah im Konfirmationsunterricht Ihrer Kirchengemeinde ab. Die mit einem * markierten Felder sind notwendige
-        Angaben und m&uuml;ssen ausgef&uuml;llt werden.</p>
+      <p>Wir freuen uns, dass Ihr Kind / Du am Konfi-Castle teilnimmt / teilnimmst.
+        Bitte tragen Sie / trage Du nachfolgend die Daten des Teilnehmers für die
+        Anmeldung zum Konfi-Castle ein. Teilnehmende Konfirmanden und Reloadeds
+        geben zudem die schriftliche Anmeldung zeitnah im Konfirmationsunterricht
+        Ihrer Kirchengemeinde ab. Die mit einem * markierten Felder sind notwendige
+        Angaben und müssen ausgefüllt werden.</p>
     </div>
   </div>
 </section>
-
-
 
 <section>
   {{ kfh.form.non_field_errors }}
   {{ kfh.formReg.non_field_errors }}
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-
 
     <div class="formgrid-container">
       <div class="formgrid-item">
@@ -151,8 +150,10 @@
       <div class="formgrid-item-full">
         {{ kfh.formReg.reg_consent.errors }}
         {{ kfh.formReg.reg_consent|addclass:'form-check-input' }}
-        <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">Hiermit melde ich mein Kind zu
-          Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*</label>
+        <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">
+          Hiermit melde ich mein Kind / mich zu Konfi-Castle im CVJM Kreisverband
+          Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.*
+        </label>
       </div>
 
       <div class="formgrid-item-full">
