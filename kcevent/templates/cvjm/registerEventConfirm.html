@@ -62,37 +62,43 @@
         <p>{{kfh.form.phone.value}}</p>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
         <h5>Allergien / Unvertr&auml;glichkeiten:</h5>
         <p>{{kfh.form.intolerances.value}}</p>
       </div>
+      {% endif %}
 
       <div class="formgrid-item-full">
         <h5>Anmeldung Freizeit:</h5>
-        <p>{{kfh.formReg.reg_doc_consent.value}}</p>
+        <p>{{kfh.formReg.reg_doc_consent.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
         <h5>Freizeitpass:</h5>
-        <p>{{kfh.formReg.reg_doc_pass.value}}</p>
+        <p>{{kfh.formReg.reg_doc_pass.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>
       </div>
 
       <div class="formgrid-item-full">
         <h5>Medikamentenabgabe:</h5>
-        <p>{{kfh.formReg.reg_doc_meddispense.value}}</p>
+        <p>{{kfh.formReg.reg_doc_meddispense.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>
       </div>
+      {% endif %}
 
       <div class="formgrid-item-full">
         <h5>Sonstige Mitteilungen:</h5>
         <p>{{kfh.formReg.reg_notes.value}}</p>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
         <h5>Ern&auml;hrung:</h5>
         <p>{{kfh.form.instance.get_nutrition_display}} <br>
           {% if kfh.form.lactose_intolerance.value %}Laktoseintoleranz{% endif %} <br>
           {% if kfh.form.celiac_disease.value %}Z&ouml;liakie{% endif %}</p>
       </div>
+      {% endif %}
 
       <div class="formgrid-item-full">
         <h5>Best&auml;tigung:</h5>
