@@ -1,17 +1,17 @@
 {% extends "cvjm/base.html" %}
+{% load i18n %}
 
 {% block content %}
 
 <section>
   <div class="event-info">
     <div class="event-info-item hover-item">
-      <h2>Anmeldung <br> {{ evt.name }}</h2>
+      <h2>{% if evt.formLogin.subject %}{{evt.formLogin.subject}}{% else %}Anmeldung <br> {{ evt.name }}{% endif %}</h2>
+      {% if evt.formLogin.content %}
+      {{evt.formLogin.content}}
+      {% else %}
       <p>Bitte geben Sie / bitte gib das Passwort aus den Anmeldeunterlagen ein.</p>
-      <p>Zur Anmeldung wird die ausgefüllte schriftliche Anmeldung zu Konfi-Castle
-        aus dem Konfirmandenunterricht, der ausgefüllte Freizeitpass und
-        gegebenenfalls die Medikamentenabgabe benötigt. Alternativ können diese
-        Dateien von der Seite <a href="https://dl.konficastle.org/">https://dl.konficastle.org/</a>
-        heruntergeladen werden.</p>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -28,9 +28,9 @@
 
     <div class="formgrid-container">
       <div class="formgrid-item-full">
-        <input id="kcevnt-password" name="password" type="password" class="form-control" placeholder="Kennwort">
+        <input id="kcevnt-password" name="password" type="password" class="form-control" placeholder="{% trans "Password" %}">
         <input type="hidden" name="next" value="{{next}}">
-        <button name="login" type="submit" class="btn btn-primary">Absenden</button>
+        <button name="login" type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
       </div>
     </div>
 

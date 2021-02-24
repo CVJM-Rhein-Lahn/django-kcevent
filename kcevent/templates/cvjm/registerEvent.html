@@ -6,13 +6,8 @@
 <section>
   <div class="event-info">
     <div class="event-info-item">
-      <h2>Anmeldung <br>{{ evt.name }}</h2>
-      <p>Wir freuen uns, dass Ihr Kind / Du am Konfi-Castle teilnimmt / teilnimmst.
-        Bitte tragen Sie / trage Du nachfolgend die Daten des Teilnehmers für die
-        Anmeldung zum Konfi-Castle ein. Teilnehmende Konfirmanden und Reloadeds
-        geben zudem die schriftliche Anmeldung zeitnah im Konfirmationsunterricht
-        Ihrer Kirchengemeinde ab. Die mit einem * markierten Felder sind notwendige
-        Angaben und müssen ausgefüllt werden.</p>
+      <h2>{{evt.formIntroduction.subject}}</h2>
+      <p>{{evt.formIntroduction.content}}</p>
     </div>
   </div>
 </section>
@@ -96,11 +91,13 @@
         <label for="{{ kfh.form.phone.id_for_label }}">Telefon*</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-textbox">
         {{ kfh.form.intolerances.errors }}
         {{ kfh.form.intolerances|addclass:'form-control' }}
         <label for="{{ kfh.form.intolerances.id_for_label }}">Allergien / Unvertr&auml;glichkeiten</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-textbox">
         {{ kfh.formReg.reg_notes.errors }}
@@ -108,6 +105,7 @@
         <label for="{{ kfh.formReg.reg_notes.id_for_label }}">Sonstige Mitteilungen</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-short">
         {{ kfh.form.nutrition.errors }}
         {{ kfh.form.nutrition|addclass:'custom-select' }}
@@ -125,15 +123,17 @@
         {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
         <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">Z&ouml;liakie</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-upload">
         {{ kfh.formReg.reg_doc_consent.errors }}
         {{ kfh.formReg.reg_doc_consent|addclass:'custom-file-input' }}
-        <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit*
+        <label for="{{ kfh.formReg.reg_doc_consent.id_for_label }}" class="custom-file-label">Anmeldung Freizeit{% if evt.onSiteAttendance %}*{% endif %}
           (Einladung & Anmeldung
           Konfi-Castle aus dem Konfirmationsunterricht)</label>
       </div>
 
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-upload">
         {{ kfh.formReg.reg_doc_pass.errors }}
         {{ kfh.formReg.reg_doc_pass|addclass:'custom-file-input' }}
@@ -146,6 +146,7 @@
         <label for="{{ kfh.formReg.reg_doc_meddispense.id_for_label }}"
           class="custom-file-label">Medikamentenabgabe</label>
       </div>
+      {% endif %}
 
       <div class="formgrid-item-full">
         {{ kfh.formReg.reg_consent.errors }}

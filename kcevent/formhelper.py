@@ -172,7 +172,7 @@ class KcFormHelper(object):
     formHash = getHash
 
     @classmethod
-    def checkInstantiate(kfh, request, **forms):
+    def checkInstantiate(kfh, request, event, **forms):
         if not forms:
             return None
 
@@ -188,16 +188,18 @@ class KcFormHelper(object):
             for k, f in forms.items():
                 if prevData['_stage'] == None or fgStage == 'preview':
                     formList[k] = f(
+                        event,
                         request.POST if request.method == 'POST' else None,
-                        request.FILES if request.method == 'POST' else None
+                        request.FILES if request.method == 'POST' else None,
                     )
                 else:
                     formList[k] = f(prevData['payload'])
         else:
             for k, f in forms.items():
                 formList[k] = f(
+                    event,
                     request.POST if request.method == 'POST' else None,
-                    request.FILES if request.method == 'POST' else None
+                    request.FILES if request.method == 'POST' else None,
                 )
 
         self = kfh(**formList)
