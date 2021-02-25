@@ -50,29 +50,38 @@ class KCEventRegistrationForm(forms.ModelForm):
 
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._event = event
         for k, v in self.fields.items():
             if k.startswith('reg_doc_'):
                 self.fields[k].widget.attrs['accept'] = 'image/*,.pdf,application/pdf'
 
     def clean_reg_consent(self):
-        if str(self.data.get('reg_consent')) in ['off', 'false', 'None']:
+        cleanedData = self.cleaned_data.get('reg_consent')
+        if not cleanedData:
             raise forms.ValidationError(_('You must consent to the registration!'))
+        
+        return cleanedData
 
     def clean_reg_doc_pass(self):
         eventId = self.instance.reg_event_id
         evt = KCEvent.objects.get(id=eventId)
+        cleanedData = self.cleaned_data.get('reg_doc_pass')
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
-        if evt.onSiteAttendance and self.data.get('reg_doc_pass') == '':
+        if evt.onSiteAttendance and not cleanedData:
             raise forms.ValidationError(_('Event passport is mandatory.'))
+        return cleanedData
 
     def clean_reg_doc_consent(self):
         eventId = self.instance.reg_event_id
         evt = KCEvent.objects.get(id=eventId)
+        cleanedData = self.cleaned_data.get('reg_doc_consent')
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
-        if evt.onSiteAttendance and self.data.get('reg_doc_consent') == '':
+        if evt.onSiteAttendance and not cleanedData:
             raise forms.ValidationError(_('Consent document is mandatory.'))
+
+        return cleanedData
 
     def clean(self):
         cleaned_data = super().clean()
