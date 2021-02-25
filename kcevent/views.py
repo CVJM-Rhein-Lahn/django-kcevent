@@ -216,6 +216,8 @@ def registerEvent(request, event_url):
                             'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
                         }
                     )
+            elif request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
+                raise Exception("Error validating event registration.")
         kfh.setStage(None)
         return render(
             request, 'cvjm/registerEvent.html', 
