@@ -1,6 +1,7 @@
 import uuid, json, tempfile, os
 from django.core.files import File
 from sentry_sdk import configure_scope as sentry_scope
+import sentry_sdk
 
 class KcUploadedFile(File):
     """
@@ -157,11 +158,13 @@ class KcFormHelper(object):
 
     def saveForm(self, request):
         fgHash = self.getHash()
-        request.session['__kcform__' + fgHash] = json.dumps({
+        sessionData = {
             '_hash': fgHash,
             '_stage': self._stage,
             'payload': self._preparePayload()
-        })
+        }
+        sentry_sdk.set_context('session.data', sessionData)
+        request.session['__kcform__' + fgHash] = json.dumps(sessionData)
 
     def __getattr__(self, attr):
         if attr in self._forms.keys():
@@ -193,7 +196,7 @@ class KcFormHelper(object):
                         request.FILES if request.method == 'POST' else None,
                     )
                 else:
-                    formList[k] = f(prevData['payload'])
+                    formList[k] = f(event, prevData['payload'])
         else:
             for k, f in forms.items():
                 formList[k] = f(
