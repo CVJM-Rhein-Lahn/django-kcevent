@@ -34,9 +34,12 @@ class ParticipantForm(forms.ModelForm):
     def clean_nutrition(self):
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
-        if self._event.onSiteAttendance and self.data.get('nutrition') == '':
+        cleanedData = self.cleaned_data.get('nutrition')
+        if self._event.onSiteAttendance and (cleanedData == None or cleanedData == ''):
             raise forms.ValidationError(_('Nutrition is mandatory.'))
-
+        
+        return cleanedData
+        
 class KCEventRegistrationForm(forms.ModelForm):
     class Meta:
         model = KCEventRegistration
