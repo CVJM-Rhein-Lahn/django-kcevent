@@ -58,6 +58,8 @@ class KCPerson(models.Model):
     zip_code = models.CharField(max_length=10, verbose_name=_('Postal code'))
     phone = models.CharField(max_length=50, blank=True, verbose_name=_('Phone'))
     mail_addr = models.EmailField(verbose_name=_('Mail address'))
+    createdTime = models.DateTimeField(auto_now_add=True, verbose_name=_('Created on'))
+    updatedTime = models.DateTimeField(auto_now=True, verbose_name=_('Updated on'))
 
     def __str__(self):
         return '{0} {1}'.format(self.first_name, self.last_name)
