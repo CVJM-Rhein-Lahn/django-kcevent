@@ -243,7 +243,7 @@ def user_login(request):
         # Process the request if posted data are available
         username = request.POST['username']
         password = request.POST['password']
-        nextPage
+
         # Check username and password combination if correct
         user = authenticate(username=username, password=password)
         if user is not None:
