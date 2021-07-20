@@ -228,6 +228,8 @@ class KCEvent(models.Model):
 
     onSiteAttendance = models.BooleanField(default=True, verbose_name=_('On-site attendance'), \
         help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
+    requireDocuments = models.BooleanField(default=True, verbose_name=_('Require documents'), \
+        help_text=_('Ask and require certain forms and documents from user to upload.'))
 
     def __str__(self):
         return self.name

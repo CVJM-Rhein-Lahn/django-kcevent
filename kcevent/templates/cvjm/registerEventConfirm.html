@@ -69,17 +69,19 @@
       </div>
       {% endif %}
 
+      {% if evt.requireDocuments %}
       <div class="formgrid-item-full">
         <h5>Anmeldung Freizeit:</h5>
         <p>{{kfh.formReg.reg_doc_consent.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>
       </div>
 
-      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
         <h5>Freizeitpass:</h5>
         <p>{{kfh.formReg.reg_doc_pass.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>
       </div>
-
+      {% endif %}
+      
+      {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
         <h5>Medikamentenabgabe:</h5>
         <p>{{kfh.formReg.reg_doc_meddispense.value|default:"<i>Nicht bereitgestellt.</i>"}}</p>

@@ -71,7 +71,7 @@ class KCEventRegistrationForm(forms.ModelForm):
         cleanedData = self.cleaned_data.get('reg_doc_pass')
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
-        if evt.onSiteAttendance and not cleanedData:
+        if evt.requireDocuments and not cleanedData:
             raise forms.ValidationError(_('Event passport is mandatory.'))
         return cleanedData
 
@@ -81,7 +81,7 @@ class KCEventRegistrationForm(forms.ModelForm):
         cleanedData = self.cleaned_data.get('reg_doc_consent')
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
-        if evt.onSiteAttendance and not cleanedData:
+        if evt.requireDocuments and not cleanedData:
             raise forms.ValidationError(_('Consent document is mandatory.'))
 
         return cleanedData
