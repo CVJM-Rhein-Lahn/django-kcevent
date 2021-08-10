@@ -251,8 +251,8 @@ def user_login(request):
                 # Save session as cookie to login the user
                 login(request, user)
                 # Success, now let's login the user.
-                if self.request.GET.get('next'):
-                    return redirect(self.request.GET.get('next'))
+                if request.GET.get('next'):
+                    return redirect(request.GET.get('next'))
                 else:
                     return render(request, 'kcevent/account.html')
             else:
