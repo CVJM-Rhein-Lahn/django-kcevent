@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Konfi-Castle Event Management\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-20 18:11+0000\n"
+"POT-Creation-Date: 2021-08-10 18:13+0000\n"
 "PO-Revision-Date: 2021-02-20 19:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -51,52 +51,56 @@ msgstr "Postleitzahl"
 msgid "City"
 msgstr "Ort"
 
-#: kcevent/forms.py:20 kcevent/models.py:59 kcevent/views.py:56
+#: kcevent/forms.py:21 kcevent/models.py:59 kcevent/views.py:56
 msgid "Phone"
 msgstr "Telefon"
 
-#: kcevent/forms.py:21 kcevent/models.py:60 kcevent/models.py:133
+#: kcevent/forms.py:22 kcevent/models.py:60 kcevent/models.py:133
 #: kcevent/models.py:158 kcevent/views.py:56
 msgid "Mail address"
 msgstr "E-Mail"
 
-#: kcevent/forms.py:23
+#: kcevent/forms.py:24
 msgid "Allergies / intolerances"
 msgstr "Allergien / Unverträglichkeiten"
 
-#: kcevent/forms.py:29
+#: kcevent/forms.py:30
 msgid "Please choose your church"
 msgstr "Bitte wähle deine Kirchengemeinde"
 
 #: kcevent/forms.py:31
+msgid "Please choose your nutrition"
+msgstr "Bitte wähle deine Ernährung"
+
+#: kcevent/forms.py:33
 msgid "Please choose your role"
 msgstr "Bitte wähle deine Funktion"
 
-#: kcevent/forms.py:32
+#: kcevent/forms.py:34
 msgid "Please choose your gender"
 msgstr "Bitte wähle dein Geschlecht"
 
-#: kcevent/forms.py:39
+#: kcevent/forms.py:41
 msgid "Nutrition is mandatory."
 msgstr "Ernährung ist ein Pflichtfeld."
 
-#: kcevent/forms.py:51
+#: kcevent/forms.py:53
 msgid "Other communications"
 msgstr "Sonstige Mitteilungen"
 
-#: kcevent/forms.py:64
+#: kcevent/forms.py:66
 msgid "You must consent to the registration!"
 msgstr "Einverständniserklärung ist erforderlich!"
 
-#: kcevent/forms.py:75
+#: kcevent/forms.py:77
 msgid "Event passport is mandatory."
 msgstr "Freizeitpass ist verpflichtend."
 
-#: kcevent/forms.py:85
+#: kcevent/forms.py:87
 msgid "Consent document is mandatory."
 msgstr "Einverständniserklärung ist verpflichtend."
 
-#: kcevent/forms.py:110
+#: kcevent/forms.py:112
 msgid "You're already registered to this event."
 msgstr "Sie / Du bist bereits zur Veranstaltung angemeldet."
 
@@ -332,7 +336,9 @@ msgstr "Fordere Dokumente"
 
 #: kcevent/models.py:232
 msgid "Ask and require certain forms and documents from user to upload."
-msgstr "Fragen Sie den Benutzer nach bestimmten Formularen und Dokumenten und fordern Sie diese zum Hochladen an."
+msgstr ""
+"Fragen Sie den Benutzer nach bestimmten Formularen und Dokumenten und "
+"fordern Sie diese zum Hochladen an."
 
 #: kcevent/models.py:276 kcevent/models.py:280
 msgid "Event partner"

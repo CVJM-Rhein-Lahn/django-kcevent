@@ -19,7 +19,7 @@ class ParticipantForm(forms.ModelForm):
             'city': forms.TextInput(attrs={'placeholder': _('City')}),
             # Phone pattern DIN norm: (\+[0-9]{1,3}\s|00[0-9]{1,3}\s|0[1-9]{1})[0-9]+\s[0-9]+(-[0-9]+)?
             'phone': forms.TextInput(attrs={'placeholder': _('Phone'), 'pattern': "(.*\d+.*)"}), 
-            'mail_addr': forms.TextInput(attrs={'placeholder': _('Mail address')}),
+            'mail_addr': forms.EmailInput(attrs={'placeholder': _('Mail address')}),
             'birthday': forms.DateInput(attrs={'type': 'date'}),
             'intolerances': forms.Textarea(attrs={'placeholder': _('Allergies / intolerances')}),
         }
@@ -28,6 +28,9 @@ class ParticipantForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self._event = event
         self.fields['church'].empty_label = _('Please choose your church')
+        self.fields['nutrition'].widget.choices = [('', _('Please choose your nutrition'))] + self.fields['nutrition'].widget.choices[1:]
+        if self._event.onSiteAttendance:
+            self.fields['nutrition'].widget.attrs['required'] = 'required'
         # replace empty choice
         self.fields['role'].widget.choices = [('', _('Please choose your role'))] + self.fields['role'].widget.choices[1:]
         self.fields['gender'].widget.choices = [('', _('Please choose your gender'))] + self.fields['gender'].widget.choices[1:]
