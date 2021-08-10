@@ -88,7 +88,7 @@
       <div class="formgrid-item">
         {{ kfh.form.phone.errors }}
         {{ kfh.form.phone|addclass:'form-control' }}
-        <label for="{{ kfh.form.phone.id_for_label }}">Telefon* (Format DIN5008, Beispiel: +49 30 3432622)</label>
+        <label for="{{ kfh.form.phone.id_for_label }}">Telefon*</label>
       </div>
 
       {% if evt.onSiteAttendance %}
@@ -148,6 +148,7 @@
         <label for="{{ kfh.formReg.reg_doc_meddispense.id_for_label }}"
           class="custom-file-label">Medikamentenabgabe</label>
       </div>
+      {% endif %}
       {% endif %}
 
       <div class="formgrid-item-full">

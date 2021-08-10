@@ -17,7 +17,8 @@ class ParticipantForm(forms.ModelForm):
             'house_number': forms.TextInput(attrs={'placeholder': _('House no.')}),
             'zip_code': forms.TextInput(attrs={'placeholder': _('Postal code')}),
             'city': forms.TextInput(attrs={'placeholder': _('City')}),
-            'phone': forms.TextInput(attrs={'placeholder': _('Phone'), 'pattern': "(\+[0-9]{1,3}\s|00[0-9]{1,3}\s|0[1-9]{1})[0-9]+\s[0-9]+(-[0-9]+)?"}),
+            # Phone pattern DIN norm: (\+[0-9]{1,3}\s|00[0-9]{1,3}\s|0[1-9]{1})[0-9]+\s[0-9]+(-[0-9]+)?
+            'phone': forms.TextInput(attrs={'placeholder': _('Phone'), 'pattern': "(.*\d+.*)"}), 
             'mail_addr': forms.TextInput(attrs={'placeholder': _('Mail address')}),
             'birthday': forms.DateInput(attrs={'type': 'date'}),
             'intolerances': forms.Textarea(attrs={'placeholder': _('Allergies / intolerances')}),
