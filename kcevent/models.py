@@ -1,9 +1,9 @@
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.core import mail
 from django.conf import settings
 from django.template import Context, Template
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 import os
 
 class KCTemplateSet(models.Model):
@@ -11,6 +11,7 @@ class KCTemplateSet(models.Model):
         verbose_name = _('Template set')
         verbose_name_plural = _('Template sets')
 
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
 
     def __str__(self):
@@ -29,6 +30,7 @@ class KCTemplate(models.Model):
         FORM_LOGIN = 'formLogin', _('Notes during login to event')
         FORM_INTRODUCTION = 'formIntroduction', _('Introduction to event')
 
+    id = models.AutoField(primary_key=True)
     tpl_set = models.ForeignKey(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
     tpl_type = models.CharField(
         max_length=50,
@@ -50,6 +52,7 @@ class KCPerson(models.Model):
         verbose_name = _('Person')
         verbose_name_plural = _('Persons')
 
+    id = models.AutoField(primary_key=True)
     first_name = models.CharField(max_length=120, verbose_name=_('First name'))
     last_name = models.CharField(max_length=120, verbose_name=_('Surname'))
     street = models.CharField(max_length=120, verbose_name=_('Street'))
@@ -125,6 +128,7 @@ class Partner(models.Model):
         verbose_name = _('Partner')
         verbose_name_plural = _('Partner')
 
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     street = models.CharField(max_length=120, verbose_name=_('Street'))
     house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
@@ -150,6 +154,7 @@ class KCEventHost(models.Model):
         verbose_name = _('Event host')
         verbose_name_plural = _('Event hosts')
 
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     street = models.CharField(max_length=120, verbose_name=_('Street'))
     house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
@@ -169,6 +174,7 @@ class KCEvent(models.Model):
         verbose_name = _('Event')
         verbose_name_plural = _('Events')
 
+    id = models.AutoField(primary_key=True)
     host = models.ForeignKey(KCEventHost, on_delete=models.CASCADE, related_name='+', verbose_name=_('Host'), null=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     start_date = models.DateField(verbose_name=_('Start date'))
@@ -276,6 +282,7 @@ class KCEventPartner(models.Model):
         verbose_name = _('Event partner')
         verbose_name_plural = _('Event partners')
 
+    id = models.AutoField(primary_key=True)
     evp_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     evp_partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name=_('Event partner'))
     # contract
@@ -313,6 +320,7 @@ class KCEventRegistration(models.Model):
             ('can_download_regdocs', _('Can download registration documents')),
         )
 
+    id = models.AutoField(primary_key=True)
     reg_time = models.DateTimeField(auto_now_add=True, verbose_name=_('Registration time'))
     reg_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))

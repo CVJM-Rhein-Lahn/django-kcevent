@@ -1,6 +1,6 @@
 from django import forms
 from kcevent.models import Participant, KCEventRegistration, KCEvent
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 class ParticipantForm(forms.ModelForm):
     class Meta:
