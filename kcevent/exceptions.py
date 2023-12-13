@@ -1,0 +1,2 @@
+class NoTemplatesException(Exception):
+    pass

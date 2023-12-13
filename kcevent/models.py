@@ -4,6 +4,7 @@ from django.conf import settings
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from .exceptions import NoTemplatesException
 import os
 
 class KCTemplateSet(models.Model):
@@ -382,14 +383,14 @@ class KCEventRegistration(models.Model):
     def sendConfirmation(self):
         # Find the right template.
         if not self.reg_event.template:
-            raise Exception('No template set defined for event {0}!'.format(self.reg_event.name))
+            raise NoTemplatesException('No template set defined for event {0}!'.format(self.reg_event.name))
 
         # find the right template
         tpl = KCTemplate.objects.filter(
             tpl_set=self.reg_event.template, tpl_type=KCTemplate.TemplateTypes.REGISTRATION_CONFIRMATION
         ).first()
         if not tpl:
-            raise Exception('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
+            raise NoTemplatesException('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
 
         sender = settings.NOTIFY_SENDER
         context = Context({
@@ -419,14 +420,14 @@ class KCEventRegistration(models.Model):
     def notifyHostChurch(self):
         # Find the right template.
         if not self.reg_event.template:
-            raise Exception('No template set defined for event {0}!'.format(self.reg_event.name))
+            raise NoTemplatesException('No template set defined for event {0}!'.format(self.reg_event.name))
 
         # find the right template
         tpl = KCTemplate.objects.filter(
             tpl_set=self.reg_event.template, tpl_type=KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION
         ).first()
         if not tpl:
-            raise Exception('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
+            raise NoTemplatesException('No template defined for {0}'.format(KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION))
 
         sender = settings.NOTIFY_SENDER
         messages = []
