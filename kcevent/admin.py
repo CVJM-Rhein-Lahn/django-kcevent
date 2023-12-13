@@ -28,6 +28,9 @@ def resendConfirmation(modeladmin, request, queryset):
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = ["reg_event", "reg_user", "reg_time", "confirmation_send", "confirmation_dt"]
+    list_filter = ["reg_event", "confirmation_send"]
+    list_display_links = ["reg_event", "reg_user"]
+    search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation]
 
