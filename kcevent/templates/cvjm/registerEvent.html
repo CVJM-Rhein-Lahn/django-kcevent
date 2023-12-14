@@ -6,8 +6,12 @@
 <section>
   <div class="event-info">
     <div class="event-info-item">
+      {% if evt.formIntroduction.subject %}
       <h2>{{evt.formIntroduction.subject}}</h2>
       <p>{{evt.formIntroduction.content}}</p>
+      {% else %}
+      <h2>{{evt.name}}</h2>
+      {% endif %}
     </div>
   </div>
 </section>

@@ -28,8 +28,7 @@ def resendConfirmation(modeladmin, request, queryset):
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = ["reg_event", "reg_user", "reg_time", "confirmation_send", "confirmation_dt"]
-    list_filter = ["reg_event", "confirmation_send"]
-    list_display_links = ["reg_event", "reg_user"]
+    list_filter = ["confirmation_send", "reg_event__name"]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation]
@@ -43,12 +42,26 @@ class KCTemplateSetAdmin(admin.ModelAdmin):
 class KCTemplateAdmin(admin.ModelAdmin):
     list_display = ["tpl_set", "tpl_type", "tpl_subject"]
 
+class KCPersonAdmin(admin.ModelAdmin):
+    list_display = ["last_name", "first_name", "phone", "mail_addr"]
+    search_fields = ["last_name", "first_name"]
+
+class ParticipantAdmin(admin.ModelAdmin):
+    list_display = ["last_name", "first_name", "phone", "mail_addr", "birthday", "church", "intolerances", "nutrition", "lactose_intolerance", "celiac_disease", "role", "gender"]
+    search_fields = ["last_name", "first_name", "events__name"]
+    list_filter = ["nutrition", "lactose_intolerance", "celiac_disease", "role", "gender", "events__name"]
+    list_display_links = ["last_name", "first_name"]
+
+class PartnerAdmin(admin.ModelAdmin):
+    list_display = ["name", "city", "mail_addr", "representative", "contact_person"]
+    search_fields = ["name"]
+
 admin.site.register(KCEventHost, KCEventHostAdmin)
 admin.site.register(KCTemplateSet, KCTemplateSetAdmin)
 admin.site.register(KCTemplate, KCTemplateAdmin)
 admin.site.register(KCEvent, KCEventAdmin)
-admin.site.register(KCPerson)
-admin.site.register(Participant)
-admin.site.register(Partner)
+admin.site.register(KCPerson, KCPersonAdmin)
+admin.site.register(Participant, ParticipantAdmin)
+admin.site.register(Partner, PartnerAdmin)
 admin.site.register(KCEventPartner, KCEventPartnerAdmin)
 admin.site.register(KCEventRegistration, KCEventRegistrationAdmin)

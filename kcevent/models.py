@@ -78,16 +78,19 @@ class Participant(KCPerson):
         verbose_name_plural = _('Participants')
 
     class NutritionTypes(models.TextChoices):
+        NUTRITION_EMPTY = '', _('Please choose your nutrition')
         NUTRITION_REGULAR = 'RGL', _('Regular')
         NUTRITION_VEGETARIAN = 'VGT', _('Vegetarian')
         NUTRITION_VEGAN = 'VGN', _('Vegan')
 
     class ParticipantRoles(models.TextChoices):
+        ROLE_EMPTY = '', _('Please choose your role')
         ROLE_CONFIRMEE = 'CF', _('Confirmand')
         ROLE_RELOADED = 'RL', _('Reloaded')
         ROLE_STAFF = 'ST', _('Staff')
 
     class GenderTypes(models.TextChoices):
+        GENDER_EMPTY = '', _('Please choose your gender')
         GENDER_MALE = 'M', _('Male')
         GENDER_FEMALE = 'W', _('Female')
         GENDER_DIVERT = 'D', _('Divert')
@@ -112,6 +115,13 @@ class Participant(KCPerson):
         max_length=1,
         choices=GenderTypes.choices,
         verbose_name=_('Gender')
+    )
+
+    events = models.ManyToManyField(
+        'KCEvent',
+        through='KCEventRegistration',
+        through_fields=('reg_user', 'reg_event'),
+        verbose_name=_('Events')
     )
 
     @property

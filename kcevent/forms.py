@@ -28,12 +28,8 @@ class ParticipantForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self._event = event
         self.fields['church'].empty_label = _('Please choose your church')
-        self.fields['nutrition'].widget.choices = [('', _('Please choose your nutrition'))] + self.fields['nutrition'].widget.choices[1:]
         if self._event.onSiteAttendance:
             self.fields['nutrition'].widget.attrs['required'] = 'required'
-        # replace empty choice
-        self.fields['role'].widget.choices = [('', _('Please choose your role'))] + self.fields['role'].widget.choices[1:]
-        self.fields['gender'].widget.choices = [('', _('Please choose your gender'))] + self.fields['gender'].widget.choices[1:]
 
     def clean_nutrition(self):
         # check if we're on-site attendance - in this case, this 
