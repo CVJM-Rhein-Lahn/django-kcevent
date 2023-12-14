@@ -183,14 +183,14 @@ def registerEvent(request, event_url):
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
                     # send confirmation to participant
                     try:
-                        kfh.formReg.instance.sendConfirmation()
+                        kfh.formReg.instance.sendConfirmation(request)
                     except Exception as e:
                         # catch SMTP issues, but log it!
                         # for user experience, just continue!
                         capture_exception(e)
                     # send information to host and church
                     try:
-                        kfh.formReg.instance.notifyHostChurch()
+                        kfh.formReg.instance.notifyHostChurch(request)
                     except Exception as e:
                         # catch SMTP issues, but log it!
                         # for user experience, just continue!

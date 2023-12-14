@@ -5,6 +5,7 @@ from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from .exceptions import NoTemplatesException
+from . import logger
 import os
 
 class KCTemplateSet(models.Model):
@@ -102,7 +103,8 @@ class Participant(KCPerson):
         max_length=3,
         choices=NutritionTypes.choices,
         blank=True,
-        default=''
+        default='',
+        verbose_name=_('Nutrition')
     )
     lactose_intolerance = models.BooleanField(default=False, verbose_name=_('Lactose intolerance'))
     celiac_disease = models.BooleanField(default=False, verbose_name=_('Celiac disease'))
@@ -346,6 +348,8 @@ class KCEventRegistration(models.Model):
     # meta information for notification
     confirmation_send = models.BooleanField(default=False, verbose_name=_('Confirmation send'))
     confirmation_dt = models.DateTimeField(null=True, verbose_name=_('Confirmation date/time'))
+    confirmation_partner_send = models.BooleanField(default=False, verbose_name=_('Partner confirmation send'))
+    confirmation_partner_dt = models.DateTimeField(null=True, verbose_name=_('Partner confirmation date/time'))
 
     def __str__(self):
         # event ?
@@ -390,7 +394,7 @@ class KCEventRegistration(models.Model):
         if changed:
             self.save()
 
-    def sendConfirmation(self):
+    def sendConfirmation(self, request):
         # Find the right template.
         if not self.reg_event.template:
             raise NoTemplatesException('No template set defined for event {0}!'.format(self.reg_event.name))
@@ -416,7 +420,8 @@ class KCEventRegistration(models.Model):
         sendResult = False
         try:
             sendResult = m.send()
-        except ConnectionRefusedError:
+        except ConnectionRefusedError as e:
+            logger.error(f"Could not connect to smtp server: {e}")
             sendResult = False
 
         if sendResult:
@@ -427,7 +432,7 @@ class KCEventRegistration(models.Model):
         else:
             return False
 
-    def notifyHostChurch(self):
+    def notifyHostChurch(self, request):
         # Find the right template.
         if not self.reg_event.template:
             raise NoTemplatesException('No template set defined for event {0}!'.format(self.reg_event.name))
@@ -461,11 +466,21 @@ class KCEventRegistration(models.Model):
                 m.attach_file(self.reg_doc_meddispense.path)
             messages.append(m)
 
+        sendResult = False
         try:
             with mail.get_connection() as connection:
                     for m in messages:
                         m.connection = connection
-                        m.send()
+                        if m.send():
+                            sendResult = True
         except ConnectionRefusedError as e:
             # log somewhere.
-            pass
+            logger.error(f"Could not connect to smtp server: {e}")
+
+        if sendResult:
+            self.confirmation_partner_send = True
+            self.confirmation_partner_dt = timezone.now()
+            self.save()
+            return True
+        else:
+            return False

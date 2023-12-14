@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
 from .models import KCTemplate, KCTemplateSet
-from .exceptions import NoTemplatesException
+from .filters import custom_list_title_filter
+from .actions import resendConfirmation, resendChurchNotification
 
 class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "start_date", "end_date", "event_url", "registration_start", "registration_end", "template"]
@@ -11,27 +12,12 @@ class KCEventAdmin(admin.ModelAdmin):
 class KCEventHostAdmin(admin.ModelAdmin):
     list_display = ["name", "representative", "contact_person"]
 
-@admin.action(description=_("Re-send participant confirmation"))
-def resendConfirmation(modeladmin, request, queryset):
-    for f in queryset:
-        try:
-            if not f.sendConfirmation():
-                modeladmin.message_user(request, _("Sending confirmation message to %(regUser)s on %(regEvent)s failed" % {
-                    "regUser": str(f.reg_user), 
-                    "regEvent": str(f.reg_event)
-                }))
-        except NoTemplatesException as e:
-            modeladmin.message_user(request, _("No template defined when sending confirmation message to %(regUser)s on %(regEvent)s" % {
-                "regUser": str(f.reg_user), 
-                "regEvent": str(f.reg_event)
-            }))
-
 class KCEventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ["reg_event", "reg_user", "reg_time", "confirmation_send", "confirmation_dt"]
-    list_filter = ["confirmation_send", "reg_event__name"]
+    list_display = ["reg_event", "reg_user", "reg_time", "confirmation_send", "confirmation_dt", "confirmation_partner_send"]
+    list_filter = ["confirmation_send", "confirmation_partner_send", ("reg_event__name", custom_list_title_filter(_("Events")))]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
-    actions = [resendConfirmation]
+    actions = [resendConfirmation, resendChurchNotification]
 
 class KCEventPartnerAdmin(admin.ModelAdmin):
     list_display = ["evp_event", "evp_partner", "evp_doc_contract"]
@@ -41,15 +27,24 @@ class KCTemplateSetAdmin(admin.ModelAdmin):
     
 class KCTemplateAdmin(admin.ModelAdmin):
     list_display = ["tpl_set", "tpl_type", "tpl_subject"]
+    list_filter = [("tpl_set__name", custom_list_title_filter(_("Template set")))]
 
 class KCPersonAdmin(admin.ModelAdmin):
     list_display = ["last_name", "first_name", "phone", "mail_addr"]
     search_fields = ["last_name", "first_name"]
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ["last_name", "first_name", "phone", "mail_addr", "birthday", "church", "intolerances", "nutrition", "lactose_intolerance", "celiac_disease", "role", "gender"]
+    list_display = [
+        "last_name", "first_name", "phone", "mail_addr", "birthday", "church", 
+        "intolerances", "nutrition", "lactose_intolerance", "celiac_disease", 
+        "role", "gender"
+    ]
     search_fields = ["last_name", "first_name", "events__name"]
-    list_filter = ["nutrition", "lactose_intolerance", "celiac_disease", "role", "gender", "events__name"]
+    list_filter = [
+        "nutrition", "lactose_intolerance", "celiac_disease", "role", "gender", 
+        ("events__name", custom_list_title_filter(_("Events"))), 
+        ("church__name", custom_list_title_filter(_("Church")))
+    ]
     list_display_links = ["last_name", "first_name"]
 
 class PartnerAdmin(admin.ModelAdmin):
