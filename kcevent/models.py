@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 from django.core import mail
 from django.conf import settings
@@ -5,6 +6,7 @@ from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from datetime import date
 from .exceptions import NoTemplatesException
 from . import logger
 import os
@@ -136,6 +138,15 @@ class Participant(KCPerson):
             n += ', ' + str(_('Celiac disease'))
 
         return n
+
+    @admin.display(description=_("Age"))
+    def age(self):
+        age = 0
+        if self.birthday:
+            today = date.today()
+            age = today.year - self.birthday.year - ((today.month, today.day) < (self.birthday.month, self.birthday.day))
+
+        return age
 
 class Partner(models.Model):
     class Meta:
@@ -357,6 +368,24 @@ class KCEventRegistration(models.Model):
         event = self.reg_event.name if self.reg_event else '??'
         participant = str(self.reg_user) if self.reg_user else '??'
         return 'Registration "' + event + '": ' + participant
+
+    @admin.display(description=_("Age"), ordering="-reg_user__birthday")
+    def participant_age(self):
+        age = 0
+        if self.reg_user.birthday:
+            today = self.reg_event.start_date
+            age = today.year - self.reg_user.birthday.year - ((today.month, today.day) < (self.reg_user.birthday.month, self.reg_user.birthday.day))
+
+        return age
+
+    @admin.display(description=_("O27/U27"), boolean=True, ordering="reg_user__birthday")
+    def is_27(self):
+        age = 0
+        if self.reg_user.birthday:
+            today = self.reg_event.start_date
+            age = today.year - self.reg_user.birthday.year - ((today.month, today.day) < (self.reg_user.birthday.month, self.reg_user.birthday.day))
+
+        return age >= 27
 
     def clean(self):
         super().clean()

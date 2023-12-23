@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Konfi-Castle Event Management\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-15 19:02+0200\n"
+"POT-Creation-Date: 2024-04-17 11:43+0200\n"
 "PO-Revision-Date: 2021-02-20 19:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,18 +19,18 @@ msgstr ""
 "X-Generator: Poedit 2.3.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
-#: django-kcevent/kcevent/actions.py:5
+#: kcevent/actions.py:5
 msgid "Re-send participant confirmation"
 msgstr "Registrierungsbestätigung erneut senden."
 
-#: django-kcevent/kcevent/actions.py:10 django-kcevent/kcevent/actions.py:25
+#: kcevent/actions.py:10 kcevent/actions.py:25
 #, python-format
 msgid "Sending confirmation message to %(regUser)s on %(regEvent)s failed"
 msgstr ""
 "Versenden der Registrierungsbestätigung an %(regUser)s zum Event "
 "%(regEvent)s ist fehlgeschlagen."
 
-#: django-kcevent/kcevent/actions.py:15 django-kcevent/kcevent/actions.py:30
+#: kcevent/actions.py:15 kcevent/actions.py:30
 #, python-format
 msgid ""
 "No template defined when sending confirmation message to %(regUser)s on "
@@ -39,324 +39,323 @@ msgstr ""
 "Es sind keine Vorlagen zum Versand von Registrierungsbestätigung an "
 "%(regUser)s zum Event %(regEvent)s definiert."
 
-#: django-kcevent/kcevent/actions.py:20
+#: kcevent/actions.py:20
 msgid "Re-send registration confirmation to partner/church and organiser"
 msgstr "Registrierungsbestätigung an Partner und Veranstalter erneut senden"
 
-#: django-kcevent/kcevent/admin.py:14
+#: kcevent/admin.py:14
 msgid "Export"
 msgstr "Exportieren"
 
-#: django-kcevent/kcevent/admin.py:17
+#: kcevent/admin.py:17
 msgid "Documents"
 msgstr "Dokumente"
 
-#: django-kcevent/kcevent/admin.py:20 django-kcevent/kcevent/models.py:197
+#: kcevent/admin.py:20 kcevent/models.py:209
 msgid "Registration URL"
 msgstr "URL zur Anmeldung"
 
-#: django-kcevent/kcevent/admin.py:30 django-kcevent/kcevent/admin.py:58
-#: django-kcevent/kcevent/models.py:126 django-kcevent/kcevent/models.py:159
-#: django-kcevent/kcevent/models.py:188
+#: kcevent/admin.py:32 kcevent/admin.py:60 kcevent/models.py:129
+#: kcevent/models.py:171 kcevent/models.py:200
 msgid "Events"
 msgstr "Veranstaltungen"
 
-#: django-kcevent/kcevent/admin.py:43 django-kcevent/kcevent/models.py:13
-#: django-kcevent/kcevent/models.py:36 django-kcevent/kcevent/models.py:203
+#: kcevent/admin.py:45 kcevent/models.py:16 kcevent/models.py:39
+#: kcevent/models.py:215
 msgid "Template set"
 msgstr "Vorlagenset"
 
-#: django-kcevent/kcevent/admin.py:59 django-kcevent/kcevent/models.py:100
-#: django-kcevent/kcevent/views.py:56
+#: kcevent/admin.py:61 kcevent/models.py:103 kcevent/views.py:56
 msgid "Church"
 msgstr "Kirchengemeinde"
 
-#: django-kcevent/kcevent/apps.py:6
+#: kcevent/apps.py:6
 msgid "Konfi Castle Event Management"
 msgstr "Konfi-Castle Event Management"
 
-#: django-kcevent/kcevent/forms.py:14 django-kcevent/kcevent/models.py:58
-#: django-kcevent/kcevent/views.py:55
+#: kcevent/filters.py:17 kcevent/filters.py:31
+msgid "Is >= 27"
+msgstr ""
+
+#: kcevent/filters.py:32
+msgid "Is < 27"
+msgstr ""
+
+#: kcevent/forms.py:14 kcevent/models.py:61 kcevent/views.py:55
 msgid "First name"
 msgstr "Vorname"
 
-#: django-kcevent/kcevent/forms.py:15 django-kcevent/kcevent/models.py:59
-#: django-kcevent/kcevent/views.py:55
+#: kcevent/forms.py:15 kcevent/models.py:62 kcevent/views.py:55
 msgid "Surname"
 msgstr "Nachname"
 
-#: django-kcevent/kcevent/forms.py:16 django-kcevent/kcevent/models.py:60
-#: django-kcevent/kcevent/models.py:146 django-kcevent/kcevent/models.py:172
-#: django-kcevent/kcevent/views.py:55
+#: kcevent/forms.py:16 kcevent/models.py:63 kcevent/models.py:158
+#: kcevent/models.py:184 kcevent/views.py:55
 msgid "Street"
 msgstr "Straße"
 
-#: django-kcevent/kcevent/forms.py:17 django-kcevent/kcevent/models.py:61
-#: django-kcevent/kcevent/models.py:147 django-kcevent/kcevent/models.py:173
-#: django-kcevent/kcevent/views.py:55
+#: kcevent/forms.py:17 kcevent/models.py:64 kcevent/models.py:159
+#: kcevent/models.py:185 kcevent/views.py:55
 msgid "House no."
 msgstr "Hausnummer"
 
-#: django-kcevent/kcevent/forms.py:18 django-kcevent/kcevent/models.py:63
-#: django-kcevent/kcevent/models.py:149 django-kcevent/kcevent/models.py:175
-#: django-kcevent/kcevent/views.py:55
+#: kcevent/forms.py:18 kcevent/models.py:66 kcevent/models.py:161
+#: kcevent/models.py:187 kcevent/views.py:55
 msgid "Postal code"
 msgstr "Postleitzahl"
 
-#: django-kcevent/kcevent/forms.py:19 django-kcevent/kcevent/models.py:62
-#: django-kcevent/kcevent/models.py:148 django-kcevent/kcevent/models.py:174
-#: django-kcevent/kcevent/views.py:56
+#: kcevent/forms.py:19 kcevent/models.py:65 kcevent/models.py:160
+#: kcevent/models.py:186 kcevent/views.py:56
 msgid "City"
 msgstr "Ort"
 
-#: django-kcevent/kcevent/forms.py:21 django-kcevent/kcevent/models.py:64
-#: django-kcevent/kcevent/views.py:56
+#: kcevent/forms.py:21 kcevent/models.py:67 kcevent/views.py:56
 msgid "Phone"
 msgstr "Telefon"
 
-#: django-kcevent/kcevent/forms.py:22 django-kcevent/kcevent/models.py:65
-#: django-kcevent/kcevent/models.py:150 django-kcevent/kcevent/models.py:176
-#: django-kcevent/kcevent/views.py:56
+#: kcevent/forms.py:22 kcevent/models.py:68 kcevent/models.py:162
+#: kcevent/models.py:188 kcevent/views.py:56
 msgid "Mail address"
 msgstr "E-Mail"
 
-#: django-kcevent/kcevent/forms.py:24
+#: kcevent/forms.py:24
 msgid "Allergies / intolerances"
 msgstr "Allergien / Unverträglichkeiten"
 
-#: django-kcevent/kcevent/forms.py:30
+#: kcevent/forms.py:30
 msgid "Please choose your church"
 msgstr "Bitte wähle deine Kirchengemeinde"
 
-#: django-kcevent/kcevent/forms.py:39
+#: kcevent/forms.py:39
 msgid "Nutrition is mandatory."
 msgstr "Ernährung ist ein Pflichtfeld."
 
-#: django-kcevent/kcevent/forms.py:51
+#: kcevent/forms.py:51
 msgid "Other communications"
 msgstr "Sonstige Mitteilungen"
 
-#: django-kcevent/kcevent/forms.py:64
+#: kcevent/forms.py:64
 msgid "You must consent to the registration!"
 msgstr "Einverständniserklärung ist erforderlich!"
 
-#: django-kcevent/kcevent/forms.py:75
+#: kcevent/forms.py:75
 msgid "Event passport is mandatory."
 msgstr "Freizeitpass ist verpflichtend."
 
-#: django-kcevent/kcevent/forms.py:85
+#: kcevent/forms.py:85
 msgid "Consent document is mandatory."
 msgstr "Einverständniserklärung ist verpflichtend."
 
-#: django-kcevent/kcevent/forms.py:110
+#: kcevent/forms.py:110
 msgid "You're already registered to this event."
 msgstr "Sie / Du bist bereits zur Veranstaltung angemeldet."
 
-#: django-kcevent/kcevent/models.py:14
+#: kcevent/models.py:17
 msgid "Template sets"
 msgstr "Vorlagensets"
 
-#: django-kcevent/kcevent/models.py:17 django-kcevent/kcevent/models.py:145
-#: django-kcevent/kcevent/models.py:171 django-kcevent/kcevent/models.py:192
+#: kcevent/models.py:20 kcevent/models.py:157 kcevent/models.py:183
+#: kcevent/models.py:204
 msgid "Name"
 msgstr "Name"
 
-#: django-kcevent/kcevent/models.py:25
+#: kcevent/models.py:28
 msgid "Template"
 msgstr "Vorlage"
 
-#: django-kcevent/kcevent/models.py:26
+#: kcevent/models.py:29
 msgid "Templates"
 msgstr "Vorlagen"
 
-#: django-kcevent/kcevent/models.py:30
+#: kcevent/models.py:33
 msgid "Confirm registration to participant"
 msgstr "Registrierungsbestätigung an Teilnehmer"
 
-#: django-kcevent/kcevent/models.py:31
+#: kcevent/models.py:34
 msgid "Confirm registration to church and host"
 msgstr "Registrierungsbestätigung an Kirchengemeinde und Veranstalter"
 
-#: django-kcevent/kcevent/models.py:32
+#: kcevent/models.py:35
 msgid "Notes during login to event"
 msgstr "Hinweise während des Logins"
 
-#: django-kcevent/kcevent/models.py:33
+#: kcevent/models.py:36
 msgid "Introduction to event"
 msgstr "Einleitung zur Veranstaltung"
 
-#: django-kcevent/kcevent/models.py:40
+#: kcevent/models.py:43
 msgid "Template type"
 msgstr "Vorlagentyp"
 
-#: django-kcevent/kcevent/models.py:42
+#: kcevent/models.py:45
 msgid "Subject template"
 msgstr "Betreff Vorlage"
 
-#: django-kcevent/kcevent/models.py:43
+#: kcevent/models.py:46
 msgid "Body template"
 msgstr "Inhalt Vorlage"
 
-#: django-kcevent/kcevent/models.py:54 django-kcevent/kcevent/models.py:339
+#: kcevent/models.py:57 kcevent/models.py:351
 msgid "Person"
 msgstr "Person"
 
-#: django-kcevent/kcevent/models.py:55
+#: kcevent/models.py:58
 msgid "Persons"
 msgstr "Personen"
 
-#: django-kcevent/kcevent/models.py:66
+#: kcevent/models.py:69
 msgid "Created on"
 msgstr "Erstellt am"
 
-#: django-kcevent/kcevent/models.py:67
+#: kcevent/models.py:70
 msgid "Updated on"
 msgstr "Aktualisiert am"
 
-#: django-kcevent/kcevent/models.py:78
+#: kcevent/models.py:81
 msgid "Participant"
 msgstr "Teilnehmer"
 
-#: django-kcevent/kcevent/models.py:79 django-kcevent/kcevent/models.py:211
+#: kcevent/models.py:82 kcevent/models.py:223
 msgid "Participants"
 msgstr "Teilnehmer"
 
-#: django-kcevent/kcevent/models.py:82
+#: kcevent/models.py:85
 msgid "Please choose your nutrition"
 msgstr "Bitte wähle deine Ernährung"
 
-#: django-kcevent/kcevent/models.py:83
+#: kcevent/models.py:86
 msgid "Regular"
 msgstr "Regulär"
 
-#: django-kcevent/kcevent/models.py:84
+#: kcevent/models.py:87
 msgid "Vegetarian"
 msgstr "Vegetarisch"
 
-#: django-kcevent/kcevent/models.py:85
+#: kcevent/models.py:88
 msgid "Vegan"
 msgstr "Vegan"
 
-#: django-kcevent/kcevent/models.py:88
+#: kcevent/models.py:91
 msgid "Please choose your role"
 msgstr "Bitte wähle deine Funktion"
 
-#: django-kcevent/kcevent/models.py:89
+#: kcevent/models.py:92
 msgid "Confirmand"
 msgstr "Konfirmand"
 
-#: django-kcevent/kcevent/models.py:90
+#: kcevent/models.py:93
 msgid "Reloaded"
 msgstr "Reloaded"
 
-#: django-kcevent/kcevent/models.py:91
+#: kcevent/models.py:94
 msgid "Staff"
 msgstr "Mitarbeiter"
 
-#: django-kcevent/kcevent/models.py:94
+#: kcevent/models.py:97
 msgid "Please choose your gender"
 msgstr "Bitte wähle dein Geschlecht"
 
-#: django-kcevent/kcevent/models.py:95
+#: kcevent/models.py:98
 msgid "Male"
 msgstr "Männlich"
 
-#: django-kcevent/kcevent/models.py:96
+#: kcevent/models.py:99
 msgid "Female"
 msgstr "Weiblich"
 
-#: django-kcevent/kcevent/models.py:97
+#: kcevent/models.py:100
 msgid "Divert"
 msgstr "Divers"
 
-#: django-kcevent/kcevent/models.py:99 django-kcevent/kcevent/views.py:56
+#: kcevent/models.py:102 kcevent/views.py:56
 msgid "Birthday"
 msgstr "Geburtstag"
 
-#: django-kcevent/kcevent/models.py:101 django-kcevent/kcevent/views.py:57
+#: kcevent/models.py:104 kcevent/views.py:57
 msgid "Intolerances"
 msgstr "Unverträglichkeiten"
 
-#: django-kcevent/kcevent/models.py:107 django-kcevent/kcevent/views.py:57
+#: kcevent/models.py:110 kcevent/views.py:57
 msgid "Nutrition"
 msgstr "Ernährung"
 
-#: django-kcevent/kcevent/models.py:109 django-kcevent/kcevent/models.py:133
-#: django-kcevent/kcevent/views.py:57
+#: kcevent/models.py:112 kcevent/models.py:136 kcevent/views.py:57
 msgid "Lactose intolerance"
 msgstr "Laktoseintoleranz"
 
-#: django-kcevent/kcevent/models.py:110 django-kcevent/kcevent/models.py:135
-#: django-kcevent/kcevent/views.py:58
+#: kcevent/models.py:113 kcevent/models.py:138 kcevent/views.py:58
 msgid "Celiac disease"
 msgstr "Zöliakie"
 
-#: django-kcevent/kcevent/models.py:114 django-kcevent/kcevent/views.py:58
+#: kcevent/models.py:117 kcevent/views.py:58
 msgid "Role"
 msgstr "Funktion"
 
-#: django-kcevent/kcevent/models.py:119 django-kcevent/kcevent/views.py:58
+#: kcevent/models.py:122 kcevent/views.py:58
 msgid "Gender"
 msgstr "Geschlecht"
 
-#: django-kcevent/kcevent/models.py:141 django-kcevent/kcevent/models.py:142
+#: kcevent/models.py:142 kcevent/models.py:372
+msgid "Age"
+msgstr ""
+
+#: kcevent/models.py:153 kcevent/models.py:154
 msgid "Partner"
 msgstr "Partner"
 
-#: django-kcevent/kcevent/models.py:152 django-kcevent/kcevent/models.py:179
+#: kcevent/models.py:164 kcevent/models.py:191
 msgid "Responsible person"
 msgstr "Verantwortliche Person"
 
-#: django-kcevent/kcevent/models.py:153 django-kcevent/kcevent/models.py:180
+#: kcevent/models.py:165 kcevent/models.py:192
 msgid "Contact person"
 msgstr "Kontaktperson"
 
-#: django-kcevent/kcevent/models.py:167
+#: kcevent/models.py:179
 msgid "Event host"
 msgstr "Veranstalter"
 
-#: django-kcevent/kcevent/models.py:168
+#: kcevent/models.py:180
 msgid "Event hosts"
 msgstr "Veranstalter"
 
-#: django-kcevent/kcevent/models.py:177
+#: kcevent/models.py:189
 msgid "Website"
 msgstr "Webseite"
 
-#: django-kcevent/kcevent/models.py:187 django-kcevent/kcevent/models.py:299
-#: django-kcevent/kcevent/models.py:338
+#: kcevent/models.py:199 kcevent/models.py:311 kcevent/models.py:350
 msgid "Event"
 msgstr "Veranstaltung"
 
-#: django-kcevent/kcevent/models.py:191
+#: kcevent/models.py:203
 msgid "Host"
 msgstr "Veranstalter"
 
-#: django-kcevent/kcevent/models.py:193
+#: kcevent/models.py:205
 msgid "Start date"
 msgstr "Startdatum"
 
-#: django-kcevent/kcevent/models.py:194
+#: kcevent/models.py:206
 msgid "End date"
 msgstr "Enddatum"
 
-#: django-kcevent/kcevent/models.py:195
+#: kcevent/models.py:207
 msgid "Registration start"
 msgstr "Start Anmeldedatum"
 
-#: django-kcevent/kcevent/models.py:196
+#: kcevent/models.py:208
 msgid "Registration end"
 msgstr "Ende Anmeldedatum"
 
-#: django-kcevent/kcevent/models.py:197
+#: kcevent/models.py:209
 msgid "SEO optimized location for register to event."
 msgstr "Suchmaschinenoptimierte Adresse zur Veranstaltungsanmeldung."
 
-#: django-kcevent/kcevent/models.py:199
+#: kcevent/models.py:211
 msgid "Registration password"
 msgstr "Anmeldekennwort"
 
-#: django-kcevent/kcevent/models.py:200
+#: kcevent/models.py:212
 msgid ""
 "Password (can be empty) which is necessary in order to be able to register "
 "to event."
@@ -364,16 +363,16 @@ msgstr ""
 "Kennwort, welches notwendig ist, um sich an der Veranstaltung anmelden zu "
 "können (kann leer bleiben)"
 
-#: django-kcevent/kcevent/models.py:204
+#: kcevent/models.py:216
 msgid "A set of templates used in order to send mails."
 msgstr ""
 "Ein Satz an Vorlagen, die für den Versand von E-Mails verwendet werden."
 
-#: django-kcevent/kcevent/models.py:248
+#: kcevent/models.py:260
 msgid "On-site attendance"
 msgstr "Präsenzteilnahme"
 
-#: django-kcevent/kcevent/models.py:249
+#: kcevent/models.py:261
 msgid ""
 "In case event is an on-site attendance event, further documents are "
 "requested by the participant during registration."
@@ -381,123 +380,132 @@ msgstr ""
 "Im Fall, dass es sich um eine Präsenzveranstaltung handelt, werden weitere "
 "Dokumente vom Teilnehmer während der Anmeldung verlangt."
 
-#: django-kcevent/kcevent/models.py:250
+#: kcevent/models.py:262
 msgid "Require documents"
 msgstr "Fordere Dokumente"
 
-#: django-kcevent/kcevent/models.py:251
+#: kcevent/models.py:263
 msgid "Ask and require certain forms and documents from user to upload."
 msgstr ""
 "Fragen Sie den Benutzer nach bestimmten Formularen und Dokumenten und "
 "fordern Sie diese zum Hochladen an."
 
-#: django-kcevent/kcevent/models.py:295 django-kcevent/kcevent/models.py:300
+#: kcevent/models.py:307 kcevent/models.py:312
 msgid "Event partner"
 msgstr "Veranstaltungspartner"
 
-#: django-kcevent/kcevent/models.py:296
+#: kcevent/models.py:308
 msgid "Event partners"
 msgstr "Veranstaltungspartner"
 
-#: django-kcevent/kcevent/models.py:302
+#: kcevent/models.py:314
 msgid "Contract"
 msgstr "Vertrag"
 
-#: django-kcevent/kcevent/models.py:305
+#: kcevent/models.py:317
 msgid "Approx. no. of male par."
 msgstr "Geschätzte Anz. männlicher Teilnehmer"
 
-#: django-kcevent/kcevent/models.py:306
+#: kcevent/models.py:318
 msgid "Approx. no. of female par."
 msgstr "Geschätzte Anz. weiblicher Teilnehmer"
 
-#: django-kcevent/kcevent/models.py:308
+#: kcevent/models.py:320
 msgid "Approx. no. of male reloaded"
 msgstr "Geschätzte Anz. männlicher Reloaded"
 
-#: django-kcevent/kcevent/models.py:309
+#: kcevent/models.py:321
 msgid "Approx. no. of female reloaded"
 msgstr "Geschätzte Anz. weiblicher Reloaded"
 
-#: django-kcevent/kcevent/models.py:311
+#: kcevent/models.py:323
 msgid "Approx. no. of male members"
 msgstr "Geschätzte Anz. männlicher Mitarbeiter"
 
-#: django-kcevent/kcevent/models.py:312
+#: kcevent/models.py:324
 msgid "Approx. no. of female members"
 msgstr "Geschätzte Anz. weiblicher Mitarbeiter"
 
-#: django-kcevent/kcevent/models.py:330
+#: kcevent/models.py:342
 msgid "Event registration"
 msgstr "Veranstaltungsregistrierung"
 
-#: django-kcevent/kcevent/models.py:331
+#: kcevent/models.py:343
 msgid "Event registrations"
 msgstr "Veranstaltungsregistrierungen"
 
-#: django-kcevent/kcevent/models.py:333
+#: kcevent/models.py:345
 msgid "Can download registration documents"
 msgstr "Kann Dokumente zur Registrierung herunterladen"
 
-#: django-kcevent/kcevent/models.py:337
+#: kcevent/models.py:349
 msgid "Registration time"
 msgstr "Anmeldezeitpunkt"
 
-#: django-kcevent/kcevent/models.py:340 django-kcevent/kcevent/views.py:59
+#: kcevent/models.py:352 kcevent/views.py:59
 msgid "Notes"
 msgstr "Anmerkungen"
 
-#: django-kcevent/kcevent/models.py:341
+#: kcevent/models.py:353
 msgid "Consent parents"
 msgstr "Einwilligungserklärung Eltern"
 
-#: django-kcevent/kcevent/models.py:344 django-kcevent/kcevent/views.py:59
+#: kcevent/models.py:356 kcevent/views.py:59
 msgid "Event passport"
 msgstr "Freizeitpass"
 
-#: django-kcevent/kcevent/models.py:345 django-kcevent/kcevent/views.py:59
+#: kcevent/models.py:357 kcevent/views.py:59
 msgid "Medical dispense"
 msgstr "Medikamentenabgabe"
 
-#: django-kcevent/kcevent/models.py:346 django-kcevent/kcevent/views.py:59
+#: kcevent/models.py:358 kcevent/views.py:59
 msgid "Consent form"
 msgstr "Einwilligungsformular"
 
-#: django-kcevent/kcevent/models.py:349
+#: kcevent/models.py:361
 msgid "Confirmation send"
 msgstr "Bestätigung versendet"
 
-#: django-kcevent/kcevent/models.py:350
+#: kcevent/models.py:362
 msgid "Confirmation date/time"
 msgstr "Bestätigungsdatum/-uhrzeit"
 
-#: django-kcevent/kcevent/models.py:351
+#: kcevent/models.py:363
 msgid "Partner confirmation send"
 msgstr "Partnerbestätigung versendet"
 
-#: django-kcevent/kcevent/models.py:352
+#: kcevent/models.py:364
 msgid "Partner confirmation date/time"
 msgstr "Partner Bestätigungsdatum/-uhrzeit"
 
-#: django-kcevent/kcevent/views.py:36 django-kcevent/kcevent/views.py:123
-#: django-kcevent/kcevent/views.py:160
+#: kcevent/models.py:381
+msgid "O27/U27"
+msgstr ""
+
+#: kcevent/models.py:394 kcevent/models.py:396
+msgid "Confirmation date/time required if confirmation was sent."
+msgstr ""
+
+#: kcevent/templates/cvjm/kclogin.html:31
+msgid "Password"
+msgstr "Kennwort"
+
+#: kcevent/templates/cvjm/kclogin.html:33
+msgid "Submit"
+msgstr "Absenden"
+
+#: kcevent/views.py:36 kcevent/views.py:123 kcevent/views.py:160
 msgid "Event not found"
 msgstr "Veranstaltung nicht gefunden"
 
-#: django-kcevent/kcevent/views.py:100 django-kcevent/kcevent/views.py:101
+#: kcevent/views.py:100 kcevent/views.py:101
 msgid "Yes"
 msgstr "Ja"
 
-#: django-kcevent/kcevent/views.py:100 django-kcevent/kcevent/views.py:101
+#: kcevent/views.py:100 kcevent/views.py:101
 msgid "No"
 msgstr "Nein"
 
-#: django-kcevent/kcevent/views.py:134
+#: kcevent/views.py:134
 msgid "Invalid credentials provided!"
 msgstr "Ungültige Zugangsdaten angegeben!"
-
-#~ msgid "Password"
-#~ msgstr "Kennwort"
-
-#~ msgid "Submit"
-#~ msgstr "Absenden"
