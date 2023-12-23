@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
 from .models import KCTemplate, KCTemplateSet
-from .filters import custom_list_title_filter
+from .filters import custom_list_title_filter, is_27_and_older
 from .actions import resendConfirmation, resendChurchNotification
 
 class KCEventAdmin(admin.ModelAdmin):
@@ -13,8 +13,10 @@ class KCEventHostAdmin(admin.ModelAdmin):
     list_display = ["name", "representative", "contact_person"]
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ["reg_event", "reg_user", "reg_time", "confirmation_send", "confirmation_dt", "confirmation_partner_send"]
-    list_filter = ["confirmation_send", "confirmation_partner_send", ("reg_event__name", custom_list_title_filter(_("Events")))]
+    list_display = [
+        "reg_event", "reg_user", "participant_age", "is_27", "reg_time", "confirmation_send", "confirmation_dt", "confirmation_partner_send"
+    ]
+    list_filter = ["confirmation_send", "confirmation_partner_send", ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation, resendChurchNotification]
@@ -35,7 +37,7 @@ class KCPersonAdmin(admin.ModelAdmin):
 
 class ParticipantAdmin(admin.ModelAdmin):
     list_display = [
-        "last_name", "first_name", "phone", "mail_addr", "birthday", "church", 
+        "last_name", "first_name", "phone", "mail_addr", "birthday", "age", "church", 
         "intolerances", "nutrition", "lactose_intolerance", "celiac_disease", 
         "role", "gender"
     ]
