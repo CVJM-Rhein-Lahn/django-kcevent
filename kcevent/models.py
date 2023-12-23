@@ -347,9 +347,9 @@ class KCEventRegistration(models.Model):
 
     # meta information for notification
     confirmation_send = models.BooleanField(default=False, verbose_name=_('Confirmation send'))
-    confirmation_dt = models.DateTimeField(null=True, verbose_name=_('Confirmation date/time'))
+    confirmation_dt = models.DateTimeField(null=True, blank=True, verbose_name=_('Confirmation date/time'))
     confirmation_partner_send = models.BooleanField(default=False, verbose_name=_('Partner confirmation send'))
-    confirmation_partner_dt = models.DateTimeField(null=True, verbose_name=_('Partner confirmation date/time'))
+    confirmation_partner_dt = models.DateTimeField(null=True, blank=True, verbose_name=_('Partner confirmation date/time'))
 
     def __str__(self):
         # event ?
