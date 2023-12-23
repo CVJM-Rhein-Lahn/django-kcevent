@@ -4,6 +4,7 @@ from django.conf import settings
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from .exceptions import NoTemplatesException
 from . import logger
 import os
@@ -79,19 +80,19 @@ class Participant(KCPerson):
         verbose_name_plural = _('Participants')
 
     class NutritionTypes(models.TextChoices):
-        NUTRITION_EMPTY = '', _('Please choose your nutrition')
+        __empty__ = _('Please choose your nutrition')
         NUTRITION_REGULAR = 'RGL', _('Regular')
         NUTRITION_VEGETARIAN = 'VGT', _('Vegetarian')
         NUTRITION_VEGAN = 'VGN', _('Vegan')
 
     class ParticipantRoles(models.TextChoices):
-        ROLE_EMPTY = '', _('Please choose your role')
+        __empty__ = _('Please choose your role')
         ROLE_CONFIRMEE = 'CF', _('Confirmand')
         ROLE_RELOADED = 'RL', _('Reloaded')
         ROLE_STAFF = 'ST', _('Staff')
 
     class GenderTypes(models.TextChoices):
-        GENDER_EMPTY = '', _('Please choose your gender')
+        __empty__ = _('Please choose your gender')
         GENDER_MALE = 'M', _('Male')
         GENDER_FEMALE = 'W', _('Female')
         GENDER_DIVERT = 'D', _('Divert')
@@ -356,6 +357,17 @@ class KCEventRegistration(models.Model):
         event = self.reg_event.name if self.reg_event else '??'
         participant = str(self.reg_user) if self.reg_user else '??'
         return 'Registration "' + event + '": ' + participant
+
+    def clean(self):
+        super().clean()
+        errorDict = {}
+        if self.confirmation_send and not self.confirmation_dt:
+            errorDict['confirmation_dt'] = _('Confirmation date/time required if confirmation was sent.')
+        if self.confirmation_partner_send and not self.confirmation_partner_dt:
+            errorDict['confirmation_partner_dt'] = _('Confirmation date/time required if confirmation was sent.')
+
+        if errorDict:
+            raise ValidationError(errorDict)
 
     def updateFilePaths(self):
         changed = False
