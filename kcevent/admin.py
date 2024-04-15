@@ -1,13 +1,26 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.urls import reverse
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
 from .models import KCTemplate, KCTemplateSet
 from .filters import custom_list_title_filter
 from .actions import resendConfirmation, resendChurchNotification
 
 class KCEventAdmin(admin.ModelAdmin):
-    list_display = ["name", "host", "start_date", "end_date", "event_url", "registration_start", "registration_end", "template"]
+    list_display = ["name", "host", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "export_link"]
     prepopulated_fields = {"event_url": ("name",)}
+
+    @admin.display(description = _('Export'))
+    def export_link(self, obj):
+        url = reverse('downloadEventDocuments', kwargs={'event_url': obj.event_url})
+        linkName = _('Documents')
+        return format_html('<a href="{url}">{linkName}</a>'.format(url=url, linkName=linkName))
+
+    @admin.display(description = _('Registration URL'))
+    def event_link(self, obj):
+        url = reverse('registerEvent', kwargs={'event_url': obj.event_url})
+        return format_html('<a href="{url}" target="_blank">{linkName}</a>'.format(url=url, linkName=obj.event_url))
 
 class KCEventHostAdmin(admin.ModelAdmin):
     list_display = ["name", "representative", "contact_person"]
