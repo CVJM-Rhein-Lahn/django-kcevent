@@ -44,8 +44,9 @@ class is_27_and_older(admin.SimpleListFilter):
             return queryset.filter(
                 reg_user__birthday__lte=F("reg_event__start_date") - timedelta(weeks=52*27),
             )
-        if self.value() == "no":
+        elif self.value() == "no":
             return queryset.filter(
                 reg_user__birthday__gt=F("reg_event__start_date") - timedelta(weeks=52*27),
             )
-        pass
+        else:
+            return queryset

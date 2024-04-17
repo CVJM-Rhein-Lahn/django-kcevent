@@ -5,11 +5,19 @@ from django.urls import reverse
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
 from .models import KCTemplate, KCTemplateSet
 from .filters import custom_list_title_filter, is_27_and_older
-from .actions import resendConfirmation, resendChurchNotification
+from .actions import resendConfirmation, resendChurchNotification, copyEvent
+
+class KCEventPartnerInlineAdmin(admin.TabularInline):
+    model = KCEventPartner
+
+class KCTemplateInlineAdmin(admin.TabularInline):
+    model = KCTemplate
 
 class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "export_link"]
     prepopulated_fields = {"event_url": ("name",)}
+    actions = [copyEvent]
+    inlines = [KCEventPartnerInlineAdmin]
 
     @admin.display(description = _('Export'))
     def export_link(self, obj):
@@ -27,18 +35,24 @@ class KCEventHostAdmin(admin.ModelAdmin):
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = [
-        "reg_event", "reg_user", "participant_age", "is_27", "reg_time", "confirmation_send", "confirmation_dt", "confirmation_partner_send"
+        "reg_event", "reg_user", "reg_status", "participant_age", "is_27", 
+        "reg_time", "confirmation_send", "confirmation_partner_send"
     ]
-    list_filter = ["confirmation_send", "confirmation_partner_send", ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older]
+    list_filter = [
+        "reg_status", "confirmation_send", "confirmation_partner_send", 
+        ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older
+    ]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation, resendChurchNotification]
+    date_hierarchy = "reg_event__start_date"
 
 class KCEventPartnerAdmin(admin.ModelAdmin):
     list_display = ["evp_event", "evp_partner", "evp_doc_contract"]
 
 class KCTemplateSetAdmin(admin.ModelAdmin):
     list_display = ["name",]
+    inlines = [KCTemplateInlineAdmin]
     
 class KCTemplateAdmin(admin.ModelAdmin):
     list_display = ["tpl_set", "tpl_type", "tpl_subject"]

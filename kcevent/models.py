@@ -1,7 +1,9 @@
+import os
 from django.contrib import admin
-from django.db import models
 from django.core import mail
+from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.db import models
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -9,7 +11,6 @@ from django.core.exceptions import ValidationError
 from datetime import date
 from .exceptions import NoTemplatesException
 from . import logger
-import os
 
 class KCTemplateSet(models.Model):
     class Meta:
@@ -222,6 +223,40 @@ class KCEvent(models.Model):
         through_fields=('reg_event', 'reg_user'),
         verbose_name=_('Participants')
     )
+
+    onSiteAttendance = models.BooleanField(default=True, verbose_name=_('On-site attendance'), \
+        help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
+    requireDocuments = models.BooleanField(default=True, verbose_name=_('Require documents'), \
+        help_text=_('Ask and require certain forms and documents from user to upload.'))
+
+    def clean(self):
+        validationErrors = {}
+
+        # Validate event dates itself
+        if self.start_date > self.end_date:
+            validationErrors['start_date'] = ValidationError(_("Event start date cannot be after end date."))
+            validationErrors['end_date'] = ValidationError(_("Event end date cannot be before start date."))
+
+        # Validate registration date range.
+        if self.registration_start is not None and self.registration_end is None:
+            validationErrors['registration_end'] = ValidationError(_("Registration date range consists of start and end date!"))
+        elif self.registration_start is None and self.registration_end is not None:
+            validationErrors['registration_start'] = ValidationError(_("Registration date range consists of start and end date!"))
+        elif self.registration_start is not None:
+            if self.registration_start > self.start_date:
+                validationErrors['registration_start'] = ValidationError(_("Usually an event registration should happen prior to the event itself!"))
+            if self.registration_end > self.end_date:
+                validationErrors['registration_end'] = ValidationError(_("A registration to the event should usually end latest on event start."))
+
+        # Validate, that event URL is unique cross registration date range.
+        evt = KCEvent.objects.filter(event_url=self.event_url)
+        if self.id:
+            evt = evt.exclude(id=self.id)
+        if len(evt) > 0:
+            validationErrors['event_url'] = ValidationError(_("Event URL must be unique."))
+
+        if len(validationErrors) > 0:
+            raise ValidationError(validationErrors)
     
     def formLogin(self):
         tpl = KCTemplate.objects.filter(
@@ -256,11 +291,6 @@ class KCEvent(models.Model):
             dta['content'] = Template(tpl.tpl_content).render(context)
 
         return dta
-
-    onSiteAttendance = models.BooleanField(default=True, verbose_name=_('On-site attendance'), \
-        help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
-    requireDocuments = models.BooleanField(default=True, verbose_name=_('Require documents'), \
-        help_text=_('Ask and require certain forms and documents from user to upload.'))
 
     def __str__(self):
         return self.name
@@ -302,6 +332,13 @@ def getUploadPathEventPartner(instance, filename):
         filename
     )
 
+class KCEventRegistrationStateTypes(models.TextChoices):
+    __empty__ = _('Please choose status of registration')
+    REGTYPE_REGISTERED = 'registered', _('Registered')
+    REGTYPE_ACTIVE = 'active', _('Active')
+    REGTYPE_CANCELLED = 'cancelled', _('Cancelled')
+    REGTYPE_DECLINED = 'declined', _('Declined')
+
 class KCEventPartner(models.Model):
     class Meta:
         verbose_name = _('Event partner')
@@ -311,7 +348,7 @@ class KCEventPartner(models.Model):
     evp_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     evp_partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name=_('Event partner'))
     # contract
-    evp_doc_contract = models.FileField(upload_to=getUploadPathEventPartner, null=True, verbose_name=_('Contract'))
+    evp_doc_contract = models.FileField(upload_to=getUploadPathEventPartner, null=True, blank=True, verbose_name=_('Contract'))
     # statistics
     # Participants
     evp_apx_participant_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male par.'))
@@ -351,6 +388,13 @@ class KCEventRegistration(models.Model):
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
+
+    reg_status = models.CharField(
+        max_length=20,
+        choices=KCEventRegistrationStateTypes.choices,
+        default=KCEventRegistrationStateTypes.REGTYPE_REGISTERED,
+        verbose_name=_('Registration status')
+    )
 
     # further documentation
     reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Event passport'))
