@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 body,
 fieldset,
 figure,
@@ -278,6 +282,126 @@ input[type=checkbox]:checked ~ #overlay-button span:after {
   border-bottom: 3px solid black;
 }
 
+/********************** Table **********************/
+.modern-table-wrap {
+  overflow-x: scroll;
+}
+
+.modern-table-wrap table {
+  min-width: 500px !important;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+
+  border-collapse: separate;
+  border-spacing: 0 10px;
+
+  color: #212529;
+}
+
+.modern-table-wrap table thead th {
+  color: black;
+  border: none;
+  padding: 15px;
+  font-size: 14px;
+}
+
+.modern-table-wrap tbody tr {
+  -webkit-box-shadow: 0px 5px 12px -12px rgba(0, 0, 0, 0.29);
+  -moz-box-shadow: 0px 5px 12px -12px rgba(0, 0, 0, 0.29);
+  box-shadow: 0px 5px 12px -12px rgba(0, 0, 0, 0.29);
+}
+.modern-table-wrap tbody td {
+  position: relative;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+}
+
+/********************** Alerts **********************/
+/* Orients at: https://codepen.io/hmps/pen/gOPeBN */
+.alert-box-centralized {
+  position: relative;
+  margin: 40px auto 0;
+}
+
+.alert-box {
+  display: table;
+  min-width: 500px;
+  background-color: #0074D9;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.alert-box.is-hidden {
+  opacity: 0;
+  height: 0;
+  font-size: 0;
+  padding: 0;
+  margin: 0 auto;
+  display: block;
+}
+
+.alert-icon {
+  display: table-cell;
+  vertical-align: middle;
+  width: 60px;
+  padding: 30px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.25);
+}
+
+.alert-icon > i {
+  width: 20px;
+  font-size: 20px;
+}
+
+.alert-body {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 30px 20px 30px 10px;
+}
+
+.alert-body > p {
+  line-height: 1.2;
+  margin-top: 6px;
+}
+
+.alert-box-error {
+  background-color: #FF4136;
+}
+
+.alert-box-info {
+  background-color: #0074D9;
+}
+
+.alert-box-success {
+  background-color: #2ECC40;
+}
+
+.alert-box-warning {
+  background-color: #F39C12;
+}
+
+.alert-error {
+  background-color:#f7a7a3;
+  border-left:5px solid #bf2d26;
+}
+
+.alert-box.alert-box-small {
+  min-width: 250px;
+}
+
+.alert-box.alert-box-small .alert-icon {
+  padding: 5px;
+}
+
+.alert-box.alert-box-small .alert-body {
+  padding: 5px;
+}
+.alert-box.alert-box-small .alert-body ul.errorlist {
+  margin: 0;
+}
 
 /********************** Footer **********************/
 #footer {

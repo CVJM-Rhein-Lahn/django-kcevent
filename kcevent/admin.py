@@ -5,11 +5,19 @@ from django.urls import reverse
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
 from .models import KCTemplate, KCTemplateSet
 from .filters import custom_list_title_filter, is_27_and_older
-from .actions import resendConfirmation, resendChurchNotification
+from .actions import resendConfirmation, resendChurchNotification, copyEvent
+
+class KCEventPartnerInlineAdmin(admin.TabularInline):
+    model = KCEventPartner
+
+class KCTemplateInlineAdmin(admin.TabularInline):
+    model = KCTemplate
 
 class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "export_link"]
     prepopulated_fields = {"event_url": ("name",)}
+    actions = [copyEvent]
+    inlines = [KCEventPartnerInlineAdmin]
 
     @admin.display(description = _('Export'))
     def export_link(self, obj):
@@ -39,6 +47,7 @@ class KCEventPartnerAdmin(admin.ModelAdmin):
 
 class KCTemplateSetAdmin(admin.ModelAdmin):
     list_display = ["name",]
+    inlines = [KCTemplateInlineAdmin]
     
 class KCTemplateAdmin(admin.ModelAdmin):
     list_display = ["tpl_set", "tpl_type", "tpl_subject"]

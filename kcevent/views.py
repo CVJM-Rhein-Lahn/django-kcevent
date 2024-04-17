@@ -195,6 +195,8 @@ def registerEvent(request, event_url):
                         # catch SMTP issues, but log it!
                         # for user experience, just continue!
                         capture_exception(e)
+
+                    kfh.setStage(None)
                     return render(
                         request, 'cvjm/registrationFinished.html',
                         {
@@ -217,7 +219,18 @@ def registerEvent(request, event_url):
                         }
                     )
             elif request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
-                raise Exception("Error validating event registration.")
+                # raise Exception("Error validating event registration.")
+                # Probably someone used "F5"
+                partner = Partner.objects.get(id=kfh.form.instance.church.id)
+                return render(
+                    request, 'cvjm/registrationFinished.html',
+                    {
+                        'evt': evt,
+                        'partner': partner,
+                        'kfh': kfh
+                    }
+                )
+
         kfh.setStage(None)
         return render(
             request, 'cvjm/registerEvent.html', 
@@ -231,9 +244,15 @@ def registerEvent(request, event_url):
 def listPublicEvents(request):
     # check which event is online...
     now = datetime.datetime.now()
-    events = KCEvent.objects.filter(registration_start__lte=now, registration_end__gte=now)
+    events = KCEvent.objects.filter(registration_start__lte=now, registration_end__gte=now).order_by('registration_start')
     if not events:
         return redirect(settings.MAIN_PAGE)
+    elif len(events) > 1:
+        # No post data availabe, let's just show the page to list the available 
+        # events for registration.
+        return render(request, 'cvjm/listEvent.html', {
+            'events': events
+        })
     else:
         # take the first active one
         return redirect(reverse('registerEvent', kwargs={'event_url': events[0].event_url}))

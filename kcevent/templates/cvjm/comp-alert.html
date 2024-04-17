@@ -1,0 +1,20 @@
+{% load i18n %}
+
+{% if chkdsp %}
+<div class="alert-box alert-box-{{ type }} {% if small %}alert-box-small{% endif %}">
+    <div class="alert-icon">
+        {% if type == "error" %}
+        <i class="fa fa-times"></i>
+        {% elif type == "warning" %}
+        <i class="fa fa-exclamation"></i>
+        {% elif type == "success" %}
+        <i class="fa fa-check"></i>
+        {% else %}
+        <i class="fa fa-bell-o"></i>
+        {% endif %}
+    </div>
+    <div class="alert-body">
+        {{ message }}
+    </div>
+</div>
+{% endif %}

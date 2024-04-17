@@ -48,3 +48,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# local configurations
+kcevent/settings_local.py
