@@ -1,9 +1,9 @@
 import os
 from django.contrib import admin
-from django.db import models
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.db import models
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -332,6 +332,13 @@ def getUploadPathEventPartner(instance, filename):
         filename
     )
 
+class KCEventRegistrationStateTypes(models.TextChoices):
+    __empty__ = _('Please choose status of registration')
+    REGTYPE_REGISTERED = 'registered', _('Registered')
+    REGTYPE_ACTIVE = 'active', _('Active')
+    REGTYPE_CANCELLED = 'cancelled', _('Cancelled')
+    REGTYPE_DECLINED = 'declined', _('Declined')
+
 class KCEventPartner(models.Model):
     class Meta:
         verbose_name = _('Event partner')
@@ -381,6 +388,13 @@ class KCEventRegistration(models.Model):
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
+
+    reg_status = models.CharField(
+        max_length=20,
+        choices=KCEventRegistrationStateTypes.choices,
+        default=KCEventRegistrationStateTypes.REGTYPE_REGISTERED,
+        verbose_name=_('Registration status')
+    )
 
     # further documentation
     reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Event passport'))

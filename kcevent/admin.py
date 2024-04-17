@@ -35,12 +35,17 @@ class KCEventHostAdmin(admin.ModelAdmin):
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = [
-        "reg_event", "reg_user", "participant_age", "is_27", "reg_time", "confirmation_send", "confirmation_dt", "confirmation_partner_send"
+        "reg_event", "reg_user", "reg_status", "participant_age", "is_27", 
+        "reg_time", "confirmation_send", "confirmation_partner_send"
     ]
-    list_filter = ["confirmation_send", "confirmation_partner_send", ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older]
+    list_filter = [
+        "reg_status", "confirmation_send", "confirmation_partner_send", 
+        ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older
+    ]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation, resendChurchNotification]
+    date_hierarchy = "reg_event__start_date"
 
 class KCEventPartnerAdmin(admin.ModelAdmin):
     list_display = ["evp_event", "evp_partner", "evp_doc_contract"]
