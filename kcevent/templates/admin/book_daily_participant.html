@@ -1,0 +1,49 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} book-daily-participant{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+&rsaquo; {% translate 'Book daily participant' %}
+</div>
+{% endblock %}
+
+{% block content %}
+{% if perms_lacking %}
+    <p>{% blocktranslate %}Booking daily participant for {{ objects_name }} would require of adding entries to objects:{% endblocktranslate %}</p>
+    <ul>{{ perms_lacking|unordered_list }}</ul>
+{% elif protected %}
+    <p>{% blocktranslate %}Booking daily participant for selected {{ objects_name }} would require modifications to the following protected related objects:{% endblocktranslate %}</p>
+    <ul>{{ protected|unordered_list }}</ul>
+{% else %}
+    <p>{% blocktranslate %}Please specify the necessary event date and type of participant for the selected {{ objects_name }}.{% endblocktranslate %}</p>
+    <h2>{% translate "Objects" %}</h2>
+    {% for registration_object in registrations %}
+        <ul>{{ registration_object|unordered_list }}</ul>
+    {% endfor %}
+    <form method="post">{% csrf_token %}
+    {{ form }}
+    <div>
+        {% for obj in queryset %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">
+        {% endfor %}
+        <input type="hidden" name="action" value="bookDailyParticipant">
+        <input type="hidden" name="book_daily_participant" value="yes">
+        <div class="submit-row">
+            <input type="submit" value="{% translate 'Book' %}">
+            <a href="#" class="button cancel-link">{% translate "Cancel, go back" %}</a>
+        </div>
+    </div>
+    </form>
+{% endif %}
+{% endblock %}

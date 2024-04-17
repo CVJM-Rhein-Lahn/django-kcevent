@@ -14,8 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from . import views
+from . import admin as eventAdmin
 
 urlpatterns = [
     path('partnership/', views.managePartnership, name='partnership'),
@@ -23,6 +24,7 @@ urlpatterns = [
     path('login/<str:event_url>', views.registerEventLogin, name='registerEventLogin'),
     path('register/<str:event_url>', views.registerEvent, name='registerEvent'),
     path('dl/<str:event_url>', views.downloadRegistrationDocuments, name='downloadEventDocuments'),
+    #path('admin/kcevent/<int:id>/participants', eventAdmin.event_part_view, name='part_view')
     path('', views.listPublicEvents, name='listPublicEvents'),
 
     #path('login/', views.user_login, name='user_login')

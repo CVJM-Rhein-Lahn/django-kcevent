@@ -1,12 +1,14 @@
 from django.contrib import admin
 from django.db import models
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django.core import mail
 from django.conf import settings
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
-from datetime import date
+from datetime import date, timedelta
 from .exceptions import NoTemplatesException
 from . import logger
 import os
@@ -223,6 +225,15 @@ class KCEvent(models.Model):
         verbose_name=_('Participants')
     )
     
+    def eventDays(self):
+        allDays = []
+        strDate = self.start_date
+        while strDate <= self.end_date:
+            allDays.append(strDate)
+            strDate += timedelta(days=1)
+        
+        return allDays
+    
     def formLogin(self):
         tpl = KCTemplate.objects.filter(
             tpl_set=self.template, tpl_type=KCTemplate.TemplateTypes.FORM_LOGIN
@@ -337,6 +348,13 @@ def getUploadPathEventRegistration(instance, filename):
         filename
     )
 
+class KCEventRegistrationStateTypes(models.TextChoices):
+    __empty__ = _('Please choose status of registration')
+    REGTYPE_REGISTERED = 'registered', _('Registered')
+    REGTYPE_ACTIVE = 'active', _('Active')
+    REGTYPE_CANCELLED = 'cancelled', _('Cancelled')
+    REGTYPE_DECLINED = 'declined', _('Declined')
+
 class KCEventRegistration(models.Model):
     class Meta:
         verbose_name = _('Event registration')
@@ -351,6 +369,12 @@ class KCEventRegistration(models.Model):
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
+    reg_status = models.CharField(
+        max_length=20,
+        choices=KCEventRegistrationStateTypes.choices,
+        default=KCEventRegistrationStateTypes.REGTYPE_REGISTERED,
+        verbose_name=_('Registration status')
+    )
 
     # further documentation
     reg_doc_pass = models.FileField(upload_to=getUploadPathEventRegistration, blank=True, verbose_name=_('Event passport'))
@@ -386,6 +410,14 @@ class KCEventRegistration(models.Model):
             age = today.year - self.reg_user.birthday.year - ((today.month, today.day) < (self.reg_user.birthday.month, self.reg_user.birthday.day))
 
         return age >= 27
+
+    @admin.display(description=_("Day entries"))
+    def participant_entries(self):
+        return self.kceventdailyparticipant_set.count()
+
+    @admin.display(description=_("Nights"))
+    def nights(self):
+        return self.kceventdailyparticipant_set.filter(participation_type="night").count()
 
     def clean(self):
         super().clean()
@@ -525,3 +557,79 @@ class KCEventRegistration(models.Model):
             return True
         else:
             return False
+
+class ParticipationTypes(models.TextChoices):
+    __empty__ = _('Please choose type of participation')
+    PTYPE_NO = 'no', _('No participation')
+    PTYPE_DAY = 'day', _('Day guest')
+    PTYPE_NIGHT = 'night', _('Overnight')
+    PTYPE_DEPARTED = 'departed', _('Departed')
+    PTYPE_ARRIVED = 'arrived', _('Arrived')
+    PTYPE_SICK = 'sick', _('Sick')
+
+class KCEventDailyParticipant(models.Model):
+    class Meta:
+        verbose_name = _('Event daily participant')
+        verbose_name_plural = _('Event daily participants')
+        unique_together= (('registration', 'day'),)
+
+    id = models.AutoField(primary_key=True)
+    registration = models.ForeignKey(KCEventRegistration, on_delete=models.CASCADE, verbose_name=_('Event registration'))
+    day = models.DateField(verbose_name=_('Event day'))
+    participation_type = models.CharField(
+        max_length=20,
+        choices=ParticipationTypes.choices,
+        verbose_name=_('Type of participation')
+    )
+
+    def __str__(self):
+        # event ?
+        reg_event = self.registration.reg_event
+        reg_user = self.registration.reg_user
+        event = reg_event.name if reg_event else '??'
+        participant = str(reg_user) if reg_user else '??'
+        return 'Daily participants "' + event + '": ' + participant + " on " + str(self.day)
+
+    @admin.display(description=_("Event"), ordering="registration__reg_event__name")
+    def event(self):
+        return self.registration.reg_event
+
+    @admin.display(description=_("Participant"), ordering=Concat("registration__reg_user__last_name", Value(", "), "registration__reg_user__first_name"))
+    def participant(self):
+        return self.registration.reg_user.last_name + ", " + self.registration.reg_user.first_name
+
+    def clean(self):
+        super().clean()
+        errorDict = {}
+        reg_event = self.registration.reg_event
+        if self.day < reg_event.start_date or self.day > reg_event.end_date:
+            errorDict['day'] = _('Event daily date must be within the event date range.')
+
+        if errorDict:
+            raise ValidationError(errorDict)
+
+class KCEventParticipant(KCEventRegistration):
+    class Meta:
+        proxy = True
+        verbose_name = _('Event participant')
+        verbose_name_plural = _('Event participants')
+
+    @admin.display(description="Test")
+    def dpc_tpl(self, *kwargs, **args):
+        print("Yeah!")
+    
+    #def dpc_2024_03_09(self, *kwargs, **args):
+    #    raise Exception("Where am i !?")
+
+    
+    #def dpc_2024_03_10(self, *kwargs, **args):
+    #    raise Exception("Where am i !?")
+
+    
+    #def dpc_2024_03_11(self, *kwargs, **args):
+    #    raise Exception("Where am i !?")
+
+    def get_field(self, field_name):
+        print(self._forward_fields_map)
+        return super().get_field(field_name)
+
