@@ -3,9 +3,9 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
-from .models import KCTemplate, KCTemplateSet
+from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
 from .filters import custom_list_title_filter, is_27_and_older
-from .actions import resendConfirmation, resendChurchNotification, copyEvent
+from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
 class KCEventPartnerInlineAdmin(admin.TabularInline):
     model = KCEventPartner
@@ -13,11 +13,14 @@ class KCEventPartnerInlineAdmin(admin.TabularInline):
 class KCTemplateInlineAdmin(admin.TabularInline):
     model = KCTemplate
 
+class KCEventExportSettingInlineAdmin(admin.StackedInline):
+    model = KCEventExportSetting
+
 class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "export_link"]
     prepopulated_fields = {"event_url": ("name",)}
-    actions = [copyEvent]
-    inlines = [KCEventPartnerInlineAdmin]
+    actions = [copyEvent, syncEvent]
+    inlines = [KCEventPartnerInlineAdmin, KCEventExportSettingInlineAdmin]
 
     @admin.display(description = _('Export'))
     def export_link(self, obj):

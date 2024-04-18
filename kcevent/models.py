@@ -324,6 +324,16 @@ class KCEvent(models.Model):
                     m.connection = connection
                     m.send()
 
+class KCEventExportSetting(models.Model):
+    class Meta:
+        verbose_name = _('Export setting')
+        verbose_name_plural = _('Export settings')
+
+    event_id = models.OneToOneField(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'), primary_key=True)
+    sheet_name = models.CharField(max_length=120, verbose_name=_('Sheet name'))
+    folder_id = models.CharField(max_length=120, verbose_name=_('Drive folder id'))
+    tpl_id = models.CharField(max_length=120, verbose_name=_('Sheet template id'))
+
 def getUploadPathEventPartner(instance, filename):
     # file will be uploaded to MEDIA_ROOT/kcevent/event_<id>/church_id/<filename>
     return 'kcevent/event_{0}/church_{1}/{2}'.format(

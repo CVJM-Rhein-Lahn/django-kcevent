@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from .exceptions import NoTemplatesException
 from .models import KCEventRegistration, KCEvent
+from .exports import GoogleSheetExporter
 
 @admin.action(description=_("Re-send participant confirmation"))
 def resendConfirmation(modeladmin, request, queryset):
@@ -58,3 +59,10 @@ def copyEvent(modeladmin, request, queryset: List[KCEvent]):
                 requireDocuments = f.requireDocuments
             )
             newEvent.save()
+
+@admin.action(description=_("Sync event"))
+def syncEvent(modeladmin, request, queryset: List[KCEvent]):
+    if len(queryset) > 0:
+        exporter = GoogleSheetExporter()
+        for event in queryset:
+            exporter.exportEvent(event)
