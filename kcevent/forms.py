@@ -27,7 +27,8 @@ class ParticipantForm(forms.ModelForm):
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._event = event
-        self.fields['church'].empty_label = _('Please choose your church')
+        self.fields['church'].empty_label = _('Please choose your church/organisation')
+        self.fields['church'].queryset = event.partners
         if self._event.onSiteAttendance:
             self.fields['nutrition'].widget.attrs['required'] = 'required'
 

@@ -47,7 +47,7 @@ class GoogleSheetExporter:
             str(_('Surname')),
             str(_('First name')),
             str(_('Street')),
-            str(_('House no')),
+            str(_('House no.')),
             str(_('Postal code')),
             str(_('City')),
             str(_('Phone')),

@@ -2,13 +2,17 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
-from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration, KCEventHost
+from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration
 from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
-from .filters import custom_list_title_filter, is_27_and_older
+from .models import KCEventLocation
+from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
 class KCEventPartnerInlineAdmin(admin.TabularInline):
     model = KCEventPartner
+    
+class KCEventLocationAdmin(admin.ModelAdmin):
+    model = KCEventLocation
 
 class KCTemplateInlineAdmin(admin.TabularInline):
     model = KCTemplate
@@ -17,24 +21,45 @@ class KCEventExportSettingInlineAdmin(admin.StackedInline):
     model = KCEventExportSetting
 
 class KCEventAdmin(admin.ModelAdmin):
-    list_display = ["name", "host", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "export_link"]
+    list_display = ["name", "host", "location", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "exe_actions"]
     prepopulated_fields = {"event_url": ("name",)}
     actions = [copyEvent, syncEvent]
     inlines = [KCEventPartnerInlineAdmin, KCEventExportSettingInlineAdmin]
 
-    @admin.display(description = _('Export'))
-    def export_link(self, obj):
-        url = reverse('downloadEventDocuments', kwargs={'event_url': obj.event_url})
-        linkName = _('Documents')
-        return format_html('<a href="{url}">{linkName}</a>'.format(url=url, linkName=linkName))
+    list_filter = [
+        "start_date", "name", is_event_future
+    ]
+
+    @admin.display(description = _('Actions'))
+    def exe_actions(self, obj):
+        links = [
+            {
+                'url': reverse('downloadEventDocuments', kwargs={'event_url': obj.event_url}),
+                'name': _('Download documents')
+            },
+            {
+                'url': reverse('admin:kcevent_kceventregistration_changelist') + '?reg_event__id__exact=' + str(obj.id),
+                'name': _('Participants')
+            },
+            {
+                'url': reverse('admin:kcevent_kceventregistration_add') + '?reg_event=' + str(obj.id),
+                'name': _('Add participant')
+            }
+        ]
+        return format_html(
+            '<ul class="flat-action-list">' + 
+            ''.join(
+                [
+                    '<li><a href="{url}">{linkName}</a></li>'.format(url=i['url'], linkName=i['name']) for i in links
+                ]
+            ) + 
+            '</ul>'   
+        )
 
     @admin.display(description = _('Registration URL'))
     def event_link(self, obj):
         url = reverse('registerEvent', kwargs={'event_url': obj.event_url})
         return format_html('<a href="{url}" target="_blank">{linkName}</a>'.format(url=url, linkName=obj.event_url))
-
-class KCEventHostAdmin(admin.ModelAdmin):
-    list_display = ["name", "representative", "contact_person"]
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = [
@@ -43,15 +68,12 @@ class KCEventRegistrationAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         "reg_status", "confirmation_send", "confirmation_partner_send", 
-        ("reg_event__name", custom_list_title_filter(_("Events"))), is_27_and_older
+        "reg_event", is_27_and_older
     ]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation, resendChurchNotification]
     date_hierarchy = "reg_event__start_date"
-
-class KCEventPartnerAdmin(admin.ModelAdmin):
-    list_display = ["evp_event", "evp_partner", "evp_doc_contract"]
 
 class KCTemplateSetAdmin(admin.ModelAdmin):
     list_display = ["name",]
@@ -75,7 +97,7 @@ class ParticipantAdmin(admin.ModelAdmin):
     list_filter = [
         "nutrition", "lactose_intolerance", "celiac_disease", "role", "gender", 
         ("events__name", custom_list_title_filter(_("Events"))), 
-        ("church__name", custom_list_title_filter(_("Church")))
+        ("church__name", custom_list_title_filter(_("Partner")))
     ]
     list_display_links = ["last_name", "first_name"]
 
@@ -83,12 +105,11 @@ class PartnerAdmin(admin.ModelAdmin):
     list_display = ["name", "city", "mail_addr", "representative", "contact_person"]
     search_fields = ["name"]
 
-admin.site.register(KCEventHost, KCEventHostAdmin)
 admin.site.register(KCTemplateSet, KCTemplateSetAdmin)
 admin.site.register(KCTemplate, KCTemplateAdmin)
 admin.site.register(KCEvent, KCEventAdmin)
 admin.site.register(KCPerson, KCPersonAdmin)
 admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Partner, PartnerAdmin)
-admin.site.register(KCEventPartner, KCEventPartnerAdmin)
 admin.site.register(KCEventRegistration, KCEventRegistrationAdmin)
+admin.site.register(KCEventLocation, KCEventLocationAdmin)

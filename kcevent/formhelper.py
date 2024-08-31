@@ -116,8 +116,6 @@ class KcFormHelper(object):
         return True
 
     def save(self):
-        #for k, v in self._forms.items():
-        #    v.save()
         print('Would save: ', self.debug())
 
     def _preparePayload(self):

@@ -137,7 +137,6 @@ def registerEventLogin(request, event_url, evt=None):
                 }
             )
     elif evt.reg_pwd:
-        print(reverse('registerEventLogin', kwargs={'event_url': evt.event_url}))
         return render(
             request, 'cvjm/kclogin.html',
             {

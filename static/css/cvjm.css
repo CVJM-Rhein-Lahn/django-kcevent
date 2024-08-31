@@ -245,6 +245,10 @@ input[type=checkbox]:checked ~ #overlay-button span:after {
   transform: rotate(-45deg) translate(7px, -7px);
 }
 
+section.event-meta-info {
+  margin-bottom: 25px;
+}
+
 #overlay {
   height: 100vh;
   width: 100vw;

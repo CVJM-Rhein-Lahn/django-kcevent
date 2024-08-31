@@ -4,10 +4,13 @@ from django.core import mail
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.dispatch import receiver
+from .defaults import *
 from datetime import date
 from .exceptions import NoTemplatesException
 from . import logger
@@ -84,9 +87,9 @@ class Participant(KCPerson):
 
     class NutritionTypes(models.TextChoices):
         __empty__ = _('Please choose your nutrition')
-        NUTRITION_REGULAR = 'RGL', _('Regular')
-        NUTRITION_VEGETARIAN = 'VGT', _('Vegetarian')
-        NUTRITION_VEGAN = 'VGN', _('Vegan')
+        NUTRITION_REGULAR = 'RGL', _('Meat-based diet')
+        NUTRITION_VEGETARIAN = 'VGT', _('Vegetarian diet')
+        NUTRITION_VEGAN = 'VGN', _('Vegan diet')
 
     class ParticipantRoles(models.TextChoices):
         __empty__ = _('Please choose your role')
@@ -101,7 +104,9 @@ class Participant(KCPerson):
         GENDER_DIVERT = 'D', _('Divert')
 
     birthday = models.DateField(verbose_name=_('Birthday'))
-    church = models.ForeignKey('Partner', null=True, on_delete=models.SET_NULL, verbose_name=_('Church'))
+    # Unfortunately, Participant is not a direct link to a specific event,
+    # otherwise, this foreign key must use limit_choices_to in order to consider the KCEventPartner.
+    church = models.ForeignKey('Partner', null=True, on_delete=models.SET_NULL, verbose_name=_('Partner'))
     intolerances = models.TextField(blank=True, default='', verbose_name=_('Intolerances'))
     nutrition = models.CharField(
         max_length=3,
@@ -156,11 +161,14 @@ class Partner(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
+    address_line_2 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 2'))
+    address_line_3 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 3'))
     street = models.CharField(max_length=120, verbose_name=_('Street'))
     house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
     city = models.CharField(max_length=120, verbose_name=_('City'))
     zip_code = models.CharField(max_length=10, verbose_name=_('Postal code'))
     mail_addr = models.EmailField(verbose_name=_('Mail address'))
+    website = models.URLField(blank=True, verbose_name=_('Website'))
 
     representative = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Responsible person'))
     contact_person = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Contact person'))
@@ -175,6 +183,7 @@ class Partner(models.Model):
     def __str__(self):
         return self.name
 
+# TODO: Migrate to Partner.
 class KCEventHost(models.Model):
     class Meta:
         verbose_name = _('Event host')
@@ -182,6 +191,8 @@ class KCEventHost(models.Model):
 
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
+    address_line_2 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 2'))
+    address_line_3 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 3'))
     street = models.CharField(max_length=120, verbose_name=_('Street'))
     house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
     city = models.CharField(max_length=120, verbose_name=_('City'))
@@ -194,6 +205,25 @@ class KCEventHost(models.Model):
 
     def __str__(self):
         return self.name
+    
+class KCEventLocation(models.Model):
+    class Meta:
+        verbose_name = _('Event location')
+        verbose_name_plural = _('Event locations')
+        
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=250, verbose_name=_('Name'))
+    address_line_2 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 2'))
+    address_line_3 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 3'))
+    street = models.CharField(max_length=120, verbose_name=_('Street'))
+    house_number = models.CharField(max_length=10, verbose_name=_('House no.'))
+    city = models.CharField(max_length=120, verbose_name=_('City'))
+    zip_code = models.CharField(max_length=10, verbose_name=_('Postal code'))
+    mail_addr = models.EmailField(blank=True, verbose_name=_('Mail address'))
+    website = models.URLField(blank=True, verbose_name=_('Website'))
+    
+    def __str__(self):
+        return self.name
 
 class KCEvent(models.Model):
     class Meta:
@@ -201,7 +231,8 @@ class KCEvent(models.Model):
         verbose_name_plural = _('Events')
 
     id = models.AutoField(primary_key=True)
-    host = models.ForeignKey(KCEventHost, on_delete=models.CASCADE, related_name='+', verbose_name=_('Host'), null=True)
+    host = models.ForeignKey(Partner, on_delete=models.CASCADE, related_name='+', verbose_name=_('Host'), null=True)
+    location = models.ForeignKey(KCEventLocation, on_delete=models.CASCADE, related_name='+', verbose_name=_('Event location'), null=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     start_date = models.DateField(verbose_name=_('Start date'))
     end_date = models.DateField(verbose_name=_('End date'))
@@ -224,10 +255,22 @@ class KCEvent(models.Model):
         verbose_name=_('Participants')
     )
 
+    partners = models.ManyToManyField(
+        'Partner',
+        through='KCEventPartner',
+        through_fields=('evp_event', 'evp_partner'),
+        verbose_name=_('Partners')
+    )
+
     onSiteAttendance = models.BooleanField(default=True, verbose_name=_('On-site attendance'), \
         help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
     requireDocuments = models.BooleanField(default=True, verbose_name=_('Require documents'), \
         help_text=_('Ask and require certain forms and documents from user to upload.'))
+    display_event_info = models.BooleanField(
+        default=True, 
+        verbose_name=_('Display event info'),
+        help_text=_('Display event meta information on registration page for better recognizing the reason for registration.')
+    )
 
     def clean(self):
         validationErrors = {}
@@ -363,12 +406,40 @@ class KCEventPartner(models.Model):
     # Participants
     evp_apx_participant_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male par.'))
     evp_apx_participant_w = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of female par.'))
+    evp_apx_participant_d = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of diverse par.'))
     # Reloaded
     evp_apx_reloaded_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male reloaded'))
     evp_apx_reloaded_w = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of female reloaded'))
+    evp_apx_reloaded_d = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of diverse reloaded'))
     # Member
     evp_apx_member_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male members'))
     evp_apx_member_w = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of female members'))
+    evp_apx_member_d = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of diverse members'))
+    
+    @property
+    def totalApproxPerson(self) -> int:
+        return self.totalApproxParticipants + \
+            self.totalApproxReloaded + \
+            self.totalApproxMembers
+            
+    @property
+    def totalApproxParticipants(self) -> int:
+        return evp_apx_participant_m + \
+                evp_apx_participant_w + \
+                evp_apx_participant_d
+                
+                
+    @property
+    def totalApproxReloaded(self) -> int:
+        return self.evp_apx_reloaded_m + \
+            self.evp_apx_reloaded_w + \
+            self.evp_apx_reloaded_d
+            
+    @property
+    def totalApproxMembers(self) -> int:
+        return self.evp_apx_member_m + \
+            self.evp_apx_member_w + \
+            self.evp_apx_member_d
 
     def __str__(self):
         # event ?
@@ -579,3 +650,50 @@ class KCEventRegistration(models.Model):
             return True
         else:
             return False
+
+class KCTemplateSetHook:
+    
+    @staticmethod
+    def createTemplate(sender, instance, created, templateType, *args, **kwargs):        
+        tpl = KCTemplate()
+        tpl.tpl_type = templateType
+        tpl.tpl_set = instance
+        if templateType == KCTemplate.TemplateTypes.REGISTRATION_CONFIRMATION:
+            tpl.tpl_subject = TPL__REGISTRATION_CONFIRMATION__SUBJECT
+            tpl.tpl_content = TPL__REGISTRATION_CONFIRMATION__CONTENT
+        elif templateType == KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION:
+            tpl.tpl_subject = TPL__REGISTRATION_NOTIFICATION__SUBJECT
+            tpl.tpl_content = TPL__REGISTRATION_NOTIFICATION__CONTENT
+        elif templateType == KCTemplate.TemplateTypes.FORM_LOGIN:
+            tpl.tpl_subject = TPL__FORM_LOGIN__SUBJECT
+            tpl.tpl_content = TPL__FORM_LOGIN__CONTENT
+        elif templateType == KCTemplate.TemplateTypes.FORM_INTRODUCTION:
+            tpl.tpl_subject = TPL__FORM_INTRODUCTION__SUBJECT
+            tpl.tpl_content = TPL__FORM_INTRODUCTION__CONTENT
+        else:
+            return
+        try:
+            tpl.save()
+        except:
+            # we ignore.
+            pass
+    
+    @staticmethod
+    @receiver(post_save, sender=KCTemplateSet)
+    def post_save(sender, instance, created, *args, **kwargs):
+        """Argument explanation:
+
+        sender - The model class. (MyModel)
+        instance - The actual instance being saved.
+        created - Boolean; True if a new record was created.
+
+        *args, **kwargs - Capture the unneeded `raw` and `using`(1.3) arguments.
+        """
+        if created:
+            for templateType in [
+                KCTemplate.TemplateTypes.REGISTRATION_CONFIRMATION, 
+                KCTemplate.TemplateTypes.REGISTRATION_NOTIFICATION, 
+                KCTemplate.TemplateTypes.FORM_LOGIN, 
+                KCTemplate.TemplateTypes.FORM_INTRODUCTION
+            ]:
+                KCTemplateSetHook.createTemplate(sender, instance, created, templateType, *args, **kwargs)

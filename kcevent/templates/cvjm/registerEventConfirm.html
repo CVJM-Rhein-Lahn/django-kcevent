@@ -1,4 +1,5 @@
 {% extends "cvjm/base.html" %}
+{% load i18n %}
 {% load formclass %}
 
 {% block content %}
@@ -16,55 +17,96 @@
   </div>
 </section>
 
+<section class="event-meta-info">
+  <div class="event-meta-info">
+    <h3>{% trans "Event" %}</h3>
+    <div class="event-meta-appointment">
+      <h4>{% trans "Appointment" %}</h4>
+      <div class="event-meta-line">{{ evt.start_date | date:"d.m.Y"}} - {{ evt.end_date | date:"d.m.Y" }}</div>
+    </div>
+    {% if evt.location %}
+    <div class="event-meta-location">
+      <h4>{% trans "Event location" %}</h4>
+      <div class="event-meta-line">{{ evt.location.name }}</div>
+      <div class="event-meta-line">{{ evt.location.address_line_2 }}</div>
+      <div class="event-meta-line">{{ evt.location.address_line_3 }}</div>
+      <div class="event-meta-line">{{ evt.location.street }} {{ evt.location.house_number }}</div>
+      <div class="event-meta-line">{{ evt.location.zip_code }} {{ evt.location.city }}</div>
+      <div class="event-meta-line">{{ evt.location.mail_addr }}</div>
+      <div class="event-meta-line">{{ evt.location.website }}</div>
+    </div>
+    {% endif %}
+    <div class="event-meta-organizer">
+      <h4>{% trans "Event host" %}</h4>
+      <div class="event-meta-line">{{ evt.host.name }}</div>
+      <div class="event-meta-line">{{ evt.host.address_line_2 }}</div>
+      <div class="event-meta-line">{{ evt.host.address_line_3 }}</div>
+      <div class="event-meta-line">{{ evt.host.street }} {{ evt.host.house_number }}</div>
+      <div class="event-meta-line">{{ evt.host.zip_code }} {{ evt.host.city }}</div>
+      <div class="event-meta-line">{{ evt.host.mail_addr }}</div>
+      <div class="event-meta-line">{{ evt.host.website }}</div>
+    </div>
+  </div>
+</section>
+
 <section>
+  <h3>{% trans "Registration" %}</h3>
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
 
     <div class="formgrid-container">
       <div class="formgrid-item-full">
-        <h5>Kirchengemeinde:</h5>
-        <p>{{partner.name}}</p>
+        <h5>{% trans "Church/Organisation" %}:</h5>
+        <p>
+          <div class="event-meta-line">{{ partner.name }}</div>
+          <div class="event-meta-line">{{ partner.address_line_2 }}</div>
+          <div class="event-meta-line">{{ partner.address_line_3 }}</div>
+          <div class="event-meta-line">{{ partner.street }} {{ partner.house_number }}</div>
+          <div class="event-meta-line">{{ partner.zip_code }} {{ partner.city }}</div>
+          <div class="event-meta-line">{{ partner.mail_addr }}</div>
+          <div class="event-meta-line">{{ partner.website }}</div>
+        </p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Funktion:</h5>
+        <h5>{% trans "Role" %}:</h5>
         <p>{{kfh.form.instance.get_role_display}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Vorname Nachname:</h5>
+        <h5>{% trans "Name" %}:</h5>
         <p>{{kfh.form.first_name.value}} {{kfh.form.last_name.value}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Geschlecht:</h5>
+        <h5>{% trans "Gender" %}:</h5>
         <p>{{kfh.form.instance.get_gender_display}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Geburtstag:</h5>
+        <h5>{% trans "Birthday" %}:</h5>
         <p>{{kfh.form.birthday.value}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Anschrift:</h5>
+        <h5>{% trans "Address" %}:</h5>
         <p>{{kfh.form.street.value}} {{kfh.form.house_number.value}}<br />{{kfh.form.zip_code.value}}
           {{kfh.form.city.value}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>E-Mail:</h5>
+        <h5>{% trans "Mail address" %}:</h5>
         <p>{{kfh.form.mail_addr.value}}</p>
       </div>
 
       <div class="formgrid-item-full">
-        <h5>Telefon:</h5>
+        <h5>{% trans "Phone" %}:</h5>
         <p>{{kfh.form.phone.value}}</p>
       </div>
 
       {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
-        <h5>Allergien / Unvertr&auml;glichkeiten:</h5>
+        <h5>{% trans "Allergies / intolerances" %}:</h5>
         <p>{{kfh.form.intolerances.value}}</p>
       </div>
       {% endif %}
@@ -89,29 +131,32 @@
       {% endif %}
 
       <div class="formgrid-item-full">
-        <h5>Sonstige Mitteilungen:</h5>
+        <h5>{% trans "Other communications" %}:</h5>
         <p>{{kfh.formReg.reg_notes.value}}</p>
       </div>
 
       {% if evt.onSiteAttendance %}
       <div class="formgrid-item-full">
-        <h5>Ern&auml;hrung:</h5>
+        <h5>{% trans "Nutrition" %}:</h5>
         <p>{{kfh.form.instance.get_nutrition_display}} <br>
-          {% if kfh.form.lactose_intolerance.value %}Laktoseintoleranz{% endif %} <br>
-          {% if kfh.form.celiac_disease.value %}Z&ouml;liakie{% endif %}</p>
+          {% if kfh.form.lactose_intolerance.value %}{% trans "Lactose intolerance" %}{% endif %} <br>
+          {% if kfh.form.celiac_disease.value %}{% trans "Celiac disease" %}{% endif %}</p>
       </div>
       {% endif %}
 
       <div class="formgrid-item-full">
-        <h5>Best&auml;tigung:</h5>
-        <p>Hiermit melde ich mein Kind / mich zu Konfi-Castle im CVJM Kreisverband Rhein-Lahn e. V. an. Die Teilnahme ist damit verbindlich.</p>
+        <h5>{% trans "Confirmation" %}:</h5>
+        <p>{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
+          I hereby register my child / myself for event {{ event_name }} of host {{ organizer }}. Participation is binding.
+          {% endblocktranslate %}
+        </p>
       </div>
 
       <div class="formgrid-item-full">
         <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
         <input type="hidden" name="_fgstage" value="confirm" />
-        <button name="edit" type="submit" class="btn btn-primary">Bearbeiten</button>
-        <button name="confirm" type="submit" class="btn btn-primary">Best&auml;tigen</button>
+        <button name="edit" type="submit" class="btn btn-primary">{% trans "Edit" %}</button>
+        <button name="confirm" type="submit" class="btn btn-primary">{% trans "Confirm binding registration" %}</button>
       </div>
     </div>
   </form>
