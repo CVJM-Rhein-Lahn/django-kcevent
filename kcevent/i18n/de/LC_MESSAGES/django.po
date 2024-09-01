@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Konfi-Castle Event Management\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-01 04:15-0500\n"
+"POT-Creation-Date: 2024-09-01 06:03-0500\n"
 "PO-Revision-Date: 2021-02-20 19:01+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -269,11 +269,14 @@ msgstr "Einverständniserklärung zur Anmeldung ist erforderlich!"
 
 #: kcevent/forms.py:83
 msgid "You must consent to the privacy policy!"
-msgstr "Die Einverständniserklärung zu den Datenschutzbestimmungen ist erforderlich!"
+msgstr ""
+"Die Einverständniserklärung zu den Datenschutzbestimmungen ist erforderlich!"
 
 #: kcevent/forms.py:90
 msgid "You must consent to the partners general terms and conditions!"
-msgstr "Die Einverständniserklärung zu den Allgemeinden Geschäftsbedingungen / Teilnahmebedingungen des Veranstaltungspartners ist erforderlich!"
+msgstr ""
+"Die Einverständniserklärung zu den Allgemeinden Geschäftsbedingungen / "
+"Teilnahmebedingungen des Veranstaltungspartners ist erforderlich!"
 
 #: kcevent/forms.py:101
 msgid "Event passport is mandatory."
@@ -744,6 +747,26 @@ msgstr "Nur für Mitglieder"
 msgid "Minimum age"
 msgstr "Mindestalter"
 
+#: kcevent/templates/cvjm/base.html:24 kcevent/templates/cvjm/base.html:33
+msgid "Home page"
+msgstr "Startseite"
+
+#: kcevent/templates/cvjm/base.html:25 kcevent/templates/cvjm/base.html:34
+msgid "Contact"
+msgstr "Kontakt"
+
+#: kcevent/templates/cvjm/base.html:51
+msgid "Imprint"
+msgstr "Impressum"
+
+#: kcevent/templates/cvjm/base.html:53
+msgid "Privacy policy & Cookies"
+msgstr "Datenschutzerklärung & Cookies"
+
+#: kcevent/templates/cvjm/base.html:54
+msgid "Intern"
+msgstr "Intern"
+
 #: kcevent/templates/cvjm/kclogin.html:31
 msgid "Password"
 msgstr "Kennwort"
@@ -795,6 +818,7 @@ msgstr "Kirchengemeinde/Organisation"
 
 #: kcevent/templates/cvjm/registerEvent.html:201
 #: kcevent/templates/cvjm/registerEventConfirm.html:176
+#, python-format
 msgid ""
 "I agree to the <a href=\"%(url_privacy_policy)s\" target=\"_blank\">privacy "
 "policy</a>."
@@ -848,8 +872,8 @@ msgid ""
 "I agree to the partners <a href=\"%(url_agb)s\" target=\"_blank\">General "
 "Terms and Conditions</a>."
 msgstr ""
-"Ich stimme den <a href=\"%(url_agb)s\" target=\"_blank\">"
-"Allgemeinen Geschäftsbedingungen</a> des Partners zu."
+"Ich stimme den <a href=\"%(url_agb)s\" target=\"_blank\">Allgemeinen "
+"Geschäftsbedingungen</a> des Partners zu."
 
 #: kcevent/templates/cvjm/registerEventConfirm.html:189
 msgid "Edit"

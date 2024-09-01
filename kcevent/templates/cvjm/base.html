@@ -1,4 +1,5 @@
 {% load static %}
+{% load i18n %}
 
 <!DOCTYPE html>
 <html lang="de">
@@ -6,11 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anmeldung Konfi-Castle</title>
-    <link rel="stylesheet" href="{% static "css/cvjm.css" %}" />
-    <link rel="stylesheet" href="{% static "css/style.css" %}" />
-    <link rel="stylesheet" href="{% static "css/SourceSansPro.css" %}" />
-    <link rel="stylesheet" href="{% static "css/Awesome.css" %}" />
+    <meta name="robots" content="noindex">
+    <title>Anmeldung Event Plattform</title>
     <link rel="shortcut icon" href="{% static "img/icons/favicon.ico" %}">
     {% block addjs %}{% endblock %}
 </head>
@@ -19,12 +17,12 @@
     <header>
         <nav>
             <div id="main-navigation">
-                <div id="logo"><a href="#"><img src="{% static "img/CVJM_Logo.png" %}" width="131" height="54" alt="CVJM"></a>
+                <div id="logo"><a href="/"><img src="{% static "img/CVJM_Logo.png" %}" width="131" height="54" alt="CVJM"></a>
                 </div>
                 <div class="main-nav-links hover-item">
                     <ul>
-                        <a href="https://konficastle.org/">Startseite</a>
-                        <a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a>
+                        <a href="/">{% trans "Home page" %}</a>
+                        <a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">{% trans "Contact" %}</a>
                     </ul>
                 </div>
                 <div id="mobile-menu">
@@ -32,8 +30,8 @@
                     <label for="overlay-input" id="overlay-button"><span></span></label>
                     <div id="overlay">
                         <ul>
-                            <li><a href="https://konficastle.org/">Startseite</a></li>
-                            <li><a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">Kontakt</a></li>
+                            <li><a href="/">{% trans "Home page" %}</a></li>
+                            <li><a href="mailto:info@konficastle.org?subject=Anmeldung%20Konfi-Castle">{% trans "Contact" %}</a></li>
                         </ul>
                     </div>
                 </div>
@@ -41,16 +39,19 @@
         </nav>
     </header>
 
+    <div class="main-content">
     {% block content %}{% endblock %}
+    </div>
 
     <footer>
         <div id="footer" class="hover-item">
             <div class="footer-copyright">
-                <p>© 2000 - 2024 CVJM Kreisverband Rhein-Lahn e. V. | <a
-                        href="https://cvjm-rhein-lahn.de/imprint" target="_blank"
-                        rel="noopener noreferrer">Impressum</a> | <a
-                        href="https://cvjm-rhein-lahn.de/privacy" target="_blank"
-                        rel="noopener noreferrer">Datenschutzerkl&auml;rung &amp; Cookies</a></p>
+                <p>© 2000 - 2024 {{ MAIN_ORGANIZER_NAME }} | <a
+                        href="{{ URL_IMPRINT }}" target="_blank"
+                        rel="noopener noreferrer">{% trans "Imprint" %}</a> | <a
+                        href="{{ URL_PRIVACY_POLICY }}" target="_blank"
+                        rel="noopener noreferrer">{% trans "Privacy policy & Cookies" %}</a> | 
+                        <a href="/admin/">{% trans "Intern" %}</a></p>
             </div>
         </div>
     </footer>
