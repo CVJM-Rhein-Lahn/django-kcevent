@@ -171,7 +171,8 @@ def registerEvent(request, event_url):
         if request.method == 'POST':
             kfh.formReg.instance.reg_user = kfh.form.instance
             kfh.formReg.instance.reg_event = evt
-            if kfh.isValid():
+            confirmOverview = request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm'
+            if kfh.isValid(confirmOverview=confirmOverview):
                 if request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
                     kfh.form.save()
                     kfh.formReg.instance.reg_user = kfh.form.instance
@@ -218,15 +219,16 @@ def registerEvent(request, event_url):
                         }
                     )
             elif request.POST.get('confirm', 'no') != 'no' and kfh.getStage() == 'confirm':
-                # raise Exception("Error validating event registration.")
-                # Probably someone used "F5"
+                kfh.setStage('preview')
+                # fetch the corresponding objects.
                 partner = Partner.objects.get(id=kfh.form.instance.church.id)
                 return render(
-                    request, 'cvjm/registrationFinished.html',
+                    request, 'cvjm/registerEventConfirm.html', 
                     {
                         'evt': evt,
                         'partner': partner,
-                        'kfh': kfh
+                        'kfh': kfh,
+                        'registerUrl': reverse('registerEvent', kwargs={'event_url': evt.event_url})
                     }
                 )
 
@@ -243,7 +245,10 @@ def registerEvent(request, event_url):
 def listPublicEvents(request):
     # check which event is online...
     now = datetime.datetime.now()
-    events = KCEvent.objects.filter(registration_start__lte=now, registration_end__gte=now).order_by('registration_start')
+    events = KCEvent.objects.filter(
+        registration_start__lte=now, 
+        registration_end__gte=now
+    ).order_by('registration_start')
     if not events:
         return redirect(settings.MAIN_PAGE)
     elif len(events) > 1:

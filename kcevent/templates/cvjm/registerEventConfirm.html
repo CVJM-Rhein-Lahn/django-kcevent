@@ -55,6 +55,13 @@
 
 <section>
   <h3>{% trans "Registration" %}</h3>
+  {% if kfh.form.errors or kfh.formReg.errors %}
+    {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
+    {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
+  {% endif %}
+
+  {{ kfh.form.non_field_errors }}
+  {{ kfh.formReg.non_field_errors }}
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
 
@@ -148,10 +155,26 @@
       </div>
       {% endif %}
 
+      {% if kfh.formReg.price %}
+      <div class="formgrid-item-full">
+        <h5>{% trans "Price" %}</h5>
+        <p>{{ kfh.formReg.price }}</p>
+      </div>
+      {% endif %}
+
       <div class="formgrid-item-full">
         <h5>{% trans "Confirmation" %}:</h5>
+        {% if kfh.formReg.has_consent_terms %}
+        {% include "cvjm/comp-alert.html" with chkdsp=kfh.formReg.reg_consent_terms.errors message=kfh.formReg.reg_consent_terms.errors type="error" small=True %}
+        {{ kfh.formReg.reg_consent_terms|addclass:'form-check-input' }}
+        <label class="form-check-label" for="{{ kfh.formReg.reg_consent_terms.id_for_label }}">
+          {% blocktranslate with url_agb=kfh.formReg.consent_terms_url.url trimmed %}
+          I agree to the partners <a href="{{ url_agb }}" target="_blank">General Terms and Conditions</a>.
+          {% endblocktranslate %}*
+        </label><br />
+        {% endif %}
         <p>{% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
-          I agree to the <a href="{{ url_privacy_policy }}">privacy policy</a>.
+          I agree to the <a href="{{ url_privacy_policy }}" target="_blank">privacy policy</a>.
           {% endblocktranslate %}
         </p>
         <p>{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
@@ -164,7 +187,11 @@
         <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
         <input type="hidden" name="_fgstage" value="confirm" />
         <button name="edit" type="submit" class="btn btn-primary">{% trans "Edit" %}</button>
+        {% if kfh.formReg.price %}
+        <button name="confirm" type="submit" class="btn btn-primary">{% trans "Confirm binding registration with costs" %}</button>
+        {% else %}
         <button name="confirm" type="submit" class="btn btn-primary">{% trans "Confirm binding registration" %}</button>
+        {% endif %}
       </div>
     </div>
   </form>

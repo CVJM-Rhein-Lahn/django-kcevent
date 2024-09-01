@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='kceventpartner',
             name='evp_doc_contract',
-            field=models.FileField(null=True, upload_to=kcevent.models.getUploadPathEventPartner),
+            field=models.FileField(null=True, upload_to=kcevent.models.getUploadPathEventPartnerContract),
         ),
     ]

@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             name='KCEventPartner',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('evp_doc_contract', models.FileField(upload_to=kcevent.models.getUploadPathEventPartner)),
+                ('evp_doc_contract', models.FileField(upload_to=kcevent.models.getUploadPathEventPartnerContract)),
                 ('evp_apx_participant_m', models.PositiveSmallIntegerField()),
                 ('evp_apx_participant_w', models.PositiveSmallIntegerField()),
                 ('evp_apx_reloaded_m', models.PositiveSmallIntegerField()),

@@ -1,6 +1,7 @@
 from django import forms
 from kcevent.models import Participant, KCEventRegistration, KCEvent
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 class ParticipantForm(forms.ModelForm):
     class Meta:
@@ -27,10 +28,15 @@ class ParticipantForm(forms.ModelForm):
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._event = event
+        self.is_confirm_overview: bool = False
         self.fields['church'].empty_label = _('Please choose your church/organisation')
         self.fields['church'].queryset = event.partners
         if self._event.onSiteAttendance:
             self.fields['nutrition'].widget.attrs['required'] = 'required'
+            
+    def is_valid(self, *args, confirmOverview: bool = False, **kwargs):
+        self.is_confirm_overview = confirmOverview
+        return super().is_valid()
 
     def clean_nutrition(self):
         # check if we're on-site attendance - in this case, this 
@@ -46,7 +52,7 @@ class KCEventRegistrationForm(forms.ModelForm):
         model = KCEventRegistration
         fields = [
             'reg_doc_pass', 'reg_doc_meddispense', 'reg_doc_consent', 'reg_notes',
-            'reg_consent', 'reg_consent_privacy'
+            'reg_consent', 'reg_consent_privacy', 'reg_consent_terms'
         ]
         widgets = {
             'reg_notes': forms.Textarea(attrs={'placeholder': _('Other communications')}),
@@ -55,9 +61,14 @@ class KCEventRegistrationForm(forms.ModelForm):
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._event = event
+        self.is_confirm_overview: bool = False
         for k, v in self.fields.items():
             if k.startswith('reg_doc_'):
                 self.fields[k].widget.attrs['accept'] = 'image/*,.pdf,application/pdf'
+            
+    def is_valid(self, *args, confirmOverview: bool = False, **kwargs):
+        self.is_confirm_overview = confirmOverview
+        return super().is_valid()
 
     def clean_reg_consent(self):
         cleanedData = self.cleaned_data.get('reg_consent')
@@ -70,6 +81,13 @@ class KCEventRegistrationForm(forms.ModelForm):
         cleanedData = self.cleaned_data.get('reg_consent_privacy')
         if not cleanedData:
             raise forms.ValidationError(_('You must consent to the privacy policy!'))
+        
+        return cleanedData
+
+    def clean_reg_consent_terms(self):
+        cleanedData = self.cleaned_data.get('reg_consent_terms')
+        if not cleanedData and self.is_confirm_overview and self.has_consent_terms:
+            raise forms.ValidationError(_('You must consent to the partners general terms and conditions!'))
         
         return cleanedData
 
@@ -93,6 +111,29 @@ class KCEventRegistrationForm(forms.ModelForm):
             raise forms.ValidationError(_('Consent document is mandatory.'))
 
         return cleanedData
+    
+    @property
+    def price(self):
+        price = self.instance.price
+        
+        if price:
+            return "{:.2f} {:s}".format(
+                price.price,
+                price.currency
+            )
+        else:
+            return ''
+        
+    @property
+    def has_consent_terms(self):
+        return self.instance.partner and self.instance.partner.evp_doc_policy
+    
+    @property
+    def consent_terms_url(self):
+        if self.instance.partner and self.instance.partner.evp_doc_policy:
+            return self.instance.partner.evp_doc_policy
+        else:
+            return None
 
     def clean(self):
         cleaned_data = super().clean()

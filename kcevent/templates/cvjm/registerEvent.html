@@ -199,7 +199,7 @@
         {{ kfh.formReg.reg_consent_privacy|addclass:'form-check-input' }}
         <label class="form-check-label" for="{{ kfh.formReg.reg_consent_privacy.id_for_label }}">
           {% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
-          I agree to the <a href="{{ url_privacy_policy }}">privacy policy</a>.
+          I agree to the <a href="{{ url_privacy_policy }}" target="_blank">privacy policy</a>.
           {% endblocktranslate %}*
         </label><br />
         {% include "cvjm/comp-alert.html" with chkdsp=kfh.formReg.reg_consent.errors message=kfh.formReg.reg_consent.errors type="error" small=True %}

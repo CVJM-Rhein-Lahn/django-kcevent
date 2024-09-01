@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='kceventpartner',
             name='evp_doc_contract',
-            field=models.FileField(null=True, upload_to=kcevent.models.getUploadPathEventPartner, verbose_name='Contract'),
+            field=models.FileField(null=True, upload_to=kcevent.models.getUploadPathEventPartnerContract, verbose_name='Contract'),
         ),
         migrations.AlterField(
             model_name='kceventpartner',

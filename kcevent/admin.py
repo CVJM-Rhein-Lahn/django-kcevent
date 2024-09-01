@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration
 from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
-from .models import KCEventLocation
+from .models import KCEventLocation, KCEventPriceRule
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
@@ -16,6 +16,9 @@ class KCEventLocationAdmin(admin.ModelAdmin):
 
 class KCTemplateInlineAdmin(admin.TabularInline):
     model = KCTemplate
+    
+class KCEventPriceRuleInlineAdmin(admin.StackedInline):
+    model = KCEventPriceRule
 
 class KCEventExportSettingInlineAdmin(admin.StackedInline):
     model = KCEventExportSetting
@@ -24,7 +27,7 @@ class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "location", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "exe_actions"]
     prepopulated_fields = {"event_url": ("name",)}
     actions = [copyEvent, syncEvent]
-    inlines = [KCEventPartnerInlineAdmin, KCEventExportSettingInlineAdmin]
+    inlines = [KCEventPartnerInlineAdmin, KCEventExportSettingInlineAdmin, KCEventPriceRuleInlineAdmin]
 
     list_filter = [
         "start_date", "name", is_event_future

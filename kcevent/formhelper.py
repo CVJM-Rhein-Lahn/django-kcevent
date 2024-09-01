@@ -108,9 +108,9 @@ class KcFormHelper(object):
         print('valid: ', self.isValid())
         print(self._preparePayload())
 
-    def isValid(self):
+    def isValid(self, **kwargs):
         for k, v in self._forms.items():
-            if not v.is_valid():
+            if not v.is_valid(**kwargs):
                 return False
 
         return True
@@ -194,7 +194,13 @@ class KcFormHelper(object):
                         request.FILES if request.method == 'POST' else None,
                     )
                 else:
-                    formList[k] = f(event, prevData['payload'])
+                    payload: dict[str, any] = prevData['payload']
+                    if request.method == 'POST':
+                        payload.update(dict(request.POST))
+                    formList[k] = f(
+                        event, 
+                        payload
+                    )
         else:
             for k, f in forms.items():
                 formList[k] = f(

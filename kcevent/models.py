@@ -1,10 +1,12 @@
 import os
+import uuid
 from django.contrib import admin
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
+from django.db.models import Q
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -161,6 +163,7 @@ class Partner(models.Model):
         verbose_name_plural = _('Partner')
 
     id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
     address_line_2 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 2'))
     address_line_3 = models.CharField(max_length=250, blank=True, verbose_name=_('Address line 3'))
@@ -232,6 +235,7 @@ class KCEvent(models.Model):
         verbose_name_plural = _('Events')
 
     id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     host = models.ForeignKey(Partner, on_delete=models.CASCADE, related_name='+', verbose_name=_('Host'), null=True)
     location = models.ForeignKey(KCEventLocation, on_delete=models.CASCADE, related_name='+', verbose_name=_('Event location'), null=True)
     name = models.CharField(max_length=250, verbose_name=_('Name'))
@@ -395,13 +399,27 @@ class KCEventExportSetting(models.Model):
     folder_id = models.CharField(max_length=120, verbose_name=_('Drive folder id'))
     tpl_id = models.CharField(max_length=120, verbose_name=_('Sheet template id'))
 
-def getUploadPathEventPartner(instance, filename):
+def _getUploadPathEventPartner(instance, filename):
     # file will be uploaded to MEDIA_ROOT/kcevent/event_<id>/church_id/<filename>
     return 'kcevent/event_{0}/church_{1}/{2}'.format(
-        instance.evp_event.id,
-        instance.evp_partner.id,
+        instance.evp_event.ext_id,
+        instance.evp_partner.ext_id,
         filename
     )
+
+def getUploadPathEventPartnerContract(instance, filename):
+    basename, extension = os.path.splitext(filename)
+    newFilename = 'event_partner_contract'
+    if extension:
+        newFilename += extension.lower()
+    return _getUploadPathEventPartner(instance, newFilename)
+
+def getUploadPathEventPartnerGTAC(instance, filename):
+    basename, extension = os.path.splitext(filename)
+    newFilename = 'event_partner_policy'
+    if extension:
+        newFilename += extension.lower()
+    return _getUploadPathEventPartner(instance, newFilename)
 
 class KCEventRegistrationStateTypes(models.TextChoices):
     __empty__ = _('Please choose status of registration')
@@ -416,10 +434,9 @@ class KCEventPartner(models.Model):
         verbose_name_plural = _('Event partners')
 
     id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     evp_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     evp_partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name=_('Event partner'))
-    # contract
-    evp_doc_contract = models.FileField(upload_to=getUploadPathEventPartner, null=True, blank=True, verbose_name=_('Contract'))
     # statistics
     # Participants
     evp_apx_participant_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male par.'))
@@ -433,6 +450,17 @@ class KCEventPartner(models.Model):
     evp_apx_member_m = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of male members'))
     evp_apx_member_w = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of female members'))
     evp_apx_member_d = models.PositiveSmallIntegerField(default=0, verbose_name=_('Approx. no. of diverse members'))
+    # contract
+    evp_doc_contract = models.FileField(
+        upload_to=getUploadPathEventPartnerContract, null=True, blank=True, verbose_name=_('Contract'),
+        max_length=255
+    )
+    # general terms and conditions
+    evp_doc_policy = models.FileField(
+        upload_to=getUploadPathEventPartnerGTAC, null=True, blank=True, verbose_name=_('General Terms and Conditions'),
+        help_text=_('This field allows to upload a document for General Terms and Conditions to be agreed by participants.'),
+        max_length=255
+    )
     
     @property
     def totalApproxPerson(self) -> int:
@@ -488,6 +516,7 @@ class KCEventRegistration(models.Model):
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
     reg_consent_privacy = models.BooleanField(default=False, verbose_name=_('Consent privacy'))
+    reg_consent_terms = models.BooleanField(default=False, verbose_name=_('Consent to General Terms and Conditions'))
 
     reg_status = models.CharField(
         max_length=20,
@@ -512,6 +541,23 @@ class KCEventRegistration(models.Model):
         event = self.reg_event.name if self.reg_event else '??'
         participant = str(self.reg_user) if self.reg_user else '??'
         return 'Registration "' + event + '": ' + participant
+    
+    @property
+    def price(self):
+        prices = KCEventPriceRule.objects.filter(
+            Q(event__isnull=True) | Q(event__exact=self.reg_event),
+            Q(partner__isnull=True) | Q(partner__exact=self.reg_user.church),
+            Q(role__isnull=True) | Q(role__exact=self.reg_user.role),
+            min_age__lte=self.participant_age()
+        ).order_by('partner_id', '-min_age')
+        if prices.count() > 0:
+            return prices.first()
+        else:
+            return None
+        
+    @property
+    def partner(self):
+        return KCEventPartner.objects.filter(evp_event=self.reg_event, evp_partner=self.reg_user.church).first()
 
     @admin.display(description=_("Age"), ordering="-reg_user__birthday")
     def participant_age(self):
@@ -669,6 +715,34 @@ class KCEventRegistration(models.Model):
             return True
         else:
             return False
+        
+class KCEventPriceRule(models.Model):
+    class Meta:
+        verbose_name = _('Price rule')
+        verbose_name_plural = _('Price rules')
+
+    id = models.AutoField(primary_key=True)
+    event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
+    partner = models.ForeignKey(
+        Partner, default=None, null=True, blank=True, on_delete=models.CASCADE, 
+        verbose_name=_('Event partner')
+    )
+    currency = models.CharField(max_length=100, default='€', verbose_name=_('Currency'))
+    price = models.FloatField(default=0.0, verbose_name=_('Price'))
+    members_only = models.BooleanField(default=False, verbose_name=_('For members only'))
+    min_age = models.PositiveIntegerField(default=0, verbose_name=_('Minimum age'))
+    role = models.CharField(
+        max_length=2,
+        choices=Participant.ParticipantRoles.choices,
+        verbose_name=_('Role'),
+        default=None,
+        null=True,
+        blank=True
+    )
+    
+    def __str__(self):
+        return 'Price rule'
+
 
 class KCTemplateSetHook:
     
