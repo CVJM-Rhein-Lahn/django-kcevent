@@ -46,7 +46,7 @@ class KCEventRegistrationForm(forms.ModelForm):
         model = KCEventRegistration
         fields = [
             'reg_doc_pass', 'reg_doc_meddispense', 'reg_doc_consent', 'reg_notes',
-            'reg_consent'
+            'reg_consent', 'reg_consent_privacy'
         ]
         widgets = {
             'reg_notes': forms.Textarea(attrs={'placeholder': _('Other communications')}),
@@ -63,6 +63,13 @@ class KCEventRegistrationForm(forms.ModelForm):
         cleanedData = self.cleaned_data.get('reg_consent')
         if not cleanedData:
             raise forms.ValidationError(_('You must consent to the registration!'))
+        
+        return cleanedData
+
+    def clean_reg_consent_privacy(self):
+        cleanedData = self.cleaned_data.get('reg_consent_privacy')
+        if not cleanedData:
+            raise forms.ValidationError(_('You must consent to the privacy policy!'))
         
         return cleanedData
 

@@ -32,7 +32,9 @@ def migrate_kceventhost(apps, schema_editor):
                 city=host.city,
                 zip_code=host.zip_code,
                 mail_addr=host.mail_addr,
-                website=host.website
+                website=host.website,
+                representative=None,
+                contact_person=None
             )
         MIGRATION_HOST_MAPPING[str(host.id)] = p.id
 
@@ -52,6 +54,28 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterField(
+            model_name="partner",
+            name="contact_person",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="kcevent.kcperson",
+                verbose_name="Contact person",
+            ),
+        ),
+        migrations.AlterField(
+            model_name="partner",
+            name="representative",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="+",
+                to="kcevent.kcperson",
+                verbose_name="Responsible person",
+            ),
+        ),
         migrations.RunPython(migrate_kceventhost),
         migrations.AddField(
             model_name="kcevent",

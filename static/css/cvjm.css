@@ -76,6 +76,15 @@ p {
   color: #000000;
 }
 
+a:not(.hidelink) {
+  color: #298dff;
+  transition: all 0.5s;
+}
+
+a:not(.hidelink):hover {
+  color: #002b5c;
+}
+
 
 .hover-item a:hover {
   color: #000000;

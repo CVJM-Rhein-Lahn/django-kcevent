@@ -8,11 +8,15 @@
   <div class="event-info">
     <div class="event-info-item">
       <h2>Anmeldung &Uuml;bersicht<br> {{ evt.name }}</h2>
-      <p>Bitte überprüfen Sie / überprüfe sorgfältig Ihre / Deine Angaben zur
-        Anmeldung zum {{ evt.name }}. Sofern alle Angaben korrekt sind,
-        bestätigen Sie / bestätige bitte die Anmeldung. Teilnehmende Konfirmanden
-        und Reloadeds geben zudem die schriftliche Anmeldung zeitnah im
-        Konfirmationsunterricht Ihrer Kirchengemeinde ab.</p>
+      <p>{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
+        Please check your registration details for the event {{ event_name }} carefully.
+        If all the details are correct, please confirm your registration by clicking on 
+        the button "Confirm binding registration".
+        {% endblocktranslate %}
+      </p>
+      {% if evt.formStatementOverview.content %}
+      <p>{{evt.formStatementOverview.content}}</p>
+      {% endif %}
     </div>
   </div>
 </section>
@@ -146,6 +150,10 @@
 
       <div class="formgrid-item-full">
         <h5>{% trans "Confirmation" %}:</h5>
+        <p>{% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
+          I agree to the <a href="{{ url_privacy_policy }}">privacy policy</a>.
+          {% endblocktranslate %}
+        </p>
         <p>{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
           I hereby register my child / myself for event {{ event_name }} of host {{ organizer }}. Participation is binding.
           {% endblocktranslate %}

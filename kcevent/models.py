@@ -37,7 +37,8 @@ class KCTemplate(models.Model):
         REGISTRATION_CONFIRMATION = 'registrationConfirmation', _('Confirm registration to participant')
         REGISTRATION_NOTIFICATION = 'registrationNotification', _('Confirm registration to church and host')
         FORM_LOGIN = 'formLogin', _('Notes during login to event')
-        FORM_INTRODUCTION = 'formIntroduction', _('Introduction to event')
+        FORM_INTRODUCTION = 'formIntroduction', _('Introduction to event'),
+        FORM_STATEMENT_OVERVIEW = 'formStatementOverview', _('Statement on registration confirmation page')
 
     id = models.AutoField(primary_key=True)
     tpl_set = models.ForeignKey(KCTemplateSet, on_delete=models.CASCADE, verbose_name=_('Template set'))
@@ -170,8 +171,8 @@ class Partner(models.Model):
     mail_addr = models.EmailField(verbose_name=_('Mail address'))
     website = models.URLField(blank=True, verbose_name=_('Website'))
 
-    representative = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Responsible person'))
-    contact_person = models.ForeignKey(KCPerson, on_delete=models.CASCADE, related_name='+', verbose_name=_('Contact person'))
+    representative = models.ForeignKey(KCPerson, on_delete=models.CASCADE, null=True, related_name='+', verbose_name=_('Responsible person'))
+    contact_person = models.ForeignKey(KCPerson, on_delete=models.CASCADE, null=True, related_name='+', verbose_name=_('Contact person'))
 
     events = models.ManyToManyField(
         'KCEvent',
@@ -335,6 +336,23 @@ class KCEvent(models.Model):
 
         return dta
 
+    def formStatementOverview(self):
+        tpl = KCTemplate.objects.filter(
+            tpl_set=self.template, tpl_type=KCTemplate.TemplateTypes.FORM_STATEMENT_OVERVIEW
+        ).first()
+        dta = {
+            'subject': None,
+            'content': None
+        }
+        if tpl:
+            context = Context({
+                'event': self,
+            })
+            dta['subject'] = Template(tpl.tpl_subject).render(context)
+            dta['content'] = Template(tpl.tpl_content).render(context)
+
+        return dta
+
     def __str__(self):
         return self.name
 
@@ -469,6 +487,7 @@ class KCEventRegistration(models.Model):
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))
     reg_notes = models.TextField(blank=True, verbose_name=_('Notes'))
     reg_consent = models.BooleanField(default=False, verbose_name=_('Consent parents'))
+    reg_consent_privacy = models.BooleanField(default=False, verbose_name=_('Consent privacy'))
 
     reg_status = models.CharField(
         max_length=20,
