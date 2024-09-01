@@ -1,0 +1,43 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <div class="event-info">
+        <div class="event-info-item hover-item">
+            <h2>{% trans "Event" %}: {{ event.name }}</h2>
+            <h3>{% trans "Participants" %}</h3>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modern-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Role" %}</th>
+                    <th>{% trans "Church/Organisation" %}</th>
+                    <th>{% trans "Registration status" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in participants %}
+                <tr>
+                    <td>{{ user.reg_user.last_name }}, {{ user.reg_user.first_name }}</td>
+                    <td>{{ user.reg_user.church.name }}</td>
+                    <td>{{ user.reg_user.get_role_display }}</td>
+                    <td>{{ user.get_reg_status_display }}</td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <div class="event-info">
+        <div class="event-info-item hover-item">
+            <h2>{% trans "Events" %}</h2>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="modern-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Event start" %}</th>
+                    <th>{% trans "Event end" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.start_date }}</td>
+                    <td>{{ event.end_date }}</td>
+                    <td>
+                        {% if event.is_register_open %}<a href="{% url 'registerEvent' event_url=event.event_url %}">{% trans "Register" %}</a> ({% trans "Password" %}: {{ event.reg_pwd }})<br />{% endif %}
+                        <a href="{% url 'viewEvent' event_id=event.ext_id %}">{% trans "View details" %}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+
+{% endblock %}

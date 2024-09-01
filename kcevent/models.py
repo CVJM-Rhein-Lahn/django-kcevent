@@ -1,12 +1,14 @@
 import os
 import uuid
+import datetime
 from django.contrib import admin
+from django.contrib.auth.models import User, AbstractUser
 from django.core import mail
 from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
-from django.db.models import Q
+from django.db.models import Q, Subquery
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -305,6 +307,14 @@ class KCEvent(models.Model):
 
         if len(validationErrors) > 0:
             raise ValidationError(validationErrors)
+        
+    @property
+    def is_register_open(self):
+        now = datetime.datetime.now().date()
+        if now >= self.registration_start and now <= self.registration_end:
+            return True
+        else:
+            return False
     
     def formLogin(self):
         tpl = KCTemplate.objects.filter(
@@ -462,6 +472,18 @@ class KCEventPartner(models.Model):
         max_length=255
     )
     
+    def getRegistrations(self, role: str = None):
+        subquery = Subquery(
+            Participant.objects.filter(
+                church=self.evp_partner,
+                role=role
+            ).values('id')
+        )
+        return KCEventRegistration.objects.filter(
+            reg_event=self.evp_event,
+            reg_user__in=subquery,
+        )
+    
     @property
     def totalApproxPerson(self) -> int:
         return self.totalApproxParticipants + \
@@ -470,10 +492,15 @@ class KCEventPartner(models.Model):
             
     @property
     def totalApproxParticipants(self) -> int:
-        return evp_apx_participant_m + \
-                evp_apx_participant_w + \
-                evp_apx_participant_d
-                
+        return self.evp_apx_participant_m + \
+                self.evp_apx_participant_w + \
+                self.evp_apx_participant_d
+            
+    @property
+    def totalRegisteredConfirmee(self) -> int:
+        return self.getRegistrations(
+            Participant.ParticipantRoles.ROLE_CONFIRMEE
+        ).count()
                 
     @property
     def totalApproxReloaded(self) -> int:
@@ -482,10 +509,57 @@ class KCEventPartner(models.Model):
             self.evp_apx_reloaded_d
             
     @property
+    def totalRegisteredReloaded(self) -> int:
+        return self.getRegistrations(
+            Participant.ParticipantRoles.ROLE_RELOADED
+        ).count()
+            
+    @property
     def totalApproxMembers(self) -> int:
         return self.evp_apx_member_m + \
             self.evp_apx_member_w + \
             self.evp_apx_member_d
+            
+    @property
+    def totalRegisteredStaff(self) -> int:
+        return self.getRegistrations(
+            Participant.ParticipantRoles.ROLE_STAFF
+        ).count()
+            
+    def _gatherStatistics(self):
+        data = {
+            'confirmee': {
+                'reported': self.totalApproxParticipants,
+                'registered': self.totalRegisteredConfirmee,
+                'progress': 0
+            },
+            'reloaded': {
+                'reported': self.totalApproxReloaded,
+                'registered': self.totalRegisteredReloaded,
+                'progress': 0
+            },
+            'staff': {
+                'reported': self.totalApproxMembers,
+                'registered': self.totalRegisteredStaff,
+                'progress': 0
+            }
+        }
+        
+        # participants:
+        for key in data.keys():
+            if data[key]['reported'] > 0:
+                data[key]['progress'] = int(round(data[key]['registered'] * 100 / data[key]['reported'], 0))
+        
+        self._statistics = data
+        return data
+        
+            
+    @property
+    def statistics(self) -> dict[str, any]:
+        try:
+            return self._statistics
+        except:
+            return self._gatherStatistics()
 
     def __str__(self):
         # event ?
@@ -500,6 +574,23 @@ def getUploadPathEventRegistration(instance, filename):
         instance.reg_user.id, 
         filename
     )
+
+class PartnerUser(models.Model):
+    class Meta:
+        verbose_name = _('Partner user')
+        verbose_name_plural = _('Partner users')
+        unique_together = ('user', 'partner',)
+        
+    ext_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE)
+    
+    def __str__(self) -> str:
+        return 'PartnerUser: {} <{}> @ {}'.format(
+            self.user.username,
+            self.user.email,
+            self.partner.name
+        )
 
 class KCEventRegistration(models.Model):
     class Meta:

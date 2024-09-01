@@ -6,8 +6,11 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required, login_required
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import smart_str
+from django.core.handlers.wsgi import WSGIRequest
+from django.db.models import Subquery, Q, Exists
 from .forms import ParticipantForm, KCEventRegistrationForm
-from .models import KCEvent, KCEventRegistration, Partner
+from .models import KCEvent, KCEventRegistration, Partner, PartnerUser, KCEventPartner
+from .models import Participant
 from .formhelper import KcFormHelper
 from sentry_sdk import configure_scope as sentry_scope
 from sentry_sdk import capture_exception
@@ -19,12 +22,75 @@ import csv
 import tempfile
 
 # allow churches to register their partnership
-def managePartnership(request):
+def managePartnership(request: WSGIRequest):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-@permission_required('kcevent.Event.can_add')
-def listEvents(request):
-    return HttpResponse("Yeah lets add event.")
+@login_required
+@permission_required('kcevent.view_kcevent', raise_exception=True)
+def listEvents(request: WSGIRequest):
+    # is current logged in user super admin?
+    events = None
+    if request.user.is_superuser:
+        events = KCEvent.objects.all()
+    else:
+        # get partner orgs.
+        partners = Subquery(PartnerUser.objects.filter(user=request.user).values('partner'))
+        events = KCEvent.objects.filter(Exists(partners) | Exists(partners))
+    
+    return render(
+        request, 'kcevent/events/list.html',
+        {
+            'events': events
+        }
+    )
+
+@login_required
+@permission_required('kcevent.view_kcevent', raise_exception=True)
+def viewEvent(request: WSGIRequest, event_id=None):
+    # is current logged in user super admin?
+    event = KCEvent.objects.filter(ext_id=event_id).first()
+    event_partner = None
+    if request.user.is_superuser:
+        event_partner = KCEventPartner.objects.filter(evp_event=event)
+    else:
+        partners = Subquery(PartnerUser.objects.filter(user=request.user).values('partner'))
+        event_partner = KCEventPartner.objects.filter(evp_event=event, evp_partner__in=partners)
+    
+    return render(
+        request, 'kcevent/events/detail.html',
+        {
+            'event': event,
+            'evp': event_partner
+        }
+    )
+
+@login_required
+@permission_required('kcevent.view_kcevent', raise_exception=True)
+def viewEventParticipants(request: WSGIRequest, event_id=None):
+    # is current logged in user super admin?
+    event = KCEvent.objects.filter(ext_id=event_id).first()
+    participants = None
+    partners = None
+    if request.user.is_superuser:
+        participants = KCEventRegistration.objects.filter(
+            reg_event=event
+        )
+    else:
+        partners = Subquery(PartnerUser.objects.filter(user=request.user).values('partner'))
+        subquery = Subquery(Participant.objects.filter(church__in=partners).values('pk'))
+        participants = KCEventRegistration.objects.filter(
+            reg_event=event, reg_user__in=subquery
+        ).order_by('reg_user__last_name', 'reg_user__first_name')
+    
+    participants = participants.order_by('reg_user__last_name', 'reg_user__first_name')
+    
+    return render(
+        request, 'kcevent/events/participants.html',
+        {
+            'event': event,
+            'participants': participants
+        }
+    )
 
 @login_required
 @permission_required('kcevent.can_download_regdocs', raise_exception=True)

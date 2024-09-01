@@ -1,0 +1,105 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<section>
+    <div class="event-info">
+        <div class="event-info-item hover-item">
+            <h2>{% trans "Event" %}: {{ event.name }}</h2>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h3>{% trans "Information" %}</h3>
+
+    <table>
+        <tbody>
+            <tr>
+                <td class="mtable-col-name">{% trans "Event host" %}:</td>
+                <td>{{ event.host.name }}</td>
+            </tr>
+            <tr>
+                <td class="mtable-col-name">{% trans "Event location" %}:</td>
+                <td>{{ event.location.name }}</td>
+            </tr>
+            <tr>
+                <td class="mtable-col-name">{% trans "Period of event" %}:</td>
+                <td>{{ event.start_date | date:"d.m.Y" }} - {{ event.end_date | date:"d.m.Y" }}</td>
+            </tr>
+            <tr>
+                <td class="mtable-col-name">{% trans "Period of registration" %}:</td>
+                <td>{{ event.registration_start | date:"d.m.Y" }} - {{ event.registration_end | date:"d.m.Y" }}</td>
+            </tr>
+            {% if event.is_register_open %}
+            <tr>
+                <td class="mtable-col-name">{% trans "Registration URL" %}:</td>
+                <td><a href="{% url 'registerEvent' event_url=event.event_url %}">{% url 'registerEvent' event_url=event.event_url %}</a> ({% trans "Password" %}: {{ event.reg_pwd }})</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <td class="mtable-col-name">{% trans "Participants" %}:</td>
+                <td><a href="{% url 'viewEventParticipants' event_id=event.ext_id %}">{% trans "Display participants" %}</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+{% for partner in evp %}
+<section>
+    <h3>{% trans "Partner" %}: {{ partner.evp_partner.name }}</h3>
+
+    <section>
+        <h4>{% trans "Statistics" %}</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th class="mtable-col-right">{% trans "Reported numbers" %}</th>
+                    <th class="mtable-col-right">{% trans "Current numbers" %}</th>
+                    <th class="mtable-col-right">{% trans "Progress" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="mtable-col-name">{% trans "Participants" %}:</td>
+                    <td class="mtable-col-right">{{ partner.statistics.confirmee.reported }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.confirmee.registered }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.confirmee.progress }} %</td>
+                </tr>
+                <tr>
+                    <td class="mtable-col-name">{% trans "Reloaded" %}:</td>
+                    <td class="mtable-col-right">{{ partner.statistics.reloaded.reported }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.reloaded.registered }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.reloaded.progress }} %</td>
+                </tr>
+                <tr>
+                    <td class="mtable-col-name">{% trans "Staff" %}:</td>
+                    <td class="mtable-col-right">{{ partner.statistics.staff.reported }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.staff.registered }}</td>
+                    <td class="mtable-col-right">{{ partner.statistics.staff.progress }} %</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+    
+    <section>
+        <h4>{% trans "Documents" %}</h4>
+        <table>
+            <tbody>
+                <tr>
+                    <td class="mtable-col-name">{% trans "Contract" %}:</td>
+                    <td>{% if partner.evp_doc_contract %}<a href="{{ partner.evp_doc_contract.url }}">{% trans "Available" %}</a>{% endif %}</td>
+                </tr>
+                <tr>
+                    <td class="mtable-col-name">{% trans "General Terms and Conditions" %}:</td>
+                    <td>{% if partner.evp_doc_policy %}<a href="{{ partner.evp_doc_policy.url }}">{% trans "Available" %}</a>{% endif %}</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</section>
+{% endfor %}
+
+{% endblock %}

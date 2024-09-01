@@ -2,9 +2,10 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from django.forms import ModelChoiceField, ModelForm
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration
 from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
-from .models import KCEventLocation, KCEventPriceRule
+from .models import KCEventLocation, KCEventPriceRule, PartnerUser
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
@@ -22,6 +23,32 @@ class KCEventPriceRuleInlineAdmin(admin.StackedInline):
 
 class KCEventExportSettingInlineAdmin(admin.StackedInline):
     model = KCEventExportSetting
+
+class UserModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return '{} <{}>'.format(
+            obj.username, obj.email
+        )
+    
+class PartnerUserInlineAdmin(admin.TabularInline):
+        
+    class PartnerUserAdminForm(ModelForm):
+        class Meta:
+            model = PartnerUser
+            fields = ('user',)
+        
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['user'] = UserModelChoiceField(
+                queryset=self.fields['user'].queryset, 
+                widget=self.fields['user'].widget,
+                empty_label=self.fields['user'].empty_label,
+                to_field_name=self.fields['user'].to_field_name
+            )
+    
+    model = PartnerUser
+    form=PartnerUserAdminForm
+
 
 class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "location", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "exe_actions"]
@@ -107,6 +134,7 @@ class ParticipantAdmin(admin.ModelAdmin):
 class PartnerAdmin(admin.ModelAdmin):
     list_display = ["name", "city", "mail_addr", "representative", "contact_person"]
     search_fields = ["name"]
+    inlines = [PartnerUserInlineAdmin]
 
 admin.site.register(KCTemplateSet, KCTemplateSetAdmin)
 admin.site.register(KCTemplate, KCTemplateAdmin)
