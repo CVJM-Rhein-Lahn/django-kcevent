@@ -14,6 +14,11 @@ tbd.
 
 tbd.
 
+Call on frequent base:
+```bash
+env DJANGO_SETTINGS_MODULE="konficastle.settings" python3 -m django reorganize
+```
+
 ### Configuration
 
 tbd.

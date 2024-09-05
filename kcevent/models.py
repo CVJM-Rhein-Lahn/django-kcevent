@@ -278,6 +278,15 @@ class KCEvent(models.Model):
         verbose_name=_('Display event info'),
         help_text=_('Display event meta information on registration page for better recognizing the reason for registration.')
     )
+    deletion_date = models.DateField(
+        verbose_name=_('Deletion date'),
+        null=True, blank=True, 
+        help_text=_(
+            'Date at which the event should be deleted with all its related data ' \
+            'to comply to the data protection policy. If no date is specified ' \
+            'the event will not be deleted automatically.'
+        )
+    )
 
     def clean(self):
         validationErrors = {}
