@@ -273,6 +273,8 @@ class KCEvent(models.Model):
         help_text=_('In case event is an on-site attendance event, further documents are requested by the participant during registration.'))
     requireDocuments = models.BooleanField(default=True, verbose_name=_('Require documents'), \
         help_text=_('Ask and require certain forms and documents from user to upload.'))
+    enablePrices = models.BooleanField(default=False, verbose_name=_('Enable Prices'), \
+        help_text=_('Calculate and show of price information in event registration based on defined rules.'))
     display_event_info = models.BooleanField(
         default=True, 
         verbose_name=_('Display event info'),

@@ -155,7 +155,7 @@
       </div>
       {% endif %}
 
-      {% if kfh.formReg.price %}
+      {% if kfh.formReg.price and evt.enablePrices %}
       <div class="formgrid-item-full">
         <h5>{% trans "Price" %}</h5>
         <p>{{ kfh.formReg.price }}</p>
