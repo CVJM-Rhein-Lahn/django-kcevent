@@ -192,6 +192,7 @@ def registerEventLogin(request, event_url, evt=None):
         password = request.POST['password']
         if password == evt.reg_pwd:
             request.session['is_kclogged_in_' + str(evt.id)] = True
+            request.session[f'is_kclogged_in_{str(evt.id)}_login'] = datetime.datetime.now().isoformat()
             return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
         else:
             return render(
@@ -212,6 +213,7 @@ def registerEventLogin(request, event_url, evt=None):
         )
     else:
         request.session['is_kclogged_in_' + str(evt.id)] = True
+        request.session[f'is_kclogged_in_{str(evt.id)}_login'] = datetime.datetime.now().isoformat()
         return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
 
 def registerEvent(request, event_url):
@@ -226,9 +228,15 @@ def registerEvent(request, event_url):
 
     with sentry_scope() as scope:
         scope.set_tag('event.id', evt.id)
+        
+    fallbackExpiration = (datetime.datetime.now() - datetime.timedelta(days=1)).isoformat()
+    loginTimestamp = request.session.get(f'is_kclogged_in_{str(evt.id)}_login', fallbackExpiration)
 
     # first check if user is logged in.
-    if not request.session.get('is_kclogged_in_' + str(evt.id), False):
+    if not request.session.get('is_kclogged_in_' + str(evt.id), False) or \
+        (
+            datetime.datetime.fromisoformat(loginTimestamp) + datetime.timedelta(days=1)
+        ) < datetime.datetime.now():
         return registerEventLogin(request, event_url, evt)
     else:
         # FIXME: depending on the given user data (first name, last name, birthday, etc.) identify and update
