@@ -115,7 +115,7 @@ def downloadRegistrationDocuments(request, event_url):
     # create a document which all participants information - usable as CSV
     regtmp = tempfile.NamedTemporaryFile(delete=False)
     regtmp.close()
-    csvfile = open(regtmp.name, 'w', encoding='iso-8859-1', newline='')
+    csvfile = open(regtmp.name, 'w', encoding='utf-8', newline='')
     rtw = csv.writer(csvfile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     headerFields = [
         _('Surname'), _('First name'), _('Street'), _('House no.'), _('Postal code'),
@@ -189,7 +189,12 @@ def registerEventLogin(request, event_url, evt=None):
             raise Http404(_('Event not found'))
 
     if request.method == 'POST':
-        password = request.POST['password']
+        password = None
+        try:
+            password = request.POST['password']
+        except KeyError:
+            pass
+        
         if password == evt.reg_pwd:
             request.session['is_kclogged_in_' + str(evt.id)] = True
             request.session[f'is_kclogged_in_{str(evt.id)}_login'] = datetime.datetime.now().isoformat()

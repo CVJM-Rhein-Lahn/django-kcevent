@@ -20,7 +20,7 @@ class ParticipantForm(forms.ModelForm):
             'city': forms.TextInput(attrs={'placeholder': _('City')}),
             # Phone pattern DIN norm: (\+[0-9]{1,3}\s|00[0-9]{1,3}\s|0[1-9]{1})[0-9]+\s[0-9]+(-[0-9]+)?
             'phone': forms.TextInput(
-                attrs={'placeholder': _('Phone'), 'pattern': "(.*\d+.*)", 'required': True}
+                attrs={'placeholder': _('Phone'), 'pattern': '(.*\\d+.*)', 'required': True}
             ), 
             'mail_addr': forms.EmailInput(attrs={'placeholder': _('Mail address')}),
             'birthday': forms.DateInput(attrs={'type': 'date'}),
