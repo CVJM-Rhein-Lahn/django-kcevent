@@ -612,6 +612,7 @@ class KCEventRegistration(models.Model):
         )
 
     id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
     reg_time = models.DateTimeField(auto_now_add=True, verbose_name=_('Registration time'))
     reg_event = models.ForeignKey(KCEvent, on_delete=models.CASCADE, verbose_name=_('Event'))
     reg_user = models.ForeignKey(Participant, on_delete=models.CASCADE, verbose_name=_('Person'))

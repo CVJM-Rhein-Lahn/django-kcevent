@@ -2,8 +2,10 @@
 {% load static %}
 {% load i18n %}
 {% load formclass %}
+{% load formutils %}
 
 {% block content %}
+{% include "cvjm/comp-stepper.html" with kfh=kfh step=1 %}
 
 <section>
   <div class="event-info">
@@ -55,12 +57,11 @@
 <section>
   <h3>{% trans "Registration" %}</h3>
   {% if kfh.form.errors or kfh.formReg.errors %}
+    {% with form_error=kfh.form.non_field_errors|combine_list:kfh.formReg.non_field_errors %}
     {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
-    {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
+    {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage message_list=form_error type="error" %}
+    {% endwith %}
   {% endif %}
-
-  {{ kfh.form.non_field_errors }}
-  {{ kfh.formReg.non_field_errors }}
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
 
@@ -246,7 +247,7 @@
       <div class="formgrid-item-full">
         <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
         <input type="hidden" name="_fgstage" value="preview" />
-        <button id="form-btn-submit" name="register" type="submit" class="btn-form-submit btn btn-primary">{% trans "Register" %}</button>
+        <button id="form-btn-submit" name="register" type="submit" class="btn-form-submit btn btn-primary  w-max-20em">{% trans "Register" %}</button>
       </div>
     </div>
   </form>

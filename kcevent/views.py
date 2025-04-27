@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import permission_required, login_required
 from django.utils.translation import gettext_lazy as _
 from django.utils.encoding import smart_str
 from django.core.handlers.wsgi import WSGIRequest
-from django.db.models import Subquery, Q, Exists
+from django.db.models import Subquery, Exists
 from .forms import ParticipantForm, KCEventRegistrationForm
 from .models import KCEvent, KCEventRegistration, Partner, PartnerUser, KCEventPartner
 from .models import Participant
@@ -94,11 +94,11 @@ def viewEventParticipants(request: WSGIRequest, event_id=None):
 
 @login_required
 @permission_required('kcevent.can_download_regdocs', raise_exception=True)
-def downloadRegistrationDocuments(request, event_url):
+def downloadRegistrationDocuments(request: WSGIRequest, event_url: str):
     # try to find the event
     try:
         evt = KCEvent.objects.get(event_url=event_url)
-    except:
+    except KCEvent.DoesNotExist:
         raise Http404(_('Event not found'))
 
     # fetch all documents
@@ -180,12 +180,12 @@ def downloadRegistrationDocuments(request, event_url):
     response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(zipName)
     return response
 
-def registerEventLogin(request, event_url, evt=None):
+def registerEventLogin(request: WSGIRequest, event_url: str, evt: KCEvent|None = None):
     if not evt:
         # try to find the event
         try:
             evt = KCEvent.objects.get(event_url=event_url)
-        except:
+        except KCEvent.DoesNotExist:
             raise Http404(_('Event not found'))
 
     if request.method == 'POST':
@@ -221,14 +221,14 @@ def registerEventLogin(request, event_url, evt=None):
         request.session[f'is_kclogged_in_{str(evt.id)}_login'] = datetime.datetime.now().isoformat()
         return redirect(reverse('registerEvent', kwargs={'event_url': evt.event_url}))
 
-def registerEvent(request, event_url):
+def registerEvent(request: WSGIRequest, event_url: str):
     with sentry_scope() as scope:
         scope.set_tag('event.slug', event_url)
         
     # try to find the event
     try:
-        evt = KCEvent.objects.get(event_url=event_url)
-    except:
+        evt: KCEvent = KCEvent.objects.get(event_url=event_url)
+    except KCEvent.DoesNotExist:
         raise Http404(_('Event not found'))
 
     with sentry_scope() as scope:
@@ -246,7 +246,7 @@ def registerEvent(request, event_url):
     else:
         # FIXME: depending on the given user data (first name, last name, birthday, etc.) identify and update
         # existing user!
-        kfh = KcFormHelper.checkInstantiate(request, evt, form=ParticipantForm, formReg=KCEventRegistrationForm)
+        kfh: KcFormHelper = KcFormHelper.checkInstantiate(request, evt, form=ParticipantForm, formReg=KCEventRegistrationForm)
         if request.method == 'POST':
             kfh.formReg.instance.reg_user = kfh.form.instance
             kfh.formReg.instance.reg_event = evt
@@ -260,6 +260,7 @@ def registerEvent(request, event_url):
                     kfh.formReg.instance.updateFilePaths()
                     kfh.clean()
                     partner = Partner.objects.get(id=kfh.form.instance.church.id)
+
                     # send confirmation to participant
                     try:
                         kfh.formReg.instance.sendConfirmation(request)
@@ -267,6 +268,7 @@ def registerEvent(request, event_url):
                         # catch SMTP issues, but log it!
                         # for user experience, just continue!
                         capture_exception(e)
+
                     # send information to host and church
                     try:
                         kfh.formReg.instance.notifyHostChurch(request)
@@ -321,7 +323,7 @@ def registerEvent(request, event_url):
             }
         )
 
-def listPublicEvents(request):
+def listPublicEvents(request: WSGIRequest):
     # check which event is online...
     now = datetime.datetime.now()
     events = KCEvent.objects.filter(
@@ -340,7 +342,7 @@ def listPublicEvents(request):
         # take the first active one
         return redirect(reverse('registerEvent', kwargs={'event_url': events[0].event_url}))
 
-def user_login(request):
+def user_login(request: WSGIRequest):
     if request.method == 'POST':
         # Process the request if posted data are available
         username = request.POST['username']
@@ -366,18 +368,18 @@ def user_login(request):
         # No post data availabe, let's just show the page to the user.
         return render(request, 'kcevent/login.html')
 
-def responseError400(request, exception):
+def responseError400(request: WSGIRequest, exception):
     return _responseError(400, request, exception)
 
-def responseError403(request, exception):
+def responseError403(request: WSGIRequest, exception):
     return _responseError(403, request, exception)
 
-def responseError404(request, exception):
+def responseError404(request: WSGIRequest, exception):
     return _responseError(404, request, exception)
 
-def responseError500(request):
+def responseError500(request: WSGIRequest):
     return _responseError(500, request)
 
-def _responseError(statusCode, request, exception=None):
+def _responseError(statusCode: int, request: WSGIRequest, exception=None):
     # No post data availabe, let's just show the page to the user.
     return render(request, 'cvjm/error.html', {'error_code': statusCode})

@@ -1,16 +1,21 @@
 {% extends "cvjm/base.html" %}
+{% load i18n %}
 
 {% block content %}
+{% include "cvjm/comp-stepper.html" with kfh=kfh step=3 %}
 
   <section>
     <div class="event-info">
       <div class="event-info-item">
-        <h2>Anmeldung erfolgreich!</h2>
+        <h2>{% trans "Registration successful!" %}</h2>
         {% if kfh.form.role.value == "ST" %}
-        <p>Vielen Dank {{kfh.form.instance.first_name}} {{kfh.form.instance.last_name}} für Deine Anmeldung und Mitarbeit zu {{ evt.name }}.</p>
+        <p>{% blocktranslate with first_name=kfh.form.instance.first_name last_name=kfh.form.instance.last_name event_name=evt.name %}Thank you {{ first_name }} {{ last_name }} for your registration and your cooperation to {{ event_name }}.{% endblocktranslate %}</p>
         {% else %}
-        <p>Vielen Dank f&uuml;r die Anmeldung Ihres Kindes {{kfh.form.instance.first_name}} {{kfh.form.instance.last_name}} zu {{ evt.name }}.</p>
+        <p>{% blocktranslate with first_name=kfh.form.instance.first_name last_name=kfh.form.instance.last_name event_name=evt.name %}Thank you for registration of yourself or your child {{ first_name }} {{ last_name }} to {{ event_name }}.{% endblocktranslate %}</p>
         {% endif %}
+        <p>{% blocktranslate with ext_id=kfh.formReg.instance.ext_id %}Your registration was saved with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
+        <p>{% blocktranslate with ext_id=kfh.formReg.instance.ext_id mail_addr=kfh.form.instance.mail_addr %}You should receive a registration confirmation mail at address {{ mail_addr }}.
+If you do not receive a confirmation mail, kindly get in touch with the event organisator with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
       </div>
     </div>
   </section>

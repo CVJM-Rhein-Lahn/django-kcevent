@@ -1,7 +1,6 @@
 from django import forms
 from kcevent.models import Participant, KCEventRegistration, KCEvent
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
 
 class ParticipantForm(forms.ModelForm):
     class Meta:
@@ -44,7 +43,7 @@ class ParticipantForm(forms.ModelForm):
         # check if we're on-site attendance - in this case, this 
         # document is mandatory!
         cleanedData = self.cleaned_data.get('nutrition')
-        if self._event.onSiteAttendance and (cleanedData == None or cleanedData == ''):
+        if self._event.onSiteAttendance and (cleanedData is None or cleanedData == ''):
             raise forms.ValidationError(_('Nutrition is mandatory.'))
         
         return cleanedData
@@ -138,7 +137,7 @@ class KCEventRegistrationForm(forms.ModelForm):
             return None
 
     def clean(self):
-        cleaned_data = super().clean()
+        cleaned_data = super().clean()  # noqa: F841
         # we need user information
         eventId = self.instance.reg_event_id
         firstName = self.data.get('first_name')
@@ -153,7 +152,7 @@ class KCEventRegistrationForm(forms.ModelForm):
             usr = usr.first()
             # now check if there is already an registration known.
             try:
-                kcer = KCEventRegistration.objects.get(reg_user=usr, reg_event=evt)
+                KCEventRegistration.objects.get(reg_user=usr, reg_event=evt)
             except KCEventRegistration.DoesNotExist:
                 pass
             else:

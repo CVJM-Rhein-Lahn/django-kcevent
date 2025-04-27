@@ -1,13 +1,15 @@
 {% extends "cvjm/base.html" %}
 {% load i18n %}
 {% load formclass %}
+{% load formutils %}
 
 {% block content %}
+{% include "cvjm/comp-stepper.html" with kfh=kfh step=2 %}
 
 <section>
   <div class="event-info">
     <div class="event-info-item">
-      <h2>Anmeldung &Uuml;bersicht<br> {{ evt.name }}</h2>
+      <h2>{% blocktranslate with event_name=evt.name %}Overview registration: {{ event_name }}{% endblocktranslate %}</h2>
       <p>{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
         Please check your registration details for the event {{ event_name }} carefully.
         If all the details are correct, please confirm your registration by clicking on 
@@ -56,12 +58,12 @@
 <section>
   <h3>{% trans "Registration" %}</h3>
   {% if kfh.form.errors or kfh.formReg.errors %}
+    {% with form_error=kfh.form.non_field_errors|combine_list:kfh.formReg.non_field_errors %}
     {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
-    {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
+    {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage message_list=form_error type="error" %}
+    {% endwith %}
   {% endif %}
 
-  {{ kfh.form.non_field_errors }}
-  {{ kfh.formReg.non_field_errors }}
   <form action="{{ registerUrl }}" enctype="multipart/form-data" method="post">
     {% csrf_token %}
 
@@ -183,14 +185,14 @@
         </p>
       </div>
 
-      <div class="formgrid-item-full">
+      <div class="formgrid-item-full formgrid-item-buttons">
         <input type="hidden" name="_fghash" value="{{ kfh.formHash }}" />
         <input type="hidden" name="_fgstage" value="confirm" />
-        <button name="edit" type="submit" class="btn btn-primary">{% trans "Edit" %}</button>
+        <button name="edit" type="submit" class="btn btn-primary w-max-20em">{% trans "Edit" %}</button>
         {% if kfh.formReg.price %}
-        <button name="confirm" type="submit" class="btn btn-primary">{% trans "Confirm binding registration with costs" %}</button>
+        <button name="confirm" type="submit" class="btn btn-primary w-max-20em">{% trans "Confirm binding registration with costs" %}</button>
         {% else %}
-        <button name="confirm" type="submit" class="btn btn-primary">{% trans "Confirm binding registration" %}</button>
+        <button name="confirm" type="submit" class="btn btn-primary w-max-20em">{% trans "Confirm binding registration" %}</button>
         {% endif %}
       </div>
     </div>
