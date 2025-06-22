@@ -151,6 +151,30 @@
       </div>
 
       {% if evt.onSiteAttendance %}
+      <div class="formgrid-item-short {% if kfh.form.nutrition.errors %}form-field-error{% endif %}">
+        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.nutrition.errors message=kfh.form.nutrition.errors type="error" small=True %}
+        {% include "cvjm/comp-mandatory.html" %}
+        {{ kfh.form.nutrition|addclass:'custom-select' }}
+        <label for="{{ kfh.form.nutrition.id_for_label }}">{% trans "Nutrition" %}*</label>
+      </div>
+
+      <div class="formgrid-item-short formgrid-space {% if kfh.form.lactose_intolerance.errors %}form-field-error{% endif %}">
+        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.lactose_intolerance.errors message=kfh.form.lactose_intolerance.errors type="error" small=True %}
+        {% include "cvjm/comp-mandatory.html" %}
+        <div class="formgrid-item-row">
+          {{ kfh.form.lactose_intolerance|addclass:'form-check-input' }}
+          <label class="form-check-label" for="{{ kfh.form.lactose_intolerance.id_for_label }}">{% trans "Lactose intolerance" %}</label>
+        </div>
+      </div>
+
+      <div class="formgrid-item-short formgrid-space {% if kfh.form.celiac_disease.errors %}form-field-error{% endif %}">
+        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.celiac_disease.errors message=kfh.form.celiac_disease.errors type="error" small=True %}
+        {% include "cvjm/comp-mandatory.html" %}
+        <div class="formgrid-item-row">
+          {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
+          <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">{% trans "Celiac disease" %}</label>
+        </div>
+      </div>
       <div class="formgrid-textbox {% if kfh.form.intolerances.errors %}form-field-error{% endif %}">
         {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.intolerances.errors message=kfh.form.intolerances.errors type="error" small=True %}
         {% include "cvjm/comp-mandatory.html" %}
@@ -165,29 +189,6 @@
         {{ kfh.formReg.reg_notes|addclass:'form-control' }}
         <label for="{{ kfh.formReg.reg_notes.id_for_label }}">{% trans "Other communications" %}</label>
       </div>
-
-      {% if evt.onSiteAttendance %}
-      <div class="formgrid-item-short {% if kfh.form.nutrition.errors %}form-field-error{% endif %}">
-        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.nutrition.errors message=kfh.form.nutrition.errors type="error" small=True %}
-        {% include "cvjm/comp-mandatory.html" %}
-        {{ kfh.form.nutrition|addclass:'custom-select' }}
-        <label for="{{ kfh.form.nutrition.id_for_label }}">{% trans "Nutrition" %}*</label>
-      </div>
-
-      <div class="formgrid-item-short {% if kfh.form.lactose_intolerance.errors %}form-field-error{% endif %}">
-        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.lactose_intolerance.errors message=kfh.form.lactose_intolerance.errors type="error" small=True %}
-        {% include "cvjm/comp-mandatory.html" %}
-        {{ kfh.form.lactose_intolerance|addclass:'form-check-input' }}
-        <label class="form-check-label" for="{{ kfh.form.lactose_intolerance.id_for_label }}">{% trans "Lactose intolerance" %}</label>
-      </div>
-
-      <div class="formgrid-item-short {% if kfh.form.celiac_disease.errors %}form-field-error{% endif %}">
-        {% include "cvjm/comp-alert.html" with chkdsp=kfh.form.celiac_disease.errors message=kfh.form.celiac_disease.errors type="error" small=True %}
-        {% include "cvjm/comp-mandatory.html" %}
-        {{ kfh.form.celiac_disease|addclass:'form-check-input' }}
-        <label class="form-check-label" for="{{ kfh.form.celiac_disease.id_for_label }}">{% trans "Celiac disease" %}</label>
-      </div>
-      {% endif %}
 
       {% if evt.requireDocuments %}
       <div class="formgrid-upload {% if kfh.formReg.reg_doc_consent.errors %}form-field-error{% endif %}">
@@ -216,23 +217,27 @@
       {% endif %}
 
       <div
-        class="formgrid-item-full {% if kfh.formReg.reg_consent.errors or kfh.formReg.reg_consent_privacy.errors %}form-field-error{% endif %}">
+        class="formgrid-item-full formgrid-space {% if kfh.formReg.reg_consent.errors or kfh.formReg.reg_consent_privacy.errors %}form-field-error{% endif %}">
         {% include "cvjm/comp-alert.html" with chkdsp=kfh.formReg.reg_consent_privacy.errors message=kfh.formReg.reg_consent_privacy.errors type="error" small=True %}
         {% include "cvjm/comp-mandatory.html" %}
-        {{ kfh.formReg.reg_consent_privacy|addclass:'form-check-input' }}
-        <label class="form-check-label" for="{{ kfh.formReg.reg_consent_privacy.id_for_label }}">
-          {% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
-          I agree to the <a href="{{ url_privacy_policy }}" target="_blank">privacy policy</a>.
-          {% endblocktranslate %}*
-        </label><br />
+        <div class="formgrid-item-row">
+          {{ kfh.formReg.reg_consent_privacy|addclass:'form-check-input' }}
+          <label class="form-check-label" for="{{ kfh.formReg.reg_consent_privacy.id_for_label }}">
+            {% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
+            I agree to the <a href="{{ url_privacy_policy }}" target="_blank">privacy policy</a>.
+            {% endblocktranslate %}*
+          </label>
+        </div>
         {% include "cvjm/comp-alert.html" with chkdsp=kfh.formReg.reg_consent.errors message=kfh.formReg.reg_consent.errors type="error" small=True %}
         {% include "cvjm/comp-mandatory.html" %}
-        {{ kfh.formReg.reg_consent|addclass:'form-check-input' }}
-        <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">
-          {% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
-          I hereby register my child / myself for event {{ event_name }} of host {{ organizer }}. Participation is binding.
-          {% endblocktranslate %}*
-        </label>
+        <div class="formgrid-item-row">
+          {{ kfh.formReg.reg_consent|addclass:'form-check-input' }}
+          <label class="form-check-label" for="{{ kfh.formReg.reg_consent.id_for_label }}">
+            {% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
+            I hereby register my child / myself for event {{ event_name }} of host {{ organizer }}. Participation is binding.
+            {% endblocktranslate %}*
+          </label>
+        </div>
       </div>
 
       <div class="formgrid-item-full">
