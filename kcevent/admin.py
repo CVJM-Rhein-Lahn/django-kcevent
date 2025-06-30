@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
+from django.urls import resolve
 from django.forms import ModelChoiceField, ModelForm
 from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration
 from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
-from .models import KCEventLocation, KCEventPriceRule, PartnerUser
+from .models import KCEventLocation, ParticipantRole, KCEventPriceRule, PartnerUser
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
@@ -18,8 +19,30 @@ class KCEventLocationAdmin(admin.ModelAdmin):
 class KCTemplateInlineAdmin(admin.TabularInline):
     model = KCTemplate
     
+class KCEventPriceRuleAdminForm(ModelForm):
+    class Meta:
+        model = KCEventPriceRule
+        fields = "__all__"
+
 class KCEventPriceRuleInlineAdmin(admin.StackedInline):
     model = KCEventPriceRule
+    form = KCEventPriceRuleAdminForm
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'role':
+            parent = self.get_parent(request)
+            kwargs["queryset"] = ParticipantRole.objects.filter(event=parent)
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def get_parent(self, request):
+        resolved = resolve(request.path_info)
+        if resolved.kwargs:
+             return self.parent_model.objects.get(pk=resolved.kwargs['object_id'])
+        return None
+    
+class KCParticipantRoleInlineAdmin(admin.StackedInline):
+    model = ParticipantRole
 
 class KCEventExportSettingInlineAdmin(admin.StackedInline):
     model = KCEventExportSetting
@@ -54,7 +77,7 @@ class KCEventAdmin(admin.ModelAdmin):
     list_display = ["name", "host", "location", "start_date", "end_date", "event_link", "registration_start", "registration_end", "template", "exe_actions"]
     prepopulated_fields = {"event_url": ("name",)}
     actions = [copyEvent, syncEvent]
-    inlines = [KCEventPartnerInlineAdmin, KCEventExportSettingInlineAdmin, KCEventPriceRuleInlineAdmin]
+    inlines = [KCEventPartnerInlineAdmin, KCParticipantRoleInlineAdmin, KCEventExportSettingInlineAdmin, KCEventPriceRuleInlineAdmin]
 
     list_filter = [
         "start_date", "name", is_event_future
@@ -104,6 +127,19 @@ class KCEventRegistrationAdmin(admin.ModelAdmin):
     ordering = ["reg_event", "reg_user"]
     actions = [resendConfirmation, resendChurchNotification]
     date_hierarchy = "reg_event__start_date"
+    
+    class KCEventRegistrationAdminForm(ModelForm):
+        class Meta:
+            model = KCEventRegistration
+            exclude = []
+        
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            if self.instance:
+                self.fields['reg_adddata'].widget.instance = self.instance
+    
+    model = KCEventRegistration
+    form = KCEventRegistrationAdminForm
 
 class KCTemplateSetAdmin(admin.ModelAdmin):
     list_display = ["name",]
@@ -130,6 +166,24 @@ class ParticipantAdmin(admin.ModelAdmin):
         ("church__name", custom_list_title_filter(_("Partner")))
     ]
     list_display_links = ["last_name", "first_name"]
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'role':
+            parent = self.get_event(request)
+            kwargs["queryset"] = ParticipantRole.objects.filter(event=parent)
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
+    def get_event(self, request):
+        resolved = resolve(request.path_info)
+        if resolved.kwargs:
+            participant = self.model.objects.get(pk=resolved.kwargs['object_id'])
+            if participant:
+                registration = KCEventRegistration.objects.get(reg_user=participant)
+                if registration:
+                    return registration.reg_event
+        
+        return None
 
 class PartnerAdmin(admin.ModelAdmin):
     list_display = ["name", "city", "mail_addr", "representative", "contact_person"]

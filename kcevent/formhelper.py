@@ -5,6 +5,7 @@ import os
 from django.core.files import File
 from .forms import ParticipantForm, KCEventRegistrationForm
 from sentry_sdk import configure_scope as sentry_scope
+from enum import Enum
 import sentry_sdk
 
 class KcUploadedFile(File):
@@ -45,12 +46,21 @@ class KcUploadedFile(File):
 
     name = property(_get_name, _set_name)
 
+class KCFormStages(Enum):
+    INIT = 0
+    PERSONAL_DATA = 1
+    EMERGENCY_CONTACT = 2
+    SUMMARY = 3
+    SUBMIT = 4
+
 class KcFormHelper(object):
+    
+    _stage: KCFormStages
 
     def __init__(self, **forms):
         self._forms = forms
         self._hash = None
-        self._stage = None
+        self._stage = KCFormStages.INIT
         self._fileInfos = {}
 
     def setHash(self, fghash):
@@ -67,10 +77,10 @@ class KcFormHelper(object):
     def _generateHash(self):
         self._hash = str(uuid.uuid4())
 
-    def setStage(self, stage):
+    def setStage(self, stage: KCFormStages):
         self._stage = stage
 
-    def getStage(self):
+    def getStage(self) -> KCFormStages:
         return self._stage
 
     def clean(self):
@@ -78,8 +88,8 @@ class KcFormHelper(object):
             if os.path.exists(vV['fileName']):
                 try:
                     os.unlink(vV['fileName'])
-                except:
-                    pass
+                except Exception as e:
+                    sentry_sdk.capture_exception(e)
         
         self._fileInfos = {}
 
@@ -106,7 +116,7 @@ class KcFormHelper(object):
                     x[fieldName]= xFile
                     self._fileInfos[vN] = vV
                 except FileNotFoundError as e:
-                    pass
+                    sentry_sdk.capture_exception(e)
 
     def debug(self):
         print('valid: ', self.isValid())
@@ -125,6 +135,9 @@ class KcFormHelper(object):
     def _preparePayload(self):
         payload = {}
         for k, v in self._forms.items():
+            for xName, xValue in v.session_fields():
+                if xValue is not None:
+                    payload[xName] = xValue
             for x in v.visible_fields() + v.hidden_fields():
                 if x.value() is None:
                     pass
@@ -190,21 +203,22 @@ class KcFormHelper(object):
             # retrieve data from cache.
             updateRequired = True
             prevData = json.loads(request.session.get('__kcform__' + fgHash, {}))
+            payload: dict[str, any] = prevData['payload']
+            if request.method == 'POST':
+                payload.update(dict(request.POST))
+            try:
+                birthday = payload['birthday']
+                if type(birthday) is list:
+                    birthday = birthday[0]
+                payload['birthday'] = birthday
+            except KeyError:
+                pass
             for k, f in forms.items():
-                if prevData['_stage'] == None or fgStage == 'preview':
-                    formList[k] = f(
-                        event,
-                        request.POST if request.method == 'POST' else None,
-                        request.FILES if request.method == 'POST' else None,
-                    )
-                else:
-                    payload: dict[str, any] = prevData['payload']
-                    if request.method == 'POST':
-                        payload.update(dict(request.POST))
-                    formList[k] = f(
-                        event, 
-                        payload
-                    )
+                formList[k] = f(
+                    event,
+                    request.POST if request.method == 'POST' else None,
+                    request.FILES if request.method == 'POST' else None,
+                )
         else:
             for k, f in forms.items():
                 formList[k] = f(

@@ -1,0 +1,33 @@
+{% load i18n %}
+<!-- {{ wizard.steps.step1 }} of {{ wizard.steps.count|add:"1" }} -->
+<div class="form-stepper">
+    <ol class="justify-center">
+      {% for step_code in wizard.steps.all %}
+      <li class="{% if forloop.counter0 == 0 %}form-step-begin{%else%}form-step{%endif%} {% if step > forloop.counter %}alert-box-success{%elif step == forloop.counter %}{% if kfh.form.errors or kfh.formReg.errors %}alert-box-error{% else %}alert-box-info{%endif%}{% else %}form-stepper-pending{%endif%} items-center">
+        <span class="form-stepper-counter flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0">
+          {{ forloop.counter }}
+        </span>
+        <span>{% if step_code == 'pd' %}
+          {% trans "Personal data" %}
+          {% elif step_code == 'rd' %}
+          {% trans "Additional data" %}
+          {% elif step_code == 'ec' %}
+          {% trans "Emergency contacts" %}
+          {% elif step_code == 'review' %}
+          {% trans "Review data" %}
+          {% endif %}
+        </span>
+        {% if step > forloop.counter %}<span>✓</span>{%endif%}
+      </li>
+      {% endfor %}
+      {% with done_step=wizard.steps.count|add:"1" %}
+      <li class="form-step-end {% if step >= done_step %}alert-box-success{% else %}form-stepper-pending{% endif %} items-center">
+        <span class="form-stepper-counter flex items-center justify-center w-5 h-5 me-2 text-xs border rounded-full shrink-0">
+          {{ done_step }}
+        </span>
+        <span>{% trans "Registration completed" %}</span>
+        {% if step >= done_step %}<span>✓</span>{%endif%}
+      </li>
+      {% endwith %}
+    </ol>
+  </div>

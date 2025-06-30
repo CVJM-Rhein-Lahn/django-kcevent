@@ -1,0 +1,126 @@
+{% extends "cvjm/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load formclass %}
+{% load formutils %}
+{% load django_jsonform %}
+
+{% block addjs %}
+{{ wizard.form.media }}
+{% endblock %}
+
+{% block content %}
+{% include "cvjm/wizard/comp-stepper.html" with kfh=kfh step=wizard.steps.step1 %}
+
+<section>
+  <div class="event-info">
+    <div class="event-info-item">
+      {% if wizard.event.formIntroduction.subject %}
+      <h2>{{wizard.event.formIntroduction.subject}}</h2>
+      <p>{{wizard.event.formIntroduction.content}}</p>
+      {% else %}
+      <h2>{{wizard.event.name}}</h2>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% if wizard.event.display_event_info %}
+<section class="event-meta-info">
+  <div class="event-meta-info">
+    <h3>{% trans "Event" %}</h3>
+    <div class="event-meta-appointment">
+      <h4>{% trans "Appointment" %}</h4>
+      <div class="event-meta-line">{{ wizard.event.start_date | date:"d.m.Y"}} - {{ wizard.event.end_date | date:"d.m.Y" }}</div>
+    </div>
+    {% if wizard.event.location %}
+    <div class="event-meta-location">
+      <h4>{% trans "Event location" %}</h4>
+      <div class="event-meta-line">{{ wizard.event.location.name }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.address_line_2 }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.address_line_3 }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.street }} {{ wizard.event.location.house_number }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.zip_code }} {{ wizard.event.location.city }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.mail_addr }}</div>
+      <div class="event-meta-line">{{ wizard.event.location.website }}</div>
+    </div>
+    {% endif %}
+    <div class="event-meta-organizer">
+      <h4>{% trans "Event host" %}</h4>
+      <div class="event-meta-line">{{ wizard.event.host.name }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.address_line_2 }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.address_line_3 }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.street }} {{ wizard.event.host.house_number }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.zip_code }} {{ wizard.event.host.city }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.mail_addr }}</div>
+      <div class="event-meta-line">{{ wizard.event.host.website }}</div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section>
+    <h3>{% trans "Registration" %}</h3>
+    {% if wizard.form.errors %}
+        {% with form_error=wizard.form.non_field_errors %}
+            {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
+            {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage message_list=form_error type="error" %}
+        {% endwith %}
+    {% endif %}
+
+    <form action="" method="post">{% csrf_token %}
+      <div class="formgrid-container">
+      {{ wizard.management_form }}
+      {% if wizard.form.forms %}
+          {{ wizard.form.management_form }}
+          {% for form in wizard.form.forms %}
+              {{ form.as_table }}
+          {% endfor %}
+      {% else %}
+          {% for form_field in wizard.form %}
+          {% if form_field.is_hidden %}
+          {{ form_field }}
+          {% else %}
+          <div class="{%if form_field.field.formgridcls == 'short' %}formgrid-item-short{%elif form_field.field.formgridcls == 'regular' %}formgrid-item{%elif form_field.field.formgridcls == 'full' %}formgrid-item-full{% elif form_field.field.widget.input_type == 'checkbox' %}formgrid-item-short{% elif form_field.field.widget.input_type == None %}formgrid-textbox{%else%}formgrid-item{%endif%} {% if form_field.errors %}form-field-error{% endif %}" data-field-name="{{ form_field.name }}">
+          {% include "cvjm/comp-alert.html" with chkdsp=form_field.errors message=form_field.errors type="error" small=True %}
+          {% if form_field.field.required %}
+          {% include "cvjm/comp-mandatory.html" %}
+          {% endif %}
+          {% if form_field.field.widget.input_type == 'select' %}
+          {{ form_field | addclass:'custom-select' }}
+          {% elif form_field.field.widget.input_type == 'checkbox' %}
+          <div class="formgrid-item-row">
+          {{ form_field | addclass:'form-check-input' }}
+          <label class="form-check-label" for="{{ form_field.id_for_label }}">{% if form_field.name == 'reg_consent_privacy'%}{% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}
+          I agree to the <a href="{{ url_privacy_policy }}" target="_blank">privacy policy</a>.
+          {% endblocktranslate %}{%elif form_field.name == 'reg_consent_terms'%}{% blocktranslate with url_agb=form_field.url trimmed %}
+        I agree to the partners <a href="{{ url_agb }}" target="_blank">General Terms and Conditions</a>.
+        {% endblocktranslate %}{%elif form_field.name == 'reg_consent'%}{% blocktranslate with event_name=evt.name organizer=evt.host.name trimmed %}
+          I hereby register my child / myself for event {{ event_name }} of host {{ organizer }}. Participation is binding.
+          {% endblocktranslate %}{%else%}{{form_field.field.label}}{%endif%}{% if form_field.field.required %}*{%endif%}</label>
+          </div>
+          {% else %}
+          {{ form_field | addclass:'form-control' }}
+          {% endif %}
+          {% if form_field.field.widget.input_type != 'checkbox' %}
+          <label for="{{ form_field.id_for_label }}">{{form_field.field.label}} {% if form_field.field.required %}*{%endif%}</label>
+          {% endif %}
+          </div>
+          {% endif %}
+          {% endfor %}
+      {% endif %}
+      </div>
+      
+      <div class="formgrid-item-full">
+        <div class="formgrid-item-row">
+          {% if wizard.steps.prev %}
+          <!-- <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.first }}" class="btn btn-primary  w-max-20em" formnovalidate>{% translate "first step" %}</button>-->
+          <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.prev }}" class="btn btn-primary  w-max-20em" formnovalidate>{% translate "prev step" %}</button>
+          {% endif %}
+          <button id="form-btn-submit" name="register" type="submit" class="btn-form-submit btn btn-primary w-max-20em" formnovalidate>{% trans "Next" %}</button>
+        </div>
+      </div>
+    </form>
+</section>
+<script type="text/javascript" src="{% static "js/form.js" %}?version=20250630210000"></script>
+{% endblock %}

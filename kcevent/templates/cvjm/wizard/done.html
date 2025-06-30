@@ -1,0 +1,25 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+
+{% block content %}
+{% with done_step=wizard.steps.count|add:"1" %}
+{% include "cvjm/wizard/comp-stepper.html" with kfh=kfh step=done_step %}
+{% endwith %}
+
+  <section>
+    <div class="event-info">
+      <div class="event-info-item">
+        <h2>{% trans "Registration successful!" %}</h2>
+        {% if not wizard.form_data.rd.instance.confirmation_send %}
+          {% trans "The confirmation mail could not be send. Please consult the event organisator." as genericMessage %}
+          {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
+        {% endif %}
+        <p>{% blocktranslate with first_name=wizard.form_data.pd.instance.first_name last_name=wizard.form_data.pd.instance.last_name event_name=wizard.event.name %}Thank you for registration of yourself or your child {{ first_name }} {{ last_name }} to {{ event_name }}.{% endblocktranslate %}</p>
+        <p>{% blocktranslate with ext_id=wizard.form_data.rd.instance.ext_id %}Your registration was saved with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
+        <p>{% blocktranslate with ext_id=wizard.form_data.rd.instance.ext_id mail_addr=wizard.form_data.pd.instance.mail_addr %}You should receive a registration confirmation mail at address {{ mail_addr }}.
+If you do not receive a confirmation mail, kindly get in touch with the event organisator with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
