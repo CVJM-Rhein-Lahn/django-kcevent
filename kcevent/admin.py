@@ -4,15 +4,21 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from django.urls import resolve
 from django.forms import ModelChoiceField, ModelForm
-from .models import KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration
-from .models import KCTemplate, KCTemplateSet, KCEventExportSetting
-from .models import KCEventLocation, ParticipantRole, KCEventPriceRule, PartnerUser
+from .models import (
+    KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration,
+    KCTemplate, KCTemplateSet, KCEventExportSetting,
+    KCEventLocation, ParticipantRole, KCEventPriceRule, PartnerUser,
+    KCEventPartnerRoleStatistic
+)
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
 
+class KCEventPartnerRoleStatisticsAdmin(admin.ModelAdmin):
+    model = KCEventPartnerRoleStatistic
+
 class KCEventPartnerInlineAdmin(admin.TabularInline):
     model = KCEventPartner
-    
+
 class KCEventLocationAdmin(admin.ModelAdmin):
     model = KCEventLocation
 
@@ -198,3 +204,4 @@ admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Partner, PartnerAdmin)
 admin.site.register(KCEventRegistration, KCEventRegistrationAdmin)
 admin.site.register(KCEventLocation, KCEventLocationAdmin)
+admin.site.register(KCEventPartnerRoleStatistic, KCEventPartnerRoleStatisticsAdmin)

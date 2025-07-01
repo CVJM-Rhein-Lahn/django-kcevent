@@ -62,24 +62,14 @@
                 </tr>
             </thead>
             <tbody>
+                {% for role in partner.statistics.roles %}
                 <tr>
-                    <td class="mtable-col-name">{% trans "Participants" %}:</td>
-                    <td class="mtable-col-right">{{ partner.statistics.confirmee.reported }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.confirmee.registered }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.confirmee.progress }} %</td>
+                    <td class="mtable-col-name">{{ role.role.name }}:</td>
+                    <td class="mtable-col-right">{{ role.reported }}</td>
+                    <td class="mtable-col-right">{{ role.registered }}</td>
+                    <td class="mtable-col-right">{{ role.progress }} %</td>
                 </tr>
-                <tr>
-                    <td class="mtable-col-name">{% trans "Reloaded" %}:</td>
-                    <td class="mtable-col-right">{{ partner.statistics.reloaded.reported }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.reloaded.registered }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.reloaded.progress }} %</td>
-                </tr>
-                <tr>
-                    <td class="mtable-col-name">{% trans "Staff" %}:</td>
-                    <td class="mtable-col-right">{{ partner.statistics.staff.reported }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.staff.registered }}</td>
-                    <td class="mtable-col-right">{{ partner.statistics.staff.progress }} %</td>
-                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </section>

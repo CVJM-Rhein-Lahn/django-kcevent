@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
-from django.db.models import Q, Subquery
+from django.db.models import Q, Subquery, Sum
 from django.db.utils import IntegrityError
 from django.template import Context, Template
 from django.utils import timezone
@@ -29,6 +29,11 @@ from .defaults import (
 )
 from . import logger
 
+class GenderTypes(models.TextChoices):
+    __empty__ = _("Please choose your gender")
+    GENDER_MALE = "M", _("Male")
+    GENDER_FEMALE = "W", _("Female")
+    GENDER_DIVERT = "D", _("Divert")
 
 class KCTemplateSet(models.Model):
     class Meta:
@@ -115,12 +120,6 @@ class Participant(KCPerson):
         NUTRITION_REGULAR = "RGL", _("Meat-based diet")
         NUTRITION_VEGETARIAN = "VGT", _("Vegetarian diet")
         NUTRITION_VEGAN = "VGN", _("Vegan diet")
-
-    class GenderTypes(models.TextChoices):
-        __empty__ = _("Please choose your gender")
-        GENDER_MALE = "M", _("Male")
-        GENDER_FEMALE = "W", _("Female")
-        GENDER_DIVERT = "D", _("Divert")
 
     birthday = models.DateField(verbose_name=_("Birthday"))
     # Unfortunately, Participant is not a direct link to a specific event,
@@ -690,6 +689,12 @@ class KCEventPartner(models.Model):
             reg_event=self.evp_event,
             reg_user__in=subquery,
         )
+        
+    def getReported(self, role: ParticipantRole):
+        return KCEventPartnerRoleStatistic.objects.filter(
+            event_partner=self,
+            role=role
+        ).aggregate(Sum('apx_participants'))["apx_participants__sum"]
 
     # TODO: This must be made more flexible.
     @property
@@ -734,29 +739,24 @@ class KCEventPartner(models.Model):
 
     def _gatherStatistics(self):
         data = {
-            "confirmee": {
-                "reported": self.totalApproxParticipants,
-                "registered": self.totalRegisteredConfirmee,
-                "progress": 0,
-            },
-            "reloaded": {
-                "reported": self.totalApproxReloaded,
-                "registered": self.totalRegisteredReloaded,
-                "progress": 0,
-            },
-            "staff": {
-                "reported": self.totalApproxMembers,
-                "registered": self.totalRegisteredStaff,
-                "progress": 0,
-            },
+            "roles": []
         }
-
-        # participants:
-        for key in data.keys():
-            if data[key]["reported"] > 0:
-                data[key]["progress"] = int(
-                    round(data[key]["registered"] * 100 / data[key]["reported"], 0)
+        
+        roles = ParticipantRole.objects.filter(event=self.evp_event)
+        for role in roles:
+            registrations = self.getRegistrations(role).count()
+            reported = self.getReported(role)
+            rolestat = {
+                "role": role,
+                "reported": reported if reported else 0,
+                "registered": registrations,
+                "progress": 0
+            }
+            if rolestat['reported'] and rolestat['reported'] > 0:
+                rolestat['progress'] = int(
+                    round(rolestat['registered'] * 100 / rolestat['reported'], 0)
                 )
+            data['roles'].append(rolestat)
 
         self._statistics = data
         return data
@@ -765,7 +765,7 @@ class KCEventPartner(models.Model):
     def statistics(self) -> dict[str, any]:
         try:
             return self._statistics
-        except:
+        except AttributeError:
             return self._gatherStatistics()
 
     def __str__(self):
@@ -781,6 +781,25 @@ def getUploadPathEventRegistration(instance, filename):
         instance.reg_event.id, instance.reg_user.id, filename
     )
 
+
+class KCEventPartnerRoleStatistic(models.Model):
+    class Meta:
+        verbose_name = _("Partner Role Statistic")
+        verbose_name_plural = _("Partner Role Statistics")
+        unique_together = (
+            "role",
+            "event_partner"
+        )
+
+    id = models.AutoField(primary_key=True)
+    event_partner = models.ForeignKey(KCEventPartner, on_delete=models.CASCADE)
+    role = models.ForeignKey(ParticipantRole, on_delete=models.CASCADE)
+    gender = models.CharField(
+        max_length=1, choices=GenderTypes.choices, verbose_name=_("Gender")
+    )
+    apx_participants = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_("Approx. no. of par.")
+    )
 
 class PartnerUser(models.Model):
     class Meta:

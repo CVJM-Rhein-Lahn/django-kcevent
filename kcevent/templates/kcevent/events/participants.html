@@ -7,19 +7,19 @@
     <div class="event-info">
         <div class="event-info-item hover-item">
             <h2>{% trans "Event" %}: {{ event.name }}</h2>
-            <h3>{% trans "Participants" %}</h3>
         </div>
     </div>
 </section>
 
 <section>
+    <h3>{% trans "Participants" %}</h3>
     <div class="modern-table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>{% trans "Name" %}</th>
-                    <th>{% trans "Role" %}</th>
                     <th>{% trans "Church/Organisation" %}</th>
+                    <th>{% trans "Role" %}</th>
                     <th>{% trans "Registration status" %}</th>
                     <th>{% trans "Actions" %}</th>
                 </tr>
@@ -29,7 +29,7 @@
                 <tr>
                     <td>{{ user.reg_user.last_name }}, {{ user.reg_user.first_name }}</td>
                     <td>{{ user.reg_user.church.name }}</td>
-                    <td>{{ user.reg_user.get_role_display }}</td>
+                    <td>{% if user.reg_user.role %}{{ user.reg_user.role }}{% endif %}</td>
                     <td>{{ user.get_reg_status_display }}</td>
                     <td></td>
                 </tr>
@@ -37,6 +37,9 @@
             </tbody>
         </table>
     </div>
+    <p>
+        <a href="{% url 'viewEvent' event_id=event.ext_id %}">Zurück</a>
+    </p>
 </section>
 
 
