@@ -55,7 +55,6 @@ class ParticipantForm(forms.ModelForm):
         }
 
     def __init__(self, event: KCEvent, *args, **kwargs):
-        print(vars(kwargs['instance']))
         super().__init__(*args, **kwargs)
         self._event = event
 
@@ -318,8 +317,6 @@ class PreviewForm(forms.Form):
             self.form_list[form].is_valid()
             for field in self.form_list[form].fields.values():
                 field.disabled = True
-                if field.label == 'Geburtstag':
-                    print(vars(field))
                 # remove all placeholders in widgets
                 try:
                     if field.widget.attrs['placeholder']:

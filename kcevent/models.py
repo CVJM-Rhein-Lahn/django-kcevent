@@ -1063,7 +1063,9 @@ class KCEventRegistration(models.Model):
         )
         sendResult = False
         try:
-            sendResult = m.send()
+            with mail.get_connection(gmail_user=sender) as connection:
+                m.connection = connection
+                sendResult = m.send()
         except ConnectionRefusedError as e:
             logger.error(f"Could not connect to smtp server: {e}")
             sendResult = False
@@ -1096,6 +1098,11 @@ class KCEventRegistration(models.Model):
             )
 
         sender = settings.NOTIFY_SENDER
+        if (
+            self.reg_event.notify_sender_address
+            and self.reg_event.notify_sender_address.strip()
+        ):
+            sender = self.reg_event.notify_sender_address.strip()
         messages = []
         recipients = []
         for f in [self.reg_event.host, self.reg_user.church]:
@@ -1132,7 +1139,7 @@ class KCEventRegistration(models.Model):
 
         sendResult = False
         try:
-            with mail.get_connection() as connection:
+            with mail.get_connection(gmail_user=sender) as connection:
                 for m in messages:
                     m.connection = connection
                     if m.send():
