@@ -3,6 +3,42 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
+def create_statistic_record(apps, schema_editor, row, number, gender, role_name):
+    ParticipantRole = apps.get_model("kcevent", "ParticipantRole")
+    KCEventPartnerRoleStatistic = apps.get_model("kcevent", "KCEventPartnerRoleStatistic")
+    role = ParticipantRole.objects.get(event=row.evp_event, name=role_name)
+    if not role:
+        return
+    
+    new = KCEventPartnerRoleStatistic(
+        event_partner=row,
+        role=role,
+        gender=gender,
+        apx_participants=number
+    )
+    new.save()    
+
+def convert_statistic(apps, schema_editor):
+    KCEventPartner = apps.get_model("kcevent", "KCEventPartner")
+    for row in KCEventPartner.objects.all():
+        if row.evp_apx_participant_m > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_participant_m, 'M', 'Confirmand')
+        if row.evp_apx_participant_w > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_participant_w, 'W', 'Confirmand')
+        if row.evp_apx_participant_d > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_participant_d, 'D', 'Confirmand')
+        if row.evp_apx_reloaded_m > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_reloaded_m, 'M', 'Reloaded')
+        if row.evp_apx_reloaded_w > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_reloaded_w, 'W', 'Reloaded')
+        if row.evp_apx_reloaded_d > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_reloaded_d, 'D', 'Reloaded')
+        if row.evp_apx_member_m > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_member_m, 'M', 'Staff')
+        if row.evp_apx_member_w > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_member_w, 'W', 'Staff')
+        if row.evp_apx_member_d > 0:
+            create_statistic_record(apps, schema_editor, row, row.evp_apx_member_d, 'D', 'Staff')    
 
 class Migration(migrations.Migration):
 
@@ -55,4 +91,5 @@ class Migration(migrations.Migration):
                 "unique_together": {("role", "event_partner")},
             },
         ),
+        migrations.RunPython(convert_statistic, reverse_code=migrations.RunPython.noop),
     ]
