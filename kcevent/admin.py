@@ -15,6 +15,16 @@ from .actions import resendConfirmation, resendChurchNotification, copyEvent, sy
 
 class KCEventPartnerRoleStatisticsAdmin(admin.ModelAdmin):
     model = KCEventPartnerRoleStatistic
+    list_display = [
+        'event_partner__evp_event__name',
+        'event_partner__evp_partner__name',
+        'role__name', 'gender', 'apx_participants'
+    ]
+    list_filter = [
+        "event_partner__evp_event",
+        "event_partner__evp_partner",
+        "gender"
+    ]
 
 class KCEventPartnerInlineAdmin(admin.TabularInline):
     model = KCEventPartner

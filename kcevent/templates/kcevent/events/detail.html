@@ -52,6 +52,7 @@
 
     <section>
         <h4>{% trans "Statistics" %}</h4>
+        <p><a href="{% url 'setEventStatistics' event_id=event.ext_id partner_id=partner.evp_partner.ext_id %}">{% trans "Edit planned values" %}</a></p>
         <table>
             <thead>
                 <tr>

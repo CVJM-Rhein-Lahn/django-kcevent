@@ -13,10 +13,13 @@ from .forms import (
     ParticipantForm, 
     KCEventRegistrationForm, 
     EmergencyContactForm, 
-    PreviewForm
+    PreviewForm,
+    StatisticMatrixForm
 )
-from .models import KCEvent, KCEventRegistration, PartnerUser, KCEventPartner
-from .models import Participant
+from .models import (
+    KCEvent, KCEventRegistration, PartnerUser, KCEventPartner,
+    Participant, Partner
+)
 from .decorators import event_logged_in
 from .wizard import EventRegistrationWizard
 import datetime
@@ -95,6 +98,32 @@ def viewEventParticipants(request: WSGIRequest, event_id=None):
         request,
         "kcevent/events/participants.html",
         {"event": event, "participants": participants},
+    )
+
+@login_required
+@permission_required("kcevent.view_kcevent", raise_exception=True)
+def setEventStatistics(request: WSGIRequest, event_id: str, partner_id: str):
+    event = KCEvent.objects.get(ext_id=event_id)
+    partner = Partner.objects.get(ext_id=partner_id)
+    event_partner = KCEventPartner.objects.get(evp_event=event, evp_partner=partner)
+    
+    if not request.user.is_superuser:
+        allowed_partners = PartnerUser.objects.filter(user=request.user, partner=partner)
+        if allowed_partners.count() <= 0:
+            raise PermissionError('Need proper permission')
+    
+    data = request.POST if request.POST else None
+    form = StatisticMatrixForm(event, event_partner, data=data)
+    if request.POST and form.is_valid() and form.has_changed():
+        form.save()
+
+    return render(
+        request,
+        "kcevent/events/statisticsform.html",
+        {
+            "event": event, "partner": partner, 
+            "form": form
+        },
     )
 
 

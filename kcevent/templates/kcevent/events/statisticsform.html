@@ -1,0 +1,61 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+{% load formclass %}
+{% load formutils %}
+
+{% block content %}
+
+<section>
+    <div class="event-info">
+        <div class="event-info-item hover-item">
+            <h2>{% trans "Event" %}: {{ event.name }}</h2>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h3>{% trans "Plan data" %}</h3>
+    {% if form.errors %}
+        {% with form_error=form.non_field_errors %}
+            {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
+            {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage message_list=form_error type="error" %}
+        {% endwith %}
+    {% endif %}
+
+
+    <div class="modern-table-wrap">
+        <form action="" method="post">
+            {% csrf_token %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>{% trans "Role" %}</th>
+                        {% for gender in form.elements.header %}
+                        <th>{{ gender.label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role_name, item in form.elements.items.items %}
+                    <tr>
+                        <td>{{ role_name }}</td>
+                        {% for stat_field in item.gender %}
+                        {% with form|attr:stat_field as form_field %}
+                        <td>{% include "cvjm/comp-alert.html" with chkdsp=form_field.errors message=form_field.errors type="error" small=True %}
+                            {{ form_field|addclass:'form-control text-center' }}</td>
+                        {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button id="form-btn-submit" name="save" type="submit" class="btn-form-submit btn btn-primary w-max-20em" formnovalidate>{% trans "Save" %}</button>
+        </form>
+    </div>
+    <p>
+        <a href="{% url 'viewEvent' event_id=event.ext_id %}">Zurück</a>
+    </p>
+</section>
+
+
+{% endblock %}

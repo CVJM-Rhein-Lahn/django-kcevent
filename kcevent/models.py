@@ -29,11 +29,13 @@ from .defaults import (
 )
 from . import logger
 
+
 class GenderTypes(models.TextChoices):
     __empty__ = _("Please choose your gender")
     GENDER_MALE = "M", _("Male")
     GENDER_FEMALE = "W", _("Female")
     GENDER_DIVERT = "D", _("Divert")
+
 
 class KCTemplateSet(models.Model):
     class Meta:
@@ -411,10 +413,10 @@ class KCEvent(models.Model):
             "the event will not be deleted automatically."
         ),
     )
-    
+
     @property
     def has_regform_schema(self):
-        return self.regform_schema and self.regform_schema != '{}'
+        return self.regform_schema and self.regform_schema != "{}"
 
     def clean(self):
         validationErrors = {}
@@ -630,43 +632,14 @@ class KCEventPartner(models.Model):
     evp_partner = models.ForeignKey(
         Partner, on_delete=models.CASCADE, verbose_name=_("Event partner")
     )
-    # statistics
-    # Participants
-    evp_apx_participant_m = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of male par.")
-    )
-    evp_apx_participant_w = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of female par.")
-    )
-    evp_apx_participant_d = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of diverse par.")
-    )
-    # Reloaded
-    evp_apx_reloaded_m = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of male reloaded")
-    )
-    evp_apx_reloaded_w = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of female reloaded")
-    )
-    evp_apx_reloaded_d = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of diverse reloaded")
-    )
-    # Member
-    evp_apx_member_m = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of male members")
-    )
-    evp_apx_member_w = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of female members")
-    )
-    evp_apx_member_d = models.PositiveSmallIntegerField(
-        default=0, verbose_name=_("Approx. no. of diverse members")
-    )
+
     # contract
     evp_doc_contract = models.FileField(
         upload_to=getUploadPathEventPartnerContract,
         null=True,
         blank=True,
         verbose_name=_("Contract"),
+        help_text=_("Contract document between event host and event partner."),
         max_length=255,
     )
     # general terms and conditions
@@ -689,59 +662,15 @@ class KCEventPartner(models.Model):
             reg_event=self.evp_event,
             reg_user__in=subquery,
         )
-        
+
     def getReported(self, role: ParticipantRole):
         return KCEventPartnerRoleStatistic.objects.filter(
-            event_partner=self,
-            role=role
-        ).aggregate(Sum('apx_participants'))["apx_participants__sum"]
-
-    # TODO: This must be made more flexible.
-    @property
-    def totalApproxPerson(self) -> int:
-        return (
-            self.totalApproxParticipants
-            + self.totalApproxReloaded
-            + self.totalApproxMembers
-        )
-
-    @property
-    def totalApproxParticipants(self) -> int:
-        return (
-            self.evp_apx_participant_m
-            + self.evp_apx_participant_w
-            + self.evp_apx_participant_d
-        )
-
-    @property
-    def totalRegisteredConfirmee(self) -> int:
-        return self.getRegistrations(
-            Participant.ParticipantRoles.ROLE_CONFIRMEE
-        ).count()
-
-    @property
-    def totalApproxReloaded(self) -> int:
-        return (
-            self.evp_apx_reloaded_m + self.evp_apx_reloaded_w + self.evp_apx_reloaded_d
-        )
-
-    @property
-    def totalRegisteredReloaded(self) -> int:
-        return self.getRegistrations(Participant.ParticipantRoles.ROLE_RELOADED).count()
-
-    @property
-    def totalApproxMembers(self) -> int:
-        return self.evp_apx_member_m + self.evp_apx_member_w + self.evp_apx_member_d
-
-    @property
-    def totalRegisteredStaff(self) -> int:
-        return self.getRegistrations(Participant.ParticipantRoles.ROLE_STAFF).count()
+            event_partner=self, role=role
+        ).aggregate(Sum("apx_participants"))["apx_participants__sum"]
 
     def _gatherStatistics(self):
-        data = {
-            "roles": []
-        }
-        
+        data = {"roles": []}
+
         roles = ParticipantRole.objects.filter(event=self.evp_event)
         for role in roles:
             registrations = self.getRegistrations(role).count()
@@ -750,13 +679,13 @@ class KCEventPartner(models.Model):
                 "role": role,
                 "reported": reported if reported else 0,
                 "registered": registrations,
-                "progress": 0
+                "progress": 0,
             }
-            if rolestat['reported'] and rolestat['reported'] > 0:
-                rolestat['progress'] = int(
-                    round(rolestat['registered'] * 100 / rolestat['reported'], 0)
+            if rolestat["reported"] and rolestat["reported"] > 0:
+                rolestat["progress"] = int(
+                    round(rolestat["registered"] * 100 / rolestat["reported"], 0)
                 )
-            data['roles'].append(rolestat)
+            data["roles"].append(rolestat)
 
         self._statistics = data
         return data
@@ -786,10 +715,7 @@ class KCEventPartnerRoleStatistic(models.Model):
     class Meta:
         verbose_name = _("Partner Role Statistic")
         verbose_name_plural = _("Partner Role Statistics")
-        unique_together = (
-            "role",
-            "event_partner"
-        )
+        unique_together = ("role", "gender", "event_partner")
 
     id = models.AutoField(primary_key=True)
     event_partner = models.ForeignKey(KCEventPartner, on_delete=models.CASCADE)
@@ -800,6 +726,17 @@ class KCEventPartnerRoleStatistic(models.Model):
     apx_participants = models.PositiveSmallIntegerField(
         default=0, verbose_name=_("Approx. no. of par.")
     )
+
+    def __repr__(self):
+        return f"<KCEventPartnerRoleStatistic id={self.id} role={self.role.name} gender={self.gender} participants={self.apx_participants}>"
+
+    def __str__(self) -> str:
+        return "KCEventPartnerRoleStatistic: {} <> {} / {} / {}: {}".format(
+            self.event_partner.evp_event.name, 
+            self.event_partner.evp_partner.name,
+            self.role.name, self.gender, self.apx_participants
+        )
+
 
 class PartnerUser(models.Model):
     class Meta:
@@ -1244,11 +1181,8 @@ class KCTemplateSetHook:
             tpl.tpl_content = TPL__FORM_INTRODUCTION__CONTENT
         else:
             return
-        try:
-            tpl.save()
-        except:
-            # we ignore.
-            pass
+
+        tpl.save()
 
     @staticmethod
     @receiver(post_save, sender=KCTemplateSet)

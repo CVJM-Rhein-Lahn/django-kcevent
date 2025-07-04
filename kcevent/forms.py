@@ -5,10 +5,14 @@ from kcevent.models import (
     ParticipantRole,
     KCEventRegistrationStateTypes,
     Partner,
-    KCEvent
+    KCEvent,
+    KCEventPartner,
+    KCEventPartnerRoleStatistic,
+    GenderTypes
 )
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
+from django.core import validators
 
 
 class ParticipantForm(forms.ModelForm):
@@ -360,4 +364,101 @@ class PreviewForm(forms.Form):
             "fields": ";".join(self.fields),
             "forms": ";".join(self.form_list)
         }
+
+class StatisticMatrixForm(forms.Form):
+    
+    def __init__(self, event: KCEvent, partner: KCEventPartner, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._event = event
+        self._evp = partner
+        self._roles = []
+        self._elements = {}
+
+        self.buildElements()
+
+    def loadRoles(self):
+        """Loads the available roles for the event"""
+
+        self._roles = {}
+        for row in ParticipantRole.objects.filter(event=self.event):
+            self._roles[str(row.id)] = row
+
+    def buildElements(self):
+        dbData = {}
+        for row in KCEventPartnerRoleStatistic.objects.filter(event_partner=self._evp):
+            try:
+                dbData[str(row.role.id)]
+            except KeyError:
+                dbData[str(row.role.id)] = {}
+                
+            dbData[str(row.role.id)][row.gender] = row.apx_participants
+        
+        self._elements = {
+            'header': [
+                GenderTypes.GENDER_MALE,
+                GenderTypes.GENDER_FEMALE,
+                GenderTypes.GENDER_DIVERT,
+            ],
+            'items': {
+            }
+        }
+        self.loadRoles()
+        for role in self.roles.values():
+            self._elements['items'][role.name] = {
+                'role': role,
+                'gender': []
+            }
+            for gender in ['M', 'W', 'D']:
+                fieldName = 'stat_'+str(role.id)+'_'+gender
+                initialValue = 0
+                try:
+                    initialValue = dbData[str(role.id)][gender]
+                except KeyError:
+                    pass
+                field = forms.IntegerField(
+                    label=_("Approx. no. of par."),
+                    min_value=0, 
+                    step_size=1, 
+                    required=False,
+                    initial=initialValue,
+                    widget=forms.NumberInput(
+                        attrs={
+                            'min': 0,
+                            'step': 1,
+                            'name': fieldName
+                        },
+                    ),
+                    validators=[
+                        validators.validate_integer
+                    ]
+                )
+                self._elements['items'][role.name]['gender'].append(fieldName)
+                self.fields[fieldName] = field
+                
+    @property
+    def elements(self):
+        return self._elements
+
+    @property
+    def roles(self):
+        return self._roles
+    
+    @property
+    def event(self):
+        return self._event
+    
+    def save(self):
+        for fieldName, field in self.fields.items():
+            stub, role_id, gender = fieldName.split('_')
+            value = self.cleaned_data.get(fieldName)
+            obj, created = KCEventPartnerRoleStatistic.objects.update_or_create(
+                event_partner=self._evp,
+                gender=gender,
+                role=self._roles[role_id],
+                defaults={
+                    'apx_participants': value if value is not None else 0,
+                }
+            )
+    
+    
 
