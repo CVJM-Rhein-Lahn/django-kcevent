@@ -269,7 +269,7 @@ def registerEventLogin(
         try:
             evt = KCEvent.objects.get(event_url=event_url)
         except KCEvent.DoesNotExist:
-            raise Http404(_("Event not found"))
+            return render(request, "cvjm/kcnotfound.html", {"event": evt})
 
     if request.method == "POST":
         password = None
@@ -319,6 +319,17 @@ def registerEventLogin(
 @require_http_methods(["GET", "POST"])
 @event_logged_in(registerEventLogin)
 def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = None):
+    if evt is None:
+        return render(request, "cvjm/kcnotfound.html", {"event": evt})
+    
+    # The user can only register, if the registration time is not exceeded yet.
+    if not request.user.is_superuser:
+        now = datetime.datetime.now().date()
+        if evt.registration_end and evt.registration_end < now:
+            return render(request, "cvjm/kcexpired.html", {"event": evt})
+        if evt.registration_start and now < evt.registration_start:
+            return render(request, "cvjm/kcnotfound.html", {"event": evt})
+    
     form_list = [
         ('pd', ParticipantForm),
         ('rd', KCEventRegistrationForm)
