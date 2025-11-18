@@ -94,7 +94,7 @@ class GoogleSheetExporter:
                     str(participant.get_nutrition_display()),
                     str(_('Yes')) if participant.lactose_intolerance else str(_('No')),
                     str(_('Yes')) if participant.celiac_disease else str(_('No')),
-                    str(participant.get_role_display()),
+                    str(participant.role.name),
                     str(participant.get_gender_display()),
                     str(registration.reg_notes),
                     docPass,

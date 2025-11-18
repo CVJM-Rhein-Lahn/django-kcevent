@@ -16,7 +16,7 @@ E-Mail Adresse: {{ user.mail_addr }}
 Geburtsdatum: {{ user.birthday }}
 Geschlecht: {{ user.get_gender_display }}
 Kirchengemeinde/Organisation: {{ partner_name }}
-Rolle: {{ user.get_role_display }}
+Rolle: {{ user.role.name }}
 
 Ernährung: {{ user.nutrition_tolerances }}
 
@@ -54,7 +54,7 @@ E-Mail Adresse: {{ user.mail_addr }}
 Geburtsdatum: {{ user.birthday }}
 Geschlecht: {{ user.get_gender_display }}
 Kirchengemeinde: {{ partner_name }}
-Rolle: {{ user.get_role_display }}
+Rolle: {{ user.role.name }}
 
 Anmerkungen: 
 {{ notes }}
