@@ -82,11 +82,11 @@ class is_27_and_older(admin.SimpleListFilter):
         # to decide how to filter the queryset.
         if self.value() == "yes":
             return queryset.filter(
-                reg_user__birthday__lte=F("reg_event__start_date") - datetime.datetime.timedelta(weeks=52*27),
+                reg_user__birthday__lte=F("reg_event__start_date") - datetime.timedelta(weeks=52*27),
             )
         elif self.value() == "no":
             return queryset.filter(
-                reg_user__birthday__gt=F("reg_event__start_date") - datetime.datetime.timedelta(weeks=52*27),
+                reg_user__birthday__gt=F("reg_event__start_date") - datetime.timedelta(weeks=52*27),
             )
         else:
             return queryset
