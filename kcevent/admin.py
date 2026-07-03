@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from django.urls import resolve
@@ -8,10 +8,13 @@ from .models import (
     KCEvent, KCPerson, Participant, Partner, KCEventPartner, KCEventRegistration,
     KCTemplate, KCTemplateSet, KCEventExportSetting,
     KCEventLocation, ParticipantRole, KCEventPriceRule, PartnerUser,
-    KCEventPartnerRoleStatistic
+    KCEventPartnerRoleStatistic, ZitadelUserMapping, ZitadelRoleAssignment
 )
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
-from .actions import resendConfirmation, resendChurchNotification, copyEvent, syncEvent
+from .actions import (
+    resendConfirmation, resendChurchNotification, copyEvent, syncEvent,
+    confirmRegistrationsAndAssignRoles
+)
 
 class KCEventPartnerRoleStatisticsAdmin(admin.ModelAdmin):
     model = KCEventPartnerRoleStatistic
@@ -116,19 +119,22 @@ class KCEventAdmin(admin.ModelAdmin):
             }
         ]
         return format_html(
-            '<ul class="flat-action-list">' + 
-            ''.join(
-                [
-                    '<li><a href="{url}">{linkName}</a></li>'.format(url=i['url'], linkName=i['name']) for i in links
-                ]
-            ) + 
-            '</ul>'   
+            '<ul class="flat-action-list">{}</ul>',
+            format_html_join(
+                '',
+                '<li><a href="{0}">{1}</a></li>',
+                ((link['url'], link['name']) for link in links)
+            )
         )
 
     @admin.display(description = _('Registration URL'))
     def event_link(self, obj):
         url = reverse('registerEvent', kwargs={'event_url': obj.event_url})
-        return format_html('<a href="{url}" target="_blank">{linkName}</a>'.format(url=url, linkName=obj.event_url))
+        return format_html(
+            '<a href="{url}" target="_blank">{linkName}</a>',
+            url=url,
+            linkName=obj.event_url
+        )
 
 class KCEventRegistrationAdmin(admin.ModelAdmin):
     list_display = [
@@ -141,7 +147,7 @@ class KCEventRegistrationAdmin(admin.ModelAdmin):
     ]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
-    actions = [resendConfirmation, resendChurchNotification]
+    actions = [resendConfirmation, resendChurchNotification, confirmRegistrationsAndAssignRoles]
     date_hierarchy = "reg_event__start_date"
     
     class KCEventRegistrationAdminForm(ModelForm):
@@ -214,4 +220,21 @@ admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Partner, PartnerAdmin)
 admin.site.register(KCEventRegistration, KCEventRegistrationAdmin)
 admin.site.register(KCEventLocation, KCEventLocationAdmin)
+
+
+class ZitadelUserMappingAdmin(admin.ModelAdmin):
+    list_display = ["participant", "zitadel_user_id", "invitation_sent", "created_at"]
+    search_fields = ["participant__first_name", "participant__last_name", "zitadel_user_id"]
+    readonly_fields = ["ext_id", "created_at", "updated_at"]
+
+
+class ZitadelRoleAssignmentAdmin(admin.ModelAdmin):
+    list_display = ["registration", "role_name", "zitadel_grant_id", "assigned_at"]
+    search_fields = ["registration__reg_user__first_name", "registration__reg_user__last_name", "role_name"]
+    list_filter = ["registration__reg_event"]
+    readonly_fields = ["ext_id", "created_at", "updated_at"]
+
+
+admin.site.register(ZitadelUserMapping, ZitadelUserMappingAdmin)
+admin.site.register(ZitadelRoleAssignment, ZitadelRoleAssignmentAdmin)
 admin.site.register(KCEventPartnerRoleStatistic, KCEventPartnerRoleStatisticsAdmin)

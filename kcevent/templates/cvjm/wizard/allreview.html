@@ -1,0 +1,55 @@
+{% extends "cvjm/base.html" %}
+{% load i18n %}
+
+{% block content %}
+{% with done_step=wizard.steps.count|add:"1" %}
+{% include "cvjm/wizard/comp-stepper.html" with kfh=kfh step=wizard.steps.step1 %}
+{% endwith %}
+
+<section>
+  <div class="event-info">
+    <div class="event-info-item">
+      <h2>{% blocktranslate with event_name=wizard.event %}Summary: {{ event_name }}{% endblocktranslate %}</h2>
+      <p>{% blocktranslate %}Please check all registrations below. Click "Confirm all registrations" to complete the process, or go back to make changes.{% endblocktranslate %}</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3>{% trans "Registrations to be confirmed" %}</h3>
+  <table class="allreview-table">
+    <thead>
+      <tr>
+        <th>{% trans "Name" %}</th>
+        <th>{% trans "Role" %}</th>
+        <th>{% trans "Church / Organisation" %}</th>
+        <th>{% trans "Birthday" %}</th>
+        <th>{% trans "Mail address" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for reg in wizard.all_pending %}
+      <tr>
+        <td>{{ reg.reg_user.first_name }} {{ reg.reg_user.last_name }}</td>
+        <td>{{ reg.reg_user.role|default:"–" }}</td>
+        <td>{{ reg.reg_user.church|default:"–" }}</td>
+        <td>{{ reg.reg_user.birthday|date:"d.m.Y"|default:"–" }}</td>
+        <td>{{ reg.reg_user.parent_mail_addr|default:reg.reg_user.mail_addr|default:"–" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ wizard.management_form }}
+    <div class="formgrid-item-full">
+      <div class="formgrid-item-row">
+        <button name="wizard_goto_step" type="submit" value="{{ wizard.steps.current }}" class="btn btn-primary w-max-20em" formnovalidate>{% trans "Back to review" %}</button>
+        <button name="_final_confirm" type="submit" value="1" class="btn btn-primary w-max-20em">{% trans "Confirm all registrations" %}</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+{% endblock %}

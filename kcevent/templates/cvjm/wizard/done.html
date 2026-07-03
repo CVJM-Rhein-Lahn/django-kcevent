@@ -10,14 +10,31 @@
     <div class="event-info">
       <div class="event-info-item">
         <h2>{% trans "Registration successful!" %}</h2>
-        {% if not wizard.form_data.rd.instance.confirmation_send %}
-          {% trans "The confirmation mail could not be send. Please consult the event organisator." as genericMessage %}
-          {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
-        {% endif %}
-        <p>{% blocktranslate with first_name=wizard.form_data.pd.instance.first_name last_name=wizard.form_data.pd.instance.last_name event_name=wizard.event.name %}Thank you for registration of yourself or your child {{ first_name }} {{ last_name }} to {{ event_name }}.{% endblocktranslate %}</p>
-        <p>{% blocktranslate with ext_id=wizard.form_data.rd.instance.ext_id %}Your registration was saved with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
-        <p>{% blocktranslate with ext_id=wizard.form_data.rd.instance.ext_id mail_addr=wizard.form_data.pd.instance.mail_addr %}You should receive a registration confirmation mail at address {{ mail_addr }}.
+
+        {% for reg in wizard.all_registrations %}
+          {% if not reg.confirmation_send %}
+            {% trans "The confirmation mail could not be send. Please consult the event organisator." as genericMessage %}
+            {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
+          {% endif %}
+        {% endfor %}
+
+        {% if wizard.all_registrations|length > 1 %}
+          <p>{% blocktranslate with event_name=wizard.event.name %}Thank you for registering the following participants to {{ event_name }}:{% endblocktranslate %}</p>
+          <ul>
+            {% for reg in wizard.all_registrations %}
+              <li>{{ reg.reg_user.first_name }} {{ reg.reg_user.last_name }} – {{ reg.ext_id }}</li>
+            {% endfor %}
+          </ul>
+          <p>{% blocktranslate %}You should receive a registration confirmation mail for each participant.
+If you do not receive a confirmation mail, kindly get in touch with the event organisator with the reference number.{% endblocktranslate %}</p>
+        {% else %}
+          {% with reg=wizard.current_registration %}
+          <p>{% blocktranslate with first_name=reg.reg_user.first_name last_name=reg.reg_user.last_name event_name=wizard.event.name %}Thank you for registration of yourself or your child {{ first_name }} {{ last_name }} to {{ event_name }}.{% endblocktranslate %}</p>
+          <p>{% blocktranslate with ext_id=reg.ext_id %}Your registration was saved with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
+          <p>{% blocktranslate with ext_id=reg.ext_id mail_addr=reg.reg_user.parent_mail_addr|default:reg.reg_user.mail_addr %}You should receive a registration confirmation mail at address {{ mail_addr }}.
 If you do not receive a confirmation mail, kindly get in touch with the event organisator with the reference number {{ ext_id }}.{% endblocktranslate %}</p>
+          {% endwith %}
+        {% endif %}
       </div>
     </div>
   </section>

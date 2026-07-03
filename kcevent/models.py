@@ -149,6 +149,11 @@ class Participant(KCPerson):
     gender = models.CharField(
         max_length=1, choices=GenderTypes.choices, verbose_name=_("Gender")
     )
+    parent_mail_addr = models.EmailField(
+        blank=True,
+        verbose_name=_("Parent mail address"),
+        help_text=_("Mail address of a parent or legal guardian. Used as fallback if the participant has no own mail address."),
+    )
     role = models.ForeignKey(
         "ParticipantRole",
         blank=True,
@@ -998,6 +1003,27 @@ class KCEventRegistration(models.Model):
             and self.reg_event.notify_sender_address.strip()
         ):
             sender = self.reg_event.notify_sender_address.strip()
+        primary_email = self.reg_user.mail_addr
+        parent_email = self.reg_user.parent_mail_addr or ""
+        if not primary_email and parent_email:
+            primary_email = parent_email
+            parent_email = ""
+
+        zitadel_invitation_link = ""
+        try:
+            zitadel_mapping = self.reg_user.zitadel_mapping
+            zitadel_invitation_link = zitadel_mapping.invitation_url or ""
+        except Exception:
+            pass
+
+        parent_contact = None
+        try:
+            parent_contact = self.kcemergencycontact_set.filter(
+                is_parent_contact=True
+            ).first()
+        except Exception:
+            pass
+
         context = Context(
             {
                 "host": self.reg_event.host,
@@ -1005,17 +1031,24 @@ class KCEventRegistration(models.Model):
                 "user": self.reg_user,
                 "notes": self.reg_notes,
                 "partner_name": self.reg_user.church.name,
+                "zitadel_invitation_link": zitadel_invitation_link,
+                "parent_contact": parent_contact,
             }
         )
         subject = Template(tpl.tpl_subject).render(context)
         message = Template(tpl.tpl_content).render(context)
+        to_addresses = [primary_email]
+        cc_addresses = []
+        if parent_email and parent_email != primary_email:
+            cc_addresses.append(parent_email)
+        elif parent_contact and parent_contact.mail_addr and parent_contact.mail_addr != primary_email:
+            cc_addresses.append(parent_contact.mail_addr)
         m = mail.EmailMessage(
             subject,
             message,
             sender,
-            [
-                self.reg_user.mail_addr,
-            ],
+            to_addresses,
+            cc=cc_addresses,
         )
         sendResult = False
         try:
@@ -1113,6 +1146,14 @@ class KCEventRegistration(models.Model):
             return False
 
 
+class KCEmergencyContactRoleTypes(models.TextChoices):
+    __empty__ = _("Please choose the emergency contact role")
+    ROLE_MOTHER = "mother", _("Mother")
+    ROLE_FATHER = "father", _("Father")
+    ROLE_GUARDIAN = "guardian", _("Legal guardian")
+    ROLE_OTHER = "other", _("Other")
+
+
 class KCEmergencyContact(KCPerson):
     class Meta:
         verbose_name = _("Emergency contacts")
@@ -1121,7 +1162,22 @@ class KCEmergencyContact(KCPerson):
     registration = models.ForeignKey(
         KCEventRegistration, on_delete=models.CASCADE, verbose_name=_("Registrierung")
     )
-    role = models.TextField(blank=True, verbose_name=_("Emergency contact role"))
+    role_type = models.CharField(
+        max_length=20,
+        choices=KCEmergencyContactRoleTypes.choices,
+        blank=True,
+        verbose_name=_("Emergency contact role"),
+    )
+    role = models.TextField(
+        blank=True,
+        verbose_name=_("Emergency contact role detail"),
+        help_text=_("Additional detail, e.g. when 'Other' is selected."),
+    )
+    is_parent_contact = models.BooleanField(
+        default=False,
+        verbose_name=_("Is parent contact"),
+        help_text=_("Marks this contact as the primary parent/legal guardian for communication."),
+    )
 
 
 class KCEventPriceRule(models.Model):
@@ -1158,6 +1214,65 @@ class KCEventPriceRule(models.Model):
 
     def __str__(self):
         return "Price rule"
+
+
+class ZitadelUserMapping(models.Model):
+    class Meta:
+        verbose_name = _("Zitadel user mapping")
+        verbose_name_plural = _("Zitadel user mappings")
+
+    id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    participant = models.OneToOneField(
+        Participant,
+        on_delete=models.CASCADE,
+        verbose_name=_("Participant"),
+        related_name="zitadel_mapping",
+    )
+    zitadel_user_id = models.CharField(
+        max_length=255, blank=True, verbose_name=_("Zitadel user ID")
+    )
+    invitation_url = models.URLField(
+        blank=True, verbose_name=_("Zitadel invitation URL")
+    )
+    invitation_sent = models.BooleanField(
+        default=False, verbose_name=_("Invitation sent")
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created on"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated on"))
+
+    def __str__(self):
+        return f"Zitadel mapping for {self.participant}"
+
+
+class ZitadelRoleAssignment(models.Model):
+    class Meta:
+        verbose_name = _("Zitadel role assignment")
+        verbose_name_plural = _("Zitadel role assignments")
+        unique_together = ("registration", "role_name")
+
+    id = models.AutoField(primary_key=True)
+    ext_id = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    registration = models.ForeignKey(
+        KCEventRegistration,
+        on_delete=models.CASCADE,
+        verbose_name=_("Event registration"),
+        related_name="zitadel_role_assignments",
+    )
+    role_name = models.CharField(
+        max_length=255, verbose_name=_("Zitadel role name")
+    )
+    zitadel_grant_id = models.CharField(
+        max_length=255, blank=True, verbose_name=_("Zitadel grant ID")
+    )
+    assigned_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Assigned at")
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created on"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("Updated on"))
+
+    def __str__(self):
+        return f"{self.role_name} for {self.registration}"
 
 
 class KCTemplateSetHook:

@@ -1,0 +1,26 @@
+{% load i18n %}
+{% if wizard.completed_registrations %}
+<section class="session-banner">
+  <div class="session-banner-inner">
+    <h4>{% trans "Already registered in this session" %}</h4>
+    <table class="session-banner-table">
+      <thead>
+        <tr>
+          <th>{% trans "Name" %}</th>
+          <th>{% trans "Role" %}</th>
+          <th>{% trans "Church / Organisation" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for reg in wizard.completed_registrations %}
+        <tr>
+          <td>{{ reg.reg_user.first_name }} {{ reg.reg_user.last_name }}</td>
+          <td>{{ reg.reg_user.role|default:"–" }}</td>
+          <td>{{ reg.reg_user.church|default:"–" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}

@@ -11,6 +11,7 @@
 
 {% block content %}
 {% include "cvjm/wizard/comp-stepper.html" with kfh=kfh step=wizard.steps.step1 %}
+{% include "cvjm/wizard/comp-session-banner.html" %}
 
 <section>
   <div class="event-info">
@@ -65,21 +66,27 @@
 
 <section>
     <h3>{% trans "Registration" %}</h3>
-    {% if kfh.form.errors or kfh.formReg.errors %}
-        {% with form_error=wizard.form.non_field_errors %}
-            {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
-            {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage message_list=form_error type="error" %}
-        {% endwith %}
+    {% if wizard.form.errors %}
+        {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}
+        {% include "cvjm/comp-alert.html" with chkdsp=True message=genericMessage type="error" %}
     {% endif %}
 
     <form action="" method="post">{% csrf_token %}
         <div class="formgrid-container form-control-preview">
             {{ wizard.management_form }}
             {% for formname, subform in wizard.form.form_list.items %}
+                {% if subform.non_field_errors %}
+                    <div class="formgrid-item-full">
+                        {% include "cvjm/comp-alert.html" with chkdsp=True message=subform.non_field_errors type="error" %}
+                    </div>
+                {% endif %}
                 {% for form_field in subform %}
                     {% if not form_field.is_hidden %}
-                        <div class="formgrid-item-full">
-                            <h5>{% trans form_field.field.label %}:</h5> 
+                        <div class="formgrid-item-full {% if form_field.errors %}form-field-error{% endif %}" data-field-name="{{ form_field.name }}">
+                            {% if form_field.errors %}
+                                {% include "cvjm/comp-alert.html" with chkdsp=True message=form_field.errors type="error" small=True %}
+                            {% endif %}
+                            <h5>{% trans form_field.field.label %}:</h5>
                             <div class="form-grid-preview-container">{% if form_field.name == 'church' %}
                                     <div class="event-meta-line">{{ subform.partner.name }}</div>
                                     <div class="event-meta-line">{{ subform.partner.address_line_2 }}</div>
@@ -132,9 +139,14 @@
                 {% else %}
                 <button name="confirm" type="submit" class="btn btn-primary w-max-20em">{% trans "Confirm binding registration" %}</button>
                 {% endif %}
+                <button name="_add_another" type="submit" value="1" class="btn btn-secondary w-max-20em" formnovalidate>{% trans "Register another participant" %}</button>
+                {% if wizard.completed_registrations %}
+                <button name="_cancel_last" type="submit" value="1" class="btn btn-danger w-max-20em" formnovalidate>{% trans "Cancel this registration" %}</button>
+                {% endif %}
             </div>
         </div>
     </form>
 </section>
+
 <script type="text/javascript" src="{% static "js/form.js" %}?version=20241031202700"></script>
 {% endblock %}

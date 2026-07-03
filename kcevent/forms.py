@@ -2,6 +2,7 @@ from django import forms
 from kcevent.models import Participant, KCEventRegistration
 from kcevent.models import (
     KCEmergencyContact,
+    KCEmergencyContactRoleTypes,
     ParticipantRole,
     KCEventRegistrationStateTypes,
     Partner,
@@ -30,6 +31,7 @@ class ParticipantForm(forms.ModelForm):
             "zip_code",
             "city",
             "mail_addr",
+            "parent_mail_addr",
             "phone",
             "nutrition",
             "lactose_intolerance",
@@ -52,6 +54,7 @@ class ParticipantForm(forms.ModelForm):
                 }
             ),
             "mail_addr": forms.EmailInput(attrs={"placeholder": _("Mail address")}),
+            "parent_mail_addr": forms.EmailInput(attrs={"placeholder": _("Parent mail address")}),
             "birthday": forms.DateInput(attrs={"type": "date"}, format='%Y-%m-%d'),
             "intolerances": forms.Textarea(
                 attrs={"placeholder": _("Allergies / intolerances"), "rows": 2}
@@ -276,6 +279,9 @@ class EmergencyContactForm(forms.ModelForm):
             "city",
             "phone",
             "mail_addr",
+            "role_type",
+            "role",
+            "is_parent_contact",
         ]
         widgets = {
             "first_name": forms.TextInput(attrs={"placeholder": _("First name")}),
@@ -293,6 +299,7 @@ class EmergencyContactForm(forms.ModelForm):
                 }
             ),
             "mail_addr": forms.EmailInput(attrs={"placeholder": _("Mail address")}),
+            "role": forms.TextInput(attrs={"placeholder": _("Other role description")}),
         }
 
     def __init__(self, event, *args, **kwargs):
@@ -352,6 +359,22 @@ class PreviewForm(forms.Form):
                 media += field.widget.media
         return media
         
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return False
+        for subform in self.form_list.values():
+            if not subform.is_valid():
+                valid = False
+                if subform.non_field_errors():
+                    errors = self._errors.get(
+                        forms.forms.NON_FIELD_ERRORS, self.error_class()
+                    )
+                    for msg in subform.non_field_errors():
+                        errors.append(f"{subform.__class__.__name__}: {msg}")
+                    self._errors[forms.forms.NON_FIELD_ERRORS] = errors
+        return valid
+
     def __repr__(self):
         if self._errors is None:
             is_valid = "Unknown"
