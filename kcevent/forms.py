@@ -96,6 +96,10 @@ class ParticipantForm(forms.ModelForm):
     def partner(self) -> Partner | None:
         return self.cleaned_data.get('church')
 
+    @property
+    def selected_role(self) -> ParticipantRole | None:
+        return self.cleaned_data.get('role')
+
     def clean_nutrition(self):
         # check if we're on-site attendance - in this case, this
         # document is mandatory!

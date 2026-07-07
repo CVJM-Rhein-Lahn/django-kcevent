@@ -95,6 +95,8 @@
                                     <div class="event-meta-line">{{ subform.partner.zip_code }} {{ subform.partner.city }}</div>
                                     <div class="event-meta-line">{{ subform.partner.mail_addr }}</div>
                                     <div class="event-meta-line">{{ subform.partner.website }}</div>
+                                {% elif form_field.name == 'role' %}
+                                    <div class="event-meta-line">{{ subform.selected_role.name }}</div>
                                 {% elif form_field.field.widget.input_type == 'checkbox' %}
                                     {% if form_field.name == 'reg_consent_privacy'%}
                                         {% blocktranslate with url_privacy_policy=URL_PRIVACY_POLICY trimmed %}

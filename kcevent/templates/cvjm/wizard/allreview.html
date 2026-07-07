@@ -34,7 +34,7 @@
         <td>{{ reg.reg_user.role|default:"–" }}</td>
         <td>{{ reg.reg_user.church|default:"–" }}</td>
         <td>{{ reg.reg_user.birthday|date:"d.m.Y"|default:"–" }}</td>
-        <td>{{ reg.reg_user.parent_mail_addr|default:reg.reg_user.mail_addr|default:"–" }}</td>
+        <td>{{ reg.reg_user.mail_addr|default:reg.reg_user.parent_mail_addr|default:"–" }}</td>
       </tr>
       {% endfor %}
     </tbody>

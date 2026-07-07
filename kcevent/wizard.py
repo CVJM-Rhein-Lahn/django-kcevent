@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from django.utils.decorators import classonlymethod
 from formtools.wizard.views import SessionWizardView #, CookieWizardView
+from formtools.wizard.forms import ManagementForm
 from sentry_sdk import capture_exception
 from .models import (
     KCEvent,
@@ -39,6 +40,8 @@ class EventRegistrationWizard(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         data = super().get_context_data(form=form, **kwargs)
         data['wizard']['event'] = self.event
+        if not self.completed_registrations:
+            self.completed_registrations = self.request.session.get('completed_registrations', [])
         if self.completed_registrations:
             data['wizard']['completed_registrations'] = [
                 KCEventRegistration.objects.get(id=rid)
@@ -142,7 +145,6 @@ class EventRegistrationWizard(SessionWizardView):
         """Intercept special wizard actions from the review step."""
         # extract / store the completed registrations from the session
         self.completed_registrations = self.request.session.get('completed_registrations', [])
-        print('Loaded copmleted_registrations: ', self.completed_registrations)
         if self.steps.current == 'review':
             if self.request.POST.get('_add_another'):
                 return self._handle_add_another()
@@ -150,8 +152,9 @@ class EventRegistrationWizard(SessionWizardView):
                 return self._handle_cancel_last()
             if self.request.POST.get('_final_confirm'):
                 return self.done([], {})
-            if self.request.POST.get('confirm'):
+            if 'confirm' in self.request.POST:
                 if self.completed_registrations:
+                    self.request.session['completed_registrations'] = self.completed_registrations
                     return self._render_allreview()
         response = super().post(*args, **kwargs)
         self.request.session['completed_registrations'] = self.completed_registrations
@@ -181,7 +184,9 @@ class EventRegistrationWizard(SessionWizardView):
             "cvjm/wizard/allreview.html",
             {
                 "wizard": {
-                    "management_form": self.get_management_form(),
+                    "management_form": ManagementForm(prefix=self.prefix, initial={
+                        'current_step': self.steps.current,
+                    }),
                     "steps": self.steps,
                     "event": self.event,
                     "all_pending": all_pending,
@@ -317,6 +322,8 @@ class EventRegistrationWizard(SessionWizardView):
         all_regs = ([current_reg] if current_reg else []) + earlier_regs
         for reg in all_regs:
             self._finalize_registration(reg)
+
+        self.request.session.pop('completed_registrations', None)
 
         return render(
             self.request,
