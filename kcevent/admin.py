@@ -13,7 +13,7 @@ from .models import (
 from .filters import custom_list_title_filter, is_27_and_older, is_event_future
 from .actions import (
     resendConfirmation, resendChurchNotification, copyEvent, syncEvent,
-    confirmRegistrationsAndAssignRoles
+    confirmRegistrationsAndAssignRoles, provisionZitadelAccounts
 )
 
 class KCEventPartnerRoleStatisticsAdmin(admin.ModelAdmin):
@@ -147,7 +147,7 @@ class KCEventRegistrationAdmin(admin.ModelAdmin):
     ]
     search_fields = ["reg_event__name", "reg_user__first_name", "reg_user__last_name"]
     ordering = ["reg_event", "reg_user"]
-    actions = [resendConfirmation, resendChurchNotification, confirmRegistrationsAndAssignRoles]
+    actions = [resendConfirmation, resendChurchNotification, confirmRegistrationsAndAssignRoles, provisionZitadelAccounts]
     date_hierarchy = "reg_event__start_date"
     
     class KCEventRegistrationAdminForm(ModelForm):

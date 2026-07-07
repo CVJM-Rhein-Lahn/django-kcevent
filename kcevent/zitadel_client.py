@@ -69,22 +69,24 @@ def create_user(
     if org_id:
         headers["x-zitadel-orgid"] = org_id
 
-    user_payload: dict = {
-        "username": email,
-        "human": {
-            "profile": {
-                "givenName": first_name,
-                "familyName": last_name,
-                "displayName": f"{first_name} {last_name}",
-                "email": {
-                    "email": email,
-                    "isVerified": False,
-                },
-            },
+    human: dict = {
+        "profile": {
+            "givenName": first_name,
+            "familyName": last_name,
+            "displayName": f"{first_name} {last_name}",
+        },
+        "email": {
+            "email": email,
+            "isVerified": False,
         },
     }
     if phone:
-        user_payload["phone"] = {"phone": phone, "isVerified": False}
+        human["phone"] = {"phone": phone, "isVerified": False}
+
+    user_payload: dict = {
+        "username": email,
+        "human": human,
+    }
 
     try:
         resp = requests.post(
@@ -95,9 +97,14 @@ def create_user(
         )
         resp.raise_for_status()
         data = resp.json()
-        user_id = data.get("userId")
+        user_id = data.get("id")
     except requests.RequestException as e:
-        logger.error("Zitadel create_user failed for %s: %s", email, e)
+        body = ""
+        try:
+            body = e.response.text if e.response is not None else ""
+        except Exception:
+            pass
+        logger.error("Zitadel create_user failed for %s: %s | response: %s", email, e, body)
         return None, None
 
     invitation_url = _create_invitation_link(user_id, issuer, project_id, headers)

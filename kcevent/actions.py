@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.utils import timezone as dj_timezone
 from .exceptions import NoTemplatesException
-from .models import KCEventRegistration, KCEvent, KCEventRegistrationStateTypes, ZitadelRoleAssignment
+from .models import KCEventRegistration, KCEvent, KCEventRegistrationStateTypes, ZitadelRoleAssignment, ZitadelUserMapping
 from .exports import GoogleSheetExporter
 from . import zitadel_client
 
@@ -158,5 +158,85 @@ def confirmRegistrationsAndAssignRoles(
             _("%(count)d error(s) occurred during Zitadel role assignment. See warnings above.") % {
                 "count": errors
             },
+            level=messages.ERROR,
+        )
+
+
+@admin.action(description=_("Provision Zitadel accounts for participants"))
+def provisionZitadelAccounts(
+    modeladmin, request, queryset: List[KCEventRegistration]
+):
+    created = 0
+    skipped = 0
+    errors = 0
+
+    for reg in queryset:
+        participant = reg.reg_user
+
+        try:
+            existing = participant.zitadel_mapping
+            if existing.zitadel_user_id:
+                skipped += 1
+                continue
+        except ZitadelUserMapping.DoesNotExist:
+            pass
+
+        email = participant.mail_addr or participant.parent_mail_addr
+        if not email:
+            modeladmin.message_user(
+                request,
+                _("%(user)s has no email address – skipping.") % {"user": str(participant)},
+                level=messages.WARNING,
+            )
+            errors += 1
+            continue
+
+        existing_user_id = zitadel_client.find_user_by_email(email)
+        if existing_user_id:
+            ZitadelUserMapping.objects.update_or_create(
+                participant=participant,
+                defaults={"zitadel_user_id": existing_user_id},
+            )
+            created += 1
+            continue
+
+        user_id, invitation_url = zitadel_client.create_user(
+            email=email,
+            first_name=participant.first_name,
+            last_name=participant.last_name,
+            phone=participant.phone or "",
+        )
+        if user_id:
+            ZitadelUserMapping.objects.update_or_create(
+                participant=participant,
+                defaults={
+                    "zitadel_user_id": user_id,
+                    "invitation_url": invitation_url or "",
+                },
+            )
+            created += 1
+        else:
+            modeladmin.message_user(
+                request,
+                _("Zitadel account creation failed for %(user)s.") % {"user": str(participant)},
+                level=messages.ERROR,
+            )
+            errors += 1
+
+    if created:
+        modeladmin.message_user(
+            request,
+            _("%(count)d Zitadel account(s) provisioned.") % {"count": created},
+        )
+    if skipped:
+        modeladmin.message_user(
+            request,
+            _("%(count)d participant(s) already had a Zitadel account and were skipped.") % {"count": skipped},
+            level=messages.INFO,
+        )
+    if errors:
+        modeladmin.message_user(
+            request,
+            _("%(count)d error(s) occurred. See warnings above.") % {"count": errors},
             level=messages.ERROR,
         )

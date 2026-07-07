@@ -1,6 +1,7 @@
 import re
 from django import template
 from django.forms.utils import ErrorList
+from django.forms import BoundField
 
 register = template.Library()
 numeric_test = re.compile("^\d+$")
@@ -37,3 +38,18 @@ def attr(value, arg):
         return value[int(arg)]
     else:
         return ""
+
+
+@register.filter(name="field_display_value")
+def field_display_value(bound_field: BoundField):
+    """Return the human-readable display value of a BoundField without rendering its widget."""
+    field = bound_field.field
+    value = bound_field.value()
+    if value is None or value == "":
+        return ""
+    # Choice fields: look up the label for the current value
+    if hasattr(field, "choices"):
+        for choice_val, choice_label in field.choices:
+            if str(choice_val) == str(value):
+                return choice_label
+    return value
