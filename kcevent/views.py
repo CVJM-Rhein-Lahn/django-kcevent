@@ -320,7 +320,7 @@ def registerEventLogin(
 
 @require_http_methods(["GET", "POST"])
 @event_logged_in(registerEventLogin)
-def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = None):
+def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = None, participant: Participant | None = None):
     if evt is None:
         return render(request, "cvjm/kcnotfound.html", {"event": evt})
     
@@ -346,6 +346,20 @@ def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = No
     )
         
     initial = {}
+    # get prefill if participant is given.
+    if not participant:
+        participant = request.session.get('pd_prefill')
+    if participant:
+        initial['pd'] = {
+            'street': participant.get('street'),
+            'house_number': participant.get('house_number'),
+            'zip_code': participant.get('zip_code'),
+            'city': participant.get('city'),
+            'church': participant.get('church_id'),
+            'role': participant.get('role_id'),
+            'parent_mail_addr': participant.get('parent_mail_addr'),
+        }
+    
     wiz = EventRegistrationWizard.as_view(evt, form_list, initial_dict=initial)(request)
     return wiz
 

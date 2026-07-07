@@ -70,15 +70,17 @@ def create_user(
         headers["x-zitadel-orgid"] = org_id
 
     user_payload: dict = {
-        "userName": email,
-        "profile": {
-            "firstName": first_name,
-            "lastName": last_name,
-            "displayName": f"{first_name} {last_name}",
-        },
-        "email": {
-            "email": email,
-            "isVerified": False,
+        "username": email,
+        "human": {
+            "profile": {
+                "givenName": first_name,
+                "familyName": last_name,
+                "displayName": f"{first_name} {last_name}",
+                "email": {
+                    "email": email,
+                    "isVerified": False,
+                },
+            },
         },
     }
     if phone:
@@ -86,7 +88,7 @@ def create_user(
 
     try:
         resp = requests.post(
-            f"{issuer}/v2/users/human",
+            f"{issuer}/v2/users/new",
             json=user_payload,
             headers=headers,
             timeout=10,

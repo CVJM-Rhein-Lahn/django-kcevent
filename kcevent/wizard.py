@@ -26,9 +26,12 @@ class EventRegistrationWizard(SessionWizardView):
     
     event: KCEvent | None = None
 
+    completed_registrations: list[int] = []
+
     def __init__(self, event: KCEvent | None = None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.event = event
+        self.completed_registrations = []
         
     def __repr__(self):
         return f'<{self.__class__.__name__}: forms: {self.form_list}>'
@@ -36,12 +39,10 @@ class EventRegistrationWizard(SessionWizardView):
     def get_context_data(self, form, **kwargs):
         data = super().get_context_data(form=form, **kwargs)
         data['wizard']['event'] = self.event
-        extra = self.storage.extra_data or {}
-        completed = extra.get('completed_registrations', [])
-        if completed:
+        if self.completed_registrations:
             data['wizard']['completed_registrations'] = [
                 KCEventRegistration.objects.get(id=rid)
-                for rid in completed
+                for rid in self.completed_registrations
                 if KCEventRegistration.objects.filter(id=rid).exists()
             ]
         return data
@@ -87,7 +88,8 @@ class EventRegistrationWizard(SessionWizardView):
         
     @classonlymethod
     def as_view(cls, event: KCEvent, *args, **kwargs):
-        return super().as_view(*args, event=event, **kwargs)
+        cls = super().as_view(*args, event=event, **kwargs)
+        return cls
 
     def get_form_kwargs(self, step=None):
         data = super().get_form_kwargs(step)
@@ -116,6 +118,18 @@ class EventRegistrationWizard(SessionWizardView):
         self.instance_dict[self.steps.current] = form.instance
         self.add_extra_data(self.steps.current, form.instance.id)
         return super().render_next_step(form, **kwargs)
+
+    def _persist_extra_data(self, extra: dict) -> None:
+        try:
+            prefix = getattr(self.storage, "prefix", None)
+            if not prefix:
+                return
+            wizard_data = self.request.session.get(prefix, {}) or {}
+            wizard_data["extra_data"] = dict(extra)
+            self.request.session[prefix] = wizard_data
+            self.request.session.modified = True
+        except Exception:
+            logger.exception("Failed to persist wizard extra_data in session")
     
     def add_extra_data(self, step, data):
         extra_data = self.storage.extra_data
@@ -126,6 +140,9 @@ class EventRegistrationWizard(SessionWizardView):
 
     def post(self, *args, **kwargs):
         """Intercept special wizard actions from the review step."""
+        # extract / store the completed registrations from the session
+        self.completed_registrations = self.request.session.get('completed_registrations', [])
+        print('Loaded copmleted_registrations: ', self.completed_registrations)
         if self.steps.current == 'review':
             if self.request.POST.get('_add_another'):
                 return self._handle_add_another()
@@ -134,25 +151,22 @@ class EventRegistrationWizard(SessionWizardView):
             if self.request.POST.get('_final_confirm'):
                 return self.done([], {})
             if self.request.POST.get('confirm'):
-                extra = self.storage.extra_data or {}
-                completed_ids = extra.get('completed_registrations', [])
-                if completed_ids:
+                if self.completed_registrations:
                     return self._render_allreview()
         response = super().post(*args, **kwargs)
+        self.request.session['completed_registrations'] = self.completed_registrations
         return response
 
     def _render_allreview(self):
         """Render the final overview page listing all pending registrations."""
-        extra = self.storage.extra_data or {}
-        completed_ids = extra.get('completed_registrations', [])
         earlier_regs = []
-        for rid in completed_ids:
+        for rid in self.completed_registrations:
             try:
                 earlier_regs.append(KCEventRegistration.objects.get(id=rid))
             except KCEventRegistration.DoesNotExist:
                 pass
 
-        rd_id = extra.get('rd')
+        rd_id = self.storage.extra_data.get('rd')
         current_reg = None
         if rd_id:
             try:
@@ -199,14 +213,13 @@ class EventRegistrationWizard(SessionWizardView):
                 reg.reg_status = KCEventRegistrationStateTypes.REGTYPE_INCOMPLETE
                 reg.save()
 
-                completed = extra.get('completed_registrations', [])
-                if rd_id not in completed:
-                    completed.append(rd_id)
-                extra['completed_registrations'] = completed
+                if rd_id not in self.completed_registrations:
+                    self.completed_registrations.append(rd_id)
             except KCEventRegistration.DoesNotExist:
                 pass
 
         prefill = {}
+        prev = None
         if pd_id:
             try:
                 prev = Participant.objects.get(id=pd_id)
@@ -219,6 +232,7 @@ class EventRegistrationWizard(SessionWizardView):
                     'role': prev.role_id,
                     'parent_mail_addr': prev.parent_mail_addr,
                 }
+                self.request.session['pd_prefill'] = prefill
             except Participant.DoesNotExist:
                 pass
 
@@ -228,6 +242,7 @@ class EventRegistrationWizard(SessionWizardView):
 
         self.storage.reset()
         self.storage.extra_data = dict(extra)
+        self._persist_extra_data(extra)
 
         return redirect(
             reverse('registerEvent', kwargs={'event_url': self.event.event_url})
@@ -247,11 +262,11 @@ class EventRegistrationWizard(SessionWizardView):
             extra.pop('rd', None)
             extra.pop('pd', None)
 
-        completed = extra.get('completed_registrations', [])
-        if completed:
+        if self.completed_registrations:
             extra.pop('pd_prefill', None)
 
         self.storage.extra_data = extra
+        self._persist_extra_data(extra)
         return redirect(
             reverse('registerEvent', kwargs={'event_url': self.event.event_url})
         )
@@ -291,10 +306,8 @@ class EventRegistrationWizard(SessionWizardView):
 
             final_forms[form_key] = form_obj
 
-        extra = self.storage.extra_data or {}
-        completed_ids = extra.get('completed_registrations', [])
         earlier_regs = []
-        for rid in completed_ids:
+        for rid in self.completed_registrations:
             try:
                 earlier_regs.append(KCEventRegistration.objects.get(id=rid))
             except KCEventRegistration.DoesNotExist:
