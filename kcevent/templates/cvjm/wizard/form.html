@@ -61,6 +61,10 @@
 
 <section>
     <h3>{% trans "Registration" %}</h3>
+    {% if session_expired %}
+        {% trans "Your registration session has expired or was started again in another window. Please enter the participant data again." as sessionExpiredMessage %}
+        {% include "cvjm/comp-alert.html" with chkdsp=True message=sessionExpiredMessage type="warning" %}
+    {% endif %}
     {% if wizard.form.errors %}
         {% with form_error=wizard.form.non_field_errors %}
             {% trans "Error occurred during validation of registration form. Please fix and re-submit." as genericMessage %}

@@ -861,6 +861,8 @@ class KCEventRegistration(models.Model):
 
     @property
     def price(self):
+        if not self.reg_user_id:
+            return None
         prices = KCEventPriceRule.objects.filter(
             Q(event__isnull=True) | Q(event__exact=self.reg_event),
             Q(partner__isnull=True) | Q(partner__exact=self.reg_user.church),
@@ -874,6 +876,8 @@ class KCEventRegistration(models.Model):
 
     @property
     def partner(self):
+        if not self.reg_user_id:
+            return None
         return KCEventPartner.objects.filter(
             evp_event=self.reg_event, evp_partner=self.reg_user.church
         ).first()

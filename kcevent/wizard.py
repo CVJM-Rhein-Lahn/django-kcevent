@@ -65,6 +65,21 @@ class EventRegistrationWizard(SessionWizardView):
     def as_view(cls, event: KCEvent, *args, **kwargs):
         return super().as_view(*args, event=event, **kwargs)
 
+    def post(self, *args, **kwargs):
+        # The wizard storage may have been reset (e.g. registration opened in
+        # another tab or already finished) while an old page is still open.
+        # Without a stored participant, later steps cannot be processed.
+        target_step = self.request.POST.get('wizard_goto_step') or self.request.POST.get(
+            f'{self.prefix}-current_step'
+        )
+        participant_id = (self.storage.extra_data or {}).get('pd')
+        if target_step and target_step != self.steps.first and not participant_id:
+            self.storage.reset()
+            self.storage.current_step = self.steps.first
+            return self.render(self.get_form(), session_expired=True)
+
+        return super().post(*args, **kwargs)
+
     def get_form_kwargs(self, step=None):
         data = super().get_form_kwargs(step)
         data['event'] = self.event

@@ -1084,6 +1084,14 @@ msgstr "Sichern"
 msgid "Invalid credentials provided!"
 msgstr "Ungültige Zugangsdaten angegeben!"
 
+#: kcevent/templates/cvjm/wizard/form.html:65
+msgid ""
+"Your registration session has expired or was started again in another "
+"window. Please enter the participant data again."
+msgstr ""
+"Deine Anmeldesitzung ist abgelaufen oder wurde in einem anderen Fenster neu "
+"gestartet. Bitte gib die Teilnehmerdaten erneut ein."
+
 #~ msgid "Approx. no. of male par."
 #~ msgstr "Geschätzte Anz. männlicher Teilnehmer"
 
