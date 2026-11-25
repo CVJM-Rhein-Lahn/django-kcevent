@@ -4,7 +4,9 @@ from django.shortcuts import render
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.utils.decorators import classonlymethod
+from django.utils import timezone
 from formtools.wizard.views import SessionWizardView #, CookieWizardView
+import sentry_sdk
 from sentry_sdk import capture_exception
 from .models import KCEvent, KCEventRegistration, Participant
 
@@ -65,7 +67,39 @@ class EventRegistrationWizard(SessionWizardView):
     def as_view(cls, event: KCEvent, *args, **kwargs):
         return super().as_view(*args, event=event, **kwargs)
 
+    HISTORY_SIZE = 10
+
+    def _trace(self, action):
+        """Attach the wizard state and a per-session step history to Sentry events."""
+        extra_data = self.storage.extra_data or {}
+        state = {
+            'action': action,
+            'stored_step': self.storage.current_step,
+            'posted_step': self.request.POST.get(f'{self.prefix}-current_step'),
+            'goto_step': self.request.POST.get('wizard_goto_step'),
+            'steps_with_data': sorted(self.storage.data.get(self.storage.step_data_key, {})),
+            'saved_objects': sorted(extra_data),
+            'has_participant': bool(extra_data.get('pd')),
+            'time': timezone.now().isoformat(),
+        }
+        sentry_sdk.set_tag('wizard.step', state['posted_step'] or state['stored_step'])
+        sentry_sdk.set_tag('wizard.action', action)
+        sentry_sdk.set_context('wizard', state)
+
+        # Kept outside the wizard storage, so it survives storage resets.
+        history_key = f'{self.prefix}_history_{self.event.id if self.event else ""}'
+        history = self.request.session.get(history_key, [])[-(self.HISTORY_SIZE - 1):]
+        history.append(state)
+        self.request.session[history_key] = history
+        sentry_sdk.set_context('wizard.history', {'entries': history})
+
+    def get(self, *args, **kwargs):
+        # Note: formtools resets the wizard storage on every GET.
+        self._trace('get')
+        return super().get(*args, **kwargs)
+
     def post(self, *args, **kwargs):
+        self._trace('post')
         # The wizard storage may have been reset (e.g. registration opened in
         # another tab or already finished) while an old page is still open.
         # Without a stored participant, later steps cannot be processed.
@@ -74,6 +108,7 @@ class EventRegistrationWizard(SessionWizardView):
         )
         participant_id = (self.storage.extra_data or {}).get('pd')
         if target_step and target_step != self.steps.first and not participant_id:
+            self._trace('restart_missing_participant')
             self.storage.reset()
             self.storage.current_step = self.steps.first
             return self.render(self.get_form(), session_expired=True)
@@ -122,6 +157,7 @@ class EventRegistrationWizard(SessionWizardView):
             return os.path.join('cvjm', 'wizard', 'form.html')
 
     def done(self, form_list, form_dict, **kwargs):
+        self._trace('done')
         final_forms = OrderedDict()
         # walk through the form list and try to validate the data again.
         for form_key in self.get_form_list():
