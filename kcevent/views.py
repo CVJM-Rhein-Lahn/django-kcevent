@@ -269,7 +269,7 @@ def registerEventLogin(
         try:
             evt = KCEvent.objects.get(event_url=event_url)
         except KCEvent.DoesNotExist:
-            return render(request, "cvjm/kcnotfound.html", {"event": evt})
+            return render(request, "cvjm/kcnotfound.html", {"event": evt}, status=404)
 
     if request.method == "POST":
         password = None
@@ -320,7 +320,7 @@ def registerEventLogin(
 @event_logged_in(registerEventLogin)
 def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = None):
     if evt is None:
-        return render(request, "cvjm/kcnotfound.html", {"event": evt})
+        return render(request, "cvjm/kcnotfound.html", {"event": evt}, status=404)
     
     # The user can only register, if the registration time is not exceeded yet.
     if not request.user.is_superuser:
@@ -328,7 +328,7 @@ def registerEvent(request: WSGIRequest, event_url: str, evt: KCEvent | None = No
         if evt.registration_end and evt.registration_end < now:
             return render(request, "cvjm/kcexpired.html", {"event": evt})
         if evt.registration_start and now < evt.registration_start:
-            return render(request, "cvjm/kcnotfound.html", {"event": evt})
+            return render(request, "cvjm/kcnotfound.html", {"event": evt}, status=404)
     
     form_list = [
         ('pd', ParticipantForm),
@@ -420,6 +420,6 @@ def responseError500(request: WSGIRequest):
 
 def _responseError(statusCode: int, request: WSGIRequest, exception=None):
     # No post data availabe, let's just show the page to the user.
-    return render(request, "cvjm/error.html", {"error_code": statusCode})
+    return render(request, "cvjm/error.html", {"error_code": statusCode}, status=statusCode)
 
     
